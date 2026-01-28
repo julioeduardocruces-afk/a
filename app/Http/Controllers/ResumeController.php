@@ -216,7 +216,9 @@ class ResumeController extends Controller
             $page,
         );
 
-        MetricsDaily::incrementToday('previews');
+        // Note: 'previews' metric is incremented in previewPage() (the page load),
+        // not here (the per-page image endpoint), to avoid inflating the count
+        // when multi-page CVs render multiple images per view.
 
         return response($imageData, 200)
             ->header('Content-Type', 'image/png')
@@ -237,6 +239,9 @@ class ResumeController extends Controller
         }
 
         $resume->load('latestVersion');
+
+        MetricsDaily::incrementToday('previews');
+
         $score = $resume->latestVersion?->score_json ?? [];
         $pageCount = 1;
 

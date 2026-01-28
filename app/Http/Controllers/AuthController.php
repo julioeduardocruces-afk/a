@@ -6,6 +6,7 @@ use App\Models\AuditLog;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
@@ -100,6 +101,7 @@ class AuthController extends Controller
 
     public function loginWithMagicToken(string $token)
     {
+        // Look up user first to get the ID
         $user = User::where('magic_token', $token)
             ->where('magic_token_expires_at', '>', now())
             ->first();
@@ -110,10 +112,22 @@ class AuthController extends Controller
             ]);
         }
 
-        $user->update([
-            'magic_token' => null,
-            'magic_token_expires_at' => null,
-        ]);
+        // Atomically claim the magic token to prevent concurrent usage
+        // (same pattern as download tokens: UPDATE WHERE ensures single-use)
+        $claimed = DB::table('users')
+            ->where('id', $user->id)
+            ->where('magic_token', $token)
+            ->where('magic_token_expires_at', '>', now())
+            ->update([
+                'magic_token' => null,
+                'magic_token_expires_at' => null,
+            ]);
+
+        if ($claimed === 0) {
+            return redirect()->route('login')->withErrors([
+                'email' => 'Enlace invalido o expirado.',
+            ]);
+        }
 
         Auth::login($user);
         session()->regenerate();

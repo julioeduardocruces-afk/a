@@ -178,7 +178,9 @@ class PaymentFlowService
             return $payment;
         }
 
-        return DB::transaction(function () use ($payment, $flowData, $flowOrder, $flowStatus) {
+        // Step 1: Atomically update payment status (committed separately so that
+        // a confirmed payment is NEVER lost if the resume transition fails below)
+        $payment = DB::transaction(function () use ($payment, $flowData, $flowOrder, $flowStatus) {
             // Re-lock payment row inside transaction to prevent race conditions
             $payment = Payment::lockForUpdate()->find($payment->id);
 
@@ -192,25 +194,8 @@ class PaymentFlowService
                 'raw_payload_json' => $flowData,
             ]);
 
-            // Flow status: 2 = paid, 3 = rejected, 4 = cancelled
             if ($flowStatus === 2) {
                 $payment->update(['status' => PaymentStatus::Paid]);
-
-                $resume = $payment->resume;
-                $resume->transitionTo(ResumeStatus::Paid);
-
-                MetricsDaily::incrementToday('paid');
-                MetricsDaily::incrementToday('revenue', $payment->amount);
-
-                AuditLog::record('payment.confirmed', $payment->user_id, 'system', [
-                    'payment_id' => $payment->id,
-                    'resume_id' => $resume->id,
-                    'flow_order' => $flowOrder,
-                ]);
-
-                // Dispatch inside transaction so duplicate webhooks (which return early
-                // at the idempotency check above) never dispatch the job a second time
-                GenerateFinalCvJob::dispatch($resume->id);
             } else {
                 $payment->update(['status' => PaymentStatus::Failed]);
 
@@ -222,6 +207,46 @@ class PaymentFlowService
 
             return $payment->fresh();
         });
+
+        // Step 2: If payment was confirmed, transition resume and dispatch job.
+        // This runs OUTSIDE the payment transaction so that a resume transition
+        // failure (e.g. resume left PreviewReady during payment) never rolls back
+        // the payment status — confirmed money must always be recorded.
+        if ($payment->status === PaymentStatus::Paid) {
+            $resume = $payment->resume;
+
+            try {
+                $resume->transitionTo(ResumeStatus::Paid);
+            } catch (\InvalidArgumentException $e) {
+                Log::warning('Payment confirmed but resume transition failed', [
+                    'payment_id' => $payment->id,
+                    'resume_id' => $resume->id,
+                    'resume_status' => $resume->status->value,
+                    'error' => $e->getMessage(),
+                ]);
+
+                AuditLog::record('payment.confirmed_transition_failed', $payment->user_id, 'system', [
+                    'payment_id' => $payment->id,
+                    'resume_id' => $resume->id,
+                    'resume_status' => $resume->status->value,
+                ]);
+
+                return $payment;
+            }
+
+            MetricsDaily::incrementToday('paid');
+            MetricsDaily::incrementToday('revenue', $payment->amount);
+
+            AuditLog::record('payment.confirmed', $payment->user_id, 'system', [
+                'payment_id' => $payment->id,
+                'resume_id' => $resume->id,
+                'flow_order' => $flowOrder,
+            ]);
+
+            GenerateFinalCvJob::dispatch($resume->id);
+        }
+
+        return $payment;
     }
 
     /**

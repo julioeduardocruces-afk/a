@@ -7,10 +7,11 @@ use PHPUnit\Framework\TestCase;
 
 class ResumeStateMachineTest extends TestCase
 {
-    public function test_draft_can_transition_to_processing(): void
+    public function test_draft_can_transition_to_processing_or_failed(): void
     {
         $status = ResumeStatus::Draft;
         $this->assertTrue($status->canTransitionTo(ResumeStatus::Processing));
+        $this->assertTrue($status->canTransitionTo(ResumeStatus::Failed));
     }
 
     public function test_draft_cannot_transition_to_paid(): void
