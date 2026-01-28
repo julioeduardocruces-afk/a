@@ -99,4 +99,28 @@ class GenerateFinalCvJob implements ShouldQueue
             throw $e; // Re-throw so the job retries via $tries/$backoff
         }
     }
+
+    /**
+     * Called by Laravel when all retry attempts are exhausted.
+     * Marks the resume as failed so the admin can see delivery failed post-payment.
+     */
+    public function failed(\Throwable $exception): void
+    {
+        $resume = Resume::find($this->resumeId);
+        if (!$resume) {
+            return;
+        }
+
+        // Only mark as failed if still in Paid state
+        // (skip if already Delivered from a concurrent admin resend,
+        // or if already Failed from a previous exhaustion)
+        if ($resume->status === ResumeStatus::Paid) {
+            $resume->markFailed('delivery_error', $exception->getMessage());
+
+            AuditLog::record('resume.delivery_exhausted', $resume->user_id, 'system', [
+                'resume_id' => $resume->id,
+                'error' => $exception->getMessage(),
+            ]);
+        }
+    }
 }

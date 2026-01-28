@@ -26,19 +26,33 @@ class PaymentFlowService
             throw new RuntimeException('El CV debe estar en estado preview_ready para pagar.');
         }
 
-        // Prevent double payment: check if there's already a pending/paid payment
-        $existingPayment = Payment::where('resume_id', $resume->id)
-            ->whereIn('status', [PaymentStatus::Pending, PaymentStatus::Paid])
-            ->first();
+        // Prevent double payment with locking to avoid race conditions
+        // (concurrent requests could both pass the check without a lock)
+        $payment = DB::transaction(function () use ($resume, $amount) {
+            // Lock existing payments for this resume to prevent duplicates
+            $existingPayment = Payment::where('resume_id', $resume->id)
+                ->whereIn('status', [PaymentStatus::Pending, PaymentStatus::Paid])
+                ->lockForUpdate()
+                ->first();
 
-        if ($existingPayment?->status === PaymentStatus::Paid) {
-            throw new RuntimeException('Este CV ya fue pagado.');
-        }
+            if ($existingPayment?->status === PaymentStatus::Paid) {
+                throw new RuntimeException('Este CV ya fue pagado.');
+            }
 
-        // If there's a pending payment, cancel it before creating a new one
-        if ($existingPayment?->status === PaymentStatus::Pending) {
-            $existingPayment->update(['status' => PaymentStatus::Failed]);
-        }
+            // If there's a pending payment, cancel it before creating a new one
+            if ($existingPayment?->status === PaymentStatus::Pending) {
+                $existingPayment->update(['status' => PaymentStatus::Failed]);
+            }
+
+            return Payment::create([
+                'user_id' => $resume->user_id,
+                'resume_id' => $resume->id,
+                'provider' => 'flow',
+                'amount' => $amount,
+                'currency' => 'CLP',
+                'status' => PaymentStatus::Pending,
+            ]);
+        });
 
         $credential = ApiCredential::getNextForProvider('flow');
         if (!$credential) {
@@ -53,16 +67,6 @@ class PaymentFlowService
         if (empty($apiKey) || empty($secretKey)) {
             throw new RuntimeException('Credenciales Flow incompletas.');
         }
-
-        // Create payment record first
-        $payment = Payment::create([
-            'user_id' => $resume->user_id,
-            'resume_id' => $resume->id,
-            'provider' => 'flow',
-            'amount' => $amount,
-            'currency' => 'CLP',
-            'status' => PaymentStatus::Pending,
-        ]);
 
         $params = [
             'apiKey' => $apiKey,

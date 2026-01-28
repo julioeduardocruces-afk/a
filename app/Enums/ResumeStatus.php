@@ -22,7 +22,7 @@ enum ResumeStatus: string
             self::Draft       => [self::Processing, self::Failed],
             self::Processing  => [self::PreviewReady, self::Failed],
             self::PreviewReady => [self::Paid, self::Failed],
-            self::Paid        => [self::Delivered],
+            self::Paid        => [self::Delivered, self::Failed],
             self::Delivered   => [],
             self::Failed      => [self::Processing], // allow retry
         };
