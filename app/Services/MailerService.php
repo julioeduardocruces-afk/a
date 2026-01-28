@@ -31,7 +31,6 @@ class MailerService
                 'emails.cv-ready',
                 [
                     'userName' => $user->name,
-                    'downloadUrl' => $downloadPdfUrl,
                     'downloadPdfUrl' => $downloadPdfUrl,
                     'downloadDocxUrl' => $downloadDocxUrl,
                     'resumeId' => $resume->id,

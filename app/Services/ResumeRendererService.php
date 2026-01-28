@@ -29,7 +29,7 @@ class ResumeRendererService
         $pageHtml = $pages[$page - 1];
         $fullHtml = $this->buildPreviewHtml($pageHtml, $watermarkEmail, $resumeId);
 
-        return $this->htmlToImage($fullHtml);
+        return $this->htmlToImage($fullHtml, $watermarkEmail, $resumeId);
     }
 
     public function getPageCount(string $markdownText): int
@@ -179,7 +179,7 @@ class ResumeRendererService
      * Render HTML to PNG image server-side.
      * Uses wkhtmltoimage if available, falls back to GD-based rendering.
      */
-    private function htmlToImage(string $html): string
+    private function htmlToImage(string $html, string $watermarkEmail = '', int $resumeId = 0): string
     {
         // Try wkhtmltoimage first
         $wkhtmltoimage = config('ats.wkhtmltoimage_path', '/usr/local/bin/wkhtmltoimage');
@@ -187,8 +187,8 @@ class ResumeRendererService
             return $this->renderWithWkhtmltoimage($html, $wkhtmltoimage);
         }
 
-        // Fallback: GD-based simple rendering
-        return $this->renderWithGd($html);
+        // Fallback: GD-based simple rendering (pass user info for watermark traceability)
+        return $this->renderWithGd($html, $watermarkEmail, $resumeId);
     }
 
     private function renderWithWkhtmltoimage(string $html, string $binary): string
@@ -229,7 +229,7 @@ class ResumeRendererService
      * Basic GD fallback: render text content onto an image.
      * Not as pretty as wkhtmltoimage but functional.
      */
-    private function renderWithGd(string $html): string
+    private function renderWithGd(string $html, string $watermarkEmail = '', int $resumeId = 0): string
     {
         $width = 800;
         $height = 1100;
@@ -238,7 +238,6 @@ class ResumeRendererService
         $white = imagecolorallocate($img, 255, 255, 255);
         $black = imagecolorallocate($img, 34, 34, 34);
         $gray = imagecolorallocate($img, 150, 150, 150);
-        $red = imagecolorallocate($img, 200, 50, 50);
 
         imagefill($img, 0, 0, $white);
 
@@ -258,10 +257,26 @@ class ResumeRendererService
             $y += 16;
         }
 
-        // Add watermark
+        // Add user-specific watermark matching the wkhtmltoimage path.
+        // Previously used generic "PREVIEW - NO DESCARGAR" which made leaked
+        // GD-rendered previews impossible to trace back to a specific user.
+        $timestamp = now()->format('Y-m-d H:i');
+        $watermarkText = "{$watermarkEmail} | PREVIEW | {$timestamp} | ID:{$resumeId}";
         $watermarkColor = imagecolorallocatealpha($img, 200, 0, 0, 100);
-        imagestring($img, 4, 150, $height / 2 - 20, 'PREVIEW - NO DESCARGAR', $watermarkColor);
-        imagestring($img, 2, 200, $height / 2, 'Pague para obtener el documento final', $gray);
+
+        // Draw watermark at multiple positions for anti-capture (same concept as HTML path)
+        $positions = [
+            ['x' => 50, 'y' => (int)($height * 0.15)],
+            ['x' => 150, 'y' => (int)($height * 0.35)],
+            ['x' => 80, 'y' => (int)($height * 0.55)],
+            ['x' => 200, 'y' => (int)($height * 0.75)],
+        ];
+
+        foreach ($positions as $pos) {
+            imagestring($img, 2, $pos['x'], $pos['y'], $watermarkText, $watermarkColor);
+        }
+
+        imagestring($img, 3, 200, (int)($height * 0.92), 'Pague para obtener el documento final', $gray);
 
         ob_start();
         imagepng($img, null, 8);
