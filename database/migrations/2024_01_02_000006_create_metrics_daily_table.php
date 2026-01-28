@@ -15,7 +15,8 @@ return new class extends Migration
             $table->unsignedInteger('previews')->default(0);
             $table->unsignedInteger('paid')->default(0);
             $table->unsignedBigInteger('revenue')->default(0)->comment('CLP cents');
-            $table->unsignedInteger('avg_process_time_ms')->default(0);
+            $table->unsignedBigInteger('total_process_time_ms')->default(0);
+            $table->unsignedInteger('processed_count')->default(0);
             $table->timestamps();
         });
     }

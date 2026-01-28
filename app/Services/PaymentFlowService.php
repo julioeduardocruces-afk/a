@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\PaymentStatus;
 use App\Enums\ResumeStatus;
+use App\Jobs\GenerateFinalCvJob;
 use App\Models\ApiCredential;
 use App\Models\AuditLog;
 use App\Models\MetricsDaily;
@@ -202,6 +203,10 @@ class PaymentFlowService
                     'resume_id' => $resume->id,
                     'flow_order' => $flowOrder,
                 ]);
+
+                // Dispatch inside transaction so duplicate webhooks (which return early
+                // at the idempotency check above) never dispatch the job a second time
+                GenerateFinalCvJob::dispatch($resume->id);
             } else {
                 $payment->update(['status' => PaymentStatus::Failed]);
 

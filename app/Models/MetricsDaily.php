@@ -14,7 +14,8 @@ class MetricsDaily extends Model
         'previews',
         'paid',
         'revenue',
-        'avg_process_time_ms',
+        'total_process_time_ms',
+        'processed_count',
     ];
 
     protected function casts(): array

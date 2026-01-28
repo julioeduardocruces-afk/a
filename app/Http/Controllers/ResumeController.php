@@ -122,7 +122,9 @@ class ResumeController extends Controller
             'target_role' => $validated['target_role'],
         ], $request->ip());
 
-        return redirect()->route('resumes.process', $resume->id);
+        // Trigger processing directly instead of redirecting to POST-only route
+        // (redirect sends GET which would result in 405 Method Not Allowed)
+        return $this->process($request, $id);
     }
 
     /**

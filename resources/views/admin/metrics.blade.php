@@ -18,7 +18,7 @@
                     <td>{{ $m->previews }}</td>
                     <td>{{ $m->paid }}</td>
                     <td>${{ number_format($m->revenue / 100, 0, ',', '.') }}</td>
-                    <td>{{ number_format($m->avg_process_time_ms) }}</td>
+                    <td>{{ $m->processed_count > 0 ? number_format($m->total_process_time_ms / $m->processed_count) : '-' }}</td>
                 </tr>
                 @endforeach
             </tbody>

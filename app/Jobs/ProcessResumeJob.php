@@ -107,8 +107,9 @@ class ProcessResumeJob implements ShouldQueue
 
             $elapsed = (int)((microtime(true) - $startTime) * 1000);
 
-            // Update average processing time metric
-            MetricsDaily::incrementToday('avg_process_time_ms', $elapsed);
+            // Track total processing time and count for computing average in dashboard
+            MetricsDaily::incrementToday('total_process_time_ms', $elapsed);
+            MetricsDaily::incrementToday('processed_count');
             AuditLog::record('resume.processed', $resume->user_id, 'system', [
                 'resume_id' => $resume->id,
                 'version' => $versionNum,
@@ -120,13 +121,33 @@ class ProcessResumeJob implements ShouldQueue
             Log::error('Resume processing failed', [
                 'resume_id' => $resume->id,
                 'error' => $e->getMessage(),
+                'attempt' => $this->attempts(),
             ]);
 
-            $resume->markFailed('processing_error', $e->getMessage());
+            // Re-throw so Laravel retries via $tries/$backoff.
+            // markFailed() is called in failed() only after all retries are exhausted.
+            throw $e;
+        }
+    }
+
+    /**
+     * Called by Laravel when all retry attempts are exhausted.
+     */
+    public function failed(\Throwable $exception): void
+    {
+        $resume = Resume::find($this->resumeId);
+        if (!$resume) {
+            return;
+        }
+
+        // Only mark as failed if still in Processing state
+        // (could have been manually retried by admin in the meantime)
+        if ($resume->status === ResumeStatus::Processing) {
+            $resume->markFailed('processing_error', $exception->getMessage());
 
             AuditLog::record('resume.failed', $resume->user_id, 'system', [
                 'resume_id' => $resume->id,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
         }
     }

@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Enums\PaymentStatus;
 use App\Enums\ResumeStatus;
-use App\Jobs\GenerateFinalCvJob;
-use App\Models\AuditLog;
 use App\Models\Resume;
 use App\Services\PaymentFlowService;
 use Illuminate\Http\Request;
@@ -57,13 +55,10 @@ class PaymentController extends Controller
     public function webhook(Request $request)
     {
         try {
-            $payment = $this->paymentService->handleWebhook($request->all());
-
-            // Only dispatch final CV generation if the resume is in PreviewReady→Paid transition
-            // (not if it was already Paid/Delivered from a previous webhook — idempotency)
-            if ($payment->status === PaymentStatus::Paid && $payment->resume->status === ResumeStatus::Paid) {
-                GenerateFinalCvJob::dispatch($payment->resume_id);
-            }
+            // handleWebhook is fully idempotent: duplicate webhooks return early
+            // without dispatching GenerateFinalCvJob again (dispatch is inside
+            // the payment transaction, guarded by lockForUpdate idempotency check)
+            $this->paymentService->handleWebhook($request->all());
 
             return response('OK', 200);
         } catch (\Exception $e) {
