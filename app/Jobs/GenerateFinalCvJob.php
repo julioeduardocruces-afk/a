@@ -149,7 +149,7 @@ class GenerateFinalCvJob implements ShouldQueue
             // failure reason, not the stale one from the original failure.
             $resume->update([
                 'error_code' => 'delivery_error',
-                'error_message' => $exception->getMessage(),
+                'error_message' => mb_substr($exception->getMessage(), 0, 1000),
             ]);
         } else {
             // Already Delivered (concurrent job succeeded) — nothing to do

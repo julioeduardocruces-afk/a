@@ -55,7 +55,7 @@ class Resume extends Model
         }
         $this->status = ResumeStatus::Failed;
         $this->error_code = $errorCode;
-        $this->error_message = $message;
+        $this->error_message = mb_substr($message, 0, 1000);
         $this->save();
     }
 
