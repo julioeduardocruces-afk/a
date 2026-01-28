@@ -40,25 +40,31 @@ class DownloadController extends Controller
             abort(403, 'El CV aun no esta disponible para descarga.');
         }
 
-        // Check PDF exists
-        $pdfPath = "finals/{$resume->id}/cv_optimizado_{$resume->id}.pdf";
-        if (!Storage::exists($pdfPath)) {
+        // Determine requested format FIRST, then check the corresponding file.
+        // Previous logic always checked PDF existence even for DOCX requests,
+        // which would 404 if PDF was missing but DOCX existed. It also silently
+        // fell back to PDF when DOCX was missing, confusing the user.
+        $format = request()->query('format', 'pdf');
+        $basePath = "finals/{$resume->id}/cv_optimizado_{$resume->id}";
+
+        if ($format === 'docx') {
+            $filePath = "{$basePath}.docx";
+            $fileName = "cv_optimizado_{$resume->id}.docx";
+        } else {
+            $filePath = "{$basePath}.pdf";
+            $fileName = "cv_optimizado_{$resume->id}.pdf";
+        }
+
+        if (!Storage::exists($filePath)) {
             abort(404, 'Archivo no encontrado.');
         }
 
         AuditLog::record('resume.downloaded', $downloadToken->user_id, 'user', [
             'resume_id' => $resume->id,
             'token_id' => $downloadToken->id,
+            'format' => $format,
         ]);
 
-        $format = request()->query('format', 'pdf');
-        if ($format === 'docx') {
-            $docxPath = "finals/{$resume->id}/cv_optimizado_{$resume->id}.docx";
-            if (Storage::exists($docxPath)) {
-                return Storage::download($docxPath, "cv_optimizado_{$resume->id}.docx");
-            }
-        }
-
-        return Storage::download($pdfPath, "cv_optimizado_{$resume->id}.pdf");
+        return Storage::download($filePath, $fileName);
     }
 }
