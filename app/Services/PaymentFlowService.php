@@ -166,15 +166,53 @@ class PaymentFlowService
             throw new RuntimeException("Pago no encontrado para token: {$token}");
         }
 
-        // Idempotency: if already paid, return early (no state change)
+        // Idempotency: if already paid, check if the delivery job needs re-dispatch.
+        // This handles the edge case where a previous webhook committed the payment
+        // as Paid but the process crashed before dispatching GenerateFinalCvJob.
         if ($payment->status === PaymentStatus::Paid) {
-            Log::info('Webhook duplicado ignorado', ['payment_id' => $payment->id]);
+            $resume = $payment->resume;
+            if ($resume && $resume->status === ResumeStatus::Paid) {
+                // Resume stuck in Paid = job was never dispatched or failed silently.
+                // Re-dispatch is safe: GenerateFinalCvJob is idempotent for Paid state.
+                Log::info('Webhook duplicado: re-dispatching job for stuck Paid resume', [
+                    'payment_id' => $payment->id,
+                    'resume_id' => $resume->id,
+                ]);
+                GenerateFinalCvJob::dispatch($resume->id);
+            } else {
+                Log::info('Webhook duplicado ignorado', ['payment_id' => $payment->id]);
+            }
             return $payment;
         }
 
-        // Also skip if payment already failed or refunded (no going backward)
-        if (in_array($payment->status, [PaymentStatus::Refunded], true)) {
-            Log::info('Webhook para pago refunded ignorado', ['payment_id' => $payment->id]);
+        // Skip if payment was locally cancelled (Failed) or refunded.
+        // A Failed payment means it was superseded by a newer payment attempt
+        // (see createPayment). Even if Flow confirms it, we must not resurrect it
+        // because the user may have already paid via the replacement payment,
+        // which would result in double-charging.
+        if (in_array($payment->status, [PaymentStatus::Failed, PaymentStatus::Refunded], true)) {
+            Log::warning('Webhook para pago cancelado/refunded ignorado', [
+                'payment_id' => $payment->id,
+                'payment_status' => $payment->status->value,
+                'flow_status' => $flowStatus,
+            ]);
+
+            // If Flow says this cancelled payment was actually charged (status=2),
+            // log a critical alert so admin can issue a refund
+            if ($flowStatus === 2) {
+                Log::critical('Flow confirmed a locally-cancelled payment — potential double charge, refund needed', [
+                    'payment_id' => $payment->id,
+                    'flow_order' => $flowOrder,
+                    'amount' => $payment->amount,
+                ]);
+
+                AuditLog::record('payment.cancelled_but_charged', $payment->user_id, 'system', [
+                    'payment_id' => $payment->id,
+                    'flow_order' => $flowOrder,
+                    'amount' => $payment->amount,
+                ]);
+            }
+
             return $payment;
         }
 

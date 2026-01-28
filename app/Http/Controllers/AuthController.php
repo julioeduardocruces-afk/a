@@ -82,21 +82,26 @@ class AuthController extends Controller
     public function sendMagicLink(Request $request)
     {
         $validated = $request->validate([
-            'email' => ['required', 'email', 'exists:users,email'],
+            'email' => ['required', 'email', 'max:255'],
         ]);
 
+        // Always return same message to prevent user enumeration.
+        // Only generate token if user actually exists.
         $user = User::where('email', $validated['email'])->first();
-        $token = Str::random(64);
 
-        $user->update([
-            'magic_token' => $token,
-            'magic_token_expires_at' => now()->addMinutes(15),
-        ]);
+        if ($user) {
+            $token = Str::random(64);
 
-        // In production, send email with the magic link
-        // Mail::to($user)->send(new MagicLinkMail($token));
+            $user->update([
+                'magic_token' => $token,
+                'magic_token_expires_at' => now()->addMinutes(15),
+            ]);
 
-        return back()->with('status', 'Te hemos enviado un enlace de acceso a tu email.');
+            // In production, send email with the magic link
+            // Mail::to($user)->send(new MagicLinkMail($token));
+        }
+
+        return back()->with('status', 'Si tu email esta registrado, te enviaremos un enlace de acceso.');
     }
 
     public function loginWithMagicToken(string $token)
