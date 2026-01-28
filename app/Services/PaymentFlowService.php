@@ -167,11 +167,32 @@ class PaymentFlowService
         }
 
         // Idempotency: if already paid, check if the delivery job needs re-dispatch.
-        // This handles the edge case where a previous webhook committed the payment
-        // as Paid but the process crashed before dispatching GenerateFinalCvJob.
+        // This handles two crash-recovery scenarios:
+        // 1. Crash after payment commit but BEFORE resume transition (resume stuck in PreviewReady)
+        // 2. Crash after resume transition but BEFORE job dispatch (resume stuck in Paid)
         if ($payment->status === PaymentStatus::Paid) {
             $resume = $payment->resume;
-            if ($resume && $resume->status === ResumeStatus::Paid) {
+            if ($resume && $resume->status === ResumeStatus::PreviewReady) {
+                // Resume stuck in PreviewReady = crash between payment commit and
+                // resume transition. Complete the transition and dispatch.
+                Log::warning('Webhook duplicado: recovering stuck PreviewReady resume with Paid payment', [
+                    'payment_id' => $payment->id,
+                    'resume_id' => $resume->id,
+                ]);
+                try {
+                    $resume->transitionTo(ResumeStatus::Paid);
+                    MetricsDaily::incrementToday('paid');
+                    MetricsDaily::incrementToday('revenue', $payment->amount);
+                } catch (\InvalidArgumentException $e) {
+                    Log::error('Recovery transition failed for PreviewReady resume', [
+                        'payment_id' => $payment->id,
+                        'resume_id' => $resume->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                    return $payment;
+                }
+                GenerateFinalCvJob::dispatch($resume->id);
+            } elseif ($resume && $resume->status === ResumeStatus::Paid) {
                 // Resume stuck in Paid = job was never dispatched or failed silently.
                 // Re-dispatch is safe: GenerateFinalCvJob is idempotent for Paid state.
                 Log::info('Webhook duplicado: re-dispatching job for stuck Paid resume', [
