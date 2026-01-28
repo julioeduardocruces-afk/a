@@ -13,8 +13,8 @@
                 <th>Estado</th>
                 <td>
                     <span class="badge badge-{{ $resume->status->value }}">{{ $resume->status->value }}</span>
-                    @if($resume->error_message)
-                        <br><small style="color:#dc3545;">{{ $resume->error_message }}</small>
+                    @if($resume->error_code)
+                        <br><small style="color:#dc3545;">Ocurrio un error al procesar tu CV ({{ $resume->error_code }}). Puedes reintentar.</small>
                     @endif
                 </td>
             </tr>

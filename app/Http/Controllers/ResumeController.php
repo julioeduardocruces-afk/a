@@ -167,10 +167,15 @@ class ResumeController extends Controller
         $resume->load('latestVersion');
 
         if ($request->wantsJson()) {
+            // Return generic error message to avoid leaking internal details
+            $errorMsg = $resume->error_message
+                ? 'Ocurrió un error procesando tu CV. Puedes reintentar.'
+                : null;
+
             return response()->json([
                 'status' => $resume->status->value,
                 'score' => $resume->latestVersion?->score_json['overall'] ?? null,
-                'error' => $resume->error_message,
+                'error' => $errorMsg,
             ]);
         }
 

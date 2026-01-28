@@ -198,8 +198,7 @@ PROMPT;
             }
         }
 
-        // Sanitize: strip any HTML from text outputs
-        $data['optimized_text_md'] = strip_tags($data['optimized_text_md'], '<br>');
+        // Sanitize: strip HTML from plain text output (markdown is rendered server-side with escaping)
         $data['optimized_text_plain'] = strip_tags($data['optimized_text_plain']);
 
         return $data;

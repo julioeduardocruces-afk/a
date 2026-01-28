@@ -95,14 +95,20 @@ class PdfGeneratorService
             );
         }
 
-        $tmpFile = tempnam(sys_get_temp_dir(), 'cv_docx_') . '.docx';
-        $writer = IOFactory::createWriter($phpWord, 'Word2007');
-        $writer->save($tmpFile);
+        $tmpDir = sys_get_temp_dir();
+        $unique = bin2hex(random_bytes(16));
+        $tmpFile = "{$tmpDir}/cv_docx_{$unique}.docx";
 
-        $content = file_get_contents($tmpFile);
-        @unlink($tmpFile);
+        try {
+            $writer = IOFactory::createWriter($phpWord, 'Word2007');
+            $writer->save($tmpFile);
 
-        return $content;
+            return file_get_contents($tmpFile);
+        } finally {
+            if (file_exists($tmpFile) && !unlink($tmpFile)) {
+                \Illuminate\Support\Facades\Log::warning("Failed to clean temp file: {$tmpFile}");
+            }
+        }
     }
 
     private function isSectionHeader(string $line): bool

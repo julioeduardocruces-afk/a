@@ -6,6 +6,7 @@ use App\Enums\ResumeStatus;
 use App\Models\AuditLog;
 use App\Models\DownloadToken;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class DownloadController extends Controller
@@ -21,7 +22,15 @@ class DownloadController extends Controller
             abort(404, 'Token no encontrado.');
         }
 
-        if (!$downloadToken->isValid()) {
+        // Atomically check validity and mark as used to prevent race conditions
+        // (two concurrent requests could both pass isValid() before markUsed())
+        $claimed = DB::table('download_tokens')
+            ->where('id', $downloadToken->id)
+            ->where('used', false)
+            ->where('expires_at', '>', now())
+            ->update(['used' => true]);
+
+        if ($claimed === 0) {
             abort(403, 'El enlace ha expirado o ya fue utilizado.');
         }
 
@@ -36,9 +45,6 @@ class DownloadController extends Controller
         if (!Storage::exists($pdfPath)) {
             abort(404, 'Archivo no encontrado.');
         }
-
-        // Mark token as used (single-use)
-        $downloadToken->markUsed();
 
         AuditLog::record('resume.downloaded', $downloadToken->user_id, 'user', [
             'resume_id' => $resume->id,

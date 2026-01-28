@@ -122,8 +122,8 @@ class AdminDashboardController extends Controller
             return back()->withErrors(['status' => 'Solo CVs fallidos pueden reintentarse.']);
         }
 
+        $resume->transitionTo(ResumeStatus::Processing);
         $resume->update([
-            'status' => ResumeStatus::Processing,
             'error_code' => null,
             'error_message' => null,
         ]);

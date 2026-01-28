@@ -107,7 +107,7 @@ class ProcessResumeJob implements ShouldQueue
             $elapsed = (int)((microtime(true) - $startTime) * 1000);
             AuditLog::record('resume.processed', $resume->user_id, 'system', [
                 'resume_id' => $resume->id,
-                'version' => $versionNum + 1,
+                'version' => $versionNum,
                 'score' => $score['overall'] ?? 0,
                 'elapsed_ms' => $elapsed,
             ]);
