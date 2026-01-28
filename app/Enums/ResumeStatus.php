@@ -24,7 +24,7 @@ enum ResumeStatus: string
             self::PreviewReady => [self::Paid, self::Failed],
             self::Paid        => [self::Delivered, self::Failed],
             self::Delivered   => [],
-            self::Failed      => [self::Processing], // allow retry
+            self::Failed      => [self::Processing, self::Delivered], // retry or admin recovery
         };
     }
 

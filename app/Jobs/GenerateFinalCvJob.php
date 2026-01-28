@@ -35,9 +35,23 @@ class GenerateFinalCvJob implements ShouldQueue
     ): void {
         $resume = Resume::with('latestVersion', 'user')->findOrFail($this->resumeId);
 
-        // Allow both Paid (first generation) and Delivered (admin resend email)
-        if (!in_array($resume->status, [ResumeStatus::Paid, ResumeStatus::Delivered], true)) {
-            Log::warning('Resume not in paid/delivered state for final generation', [
+        // Allow Paid (first generation), Delivered (admin resend), or Failed with
+        // a confirmed payment (admin resend after delivery_error marked resume Failed)
+        $allowed = [ResumeStatus::Paid, ResumeStatus::Delivered];
+        $isFailedWithPayment = false;
+
+        if ($resume->status === ResumeStatus::Failed) {
+            $isFailedWithPayment = \App\Models\Payment::where('resume_id', $resume->id)
+                ->where('status', \App\Enums\PaymentStatus::Paid)
+                ->exists();
+            if (!$isFailedWithPayment) {
+                Log::warning('Resume failed without paid payment, skipping generation', [
+                    'resume_id' => $resume->id,
+                ]);
+                return;
+            }
+        } elseif (!in_array($resume->status, $allowed, true)) {
+            Log::warning('Resume not in valid state for final generation', [
                 'resume_id' => $resume->id,
                 'status' => $resume->status->value,
             ]);
@@ -73,9 +87,11 @@ class GenerateFinalCvJob implements ShouldQueue
             // so the job can be retried and the state remains recoverable
             $mailer->sendFinalCvEmail($resume);
 
-            // Only transition to Delivered AFTER email succeeds
-            // Skip transition if already Delivered (admin resend scenario)
-            if ($resume->status === ResumeStatus::Paid) {
+            // Transition to Delivered AFTER email succeeds
+            // Handles: Paid → Delivered (normal), Failed → Delivered (admin recovery)
+            // Skips transition if already Delivered (admin resend scenario)
+            if (in_array($resume->status, [ResumeStatus::Paid, ResumeStatus::Failed], true)) {
+                $resume->update(['error_code' => null, 'error_message' => null]);
                 $resume->transitionTo(ResumeStatus::Delivered);
             }
 

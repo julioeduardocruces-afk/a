@@ -35,10 +35,11 @@ class ResumeStateMachineTest extends TestCase
         $this->assertFalse($status->canTransitionTo(ResumeStatus::Delivered));
     }
 
-    public function test_paid_can_transition_to_delivered(): void
+    public function test_paid_can_transition_to_delivered_or_failed(): void
     {
         $status = ResumeStatus::Paid;
         $this->assertTrue($status->canTransitionTo(ResumeStatus::Delivered));
+        $this->assertTrue($status->canTransitionTo(ResumeStatus::Failed));
         $this->assertFalse($status->canTransitionTo(ResumeStatus::Processing));
     }
 
@@ -48,10 +49,11 @@ class ResumeStateMachineTest extends TestCase
         $this->assertEmpty($status->allowedTransitions());
     }
 
-    public function test_failed_can_retry_to_processing(): void
+    public function test_failed_can_retry_to_processing_or_recover_to_delivered(): void
     {
         $status = ResumeStatus::Failed;
         $this->assertTrue($status->canTransitionTo(ResumeStatus::Processing));
+        $this->assertTrue($status->canTransitionTo(ResumeStatus::Delivered));
         $this->assertFalse($status->canTransitionTo(ResumeStatus::Paid));
     }
 }

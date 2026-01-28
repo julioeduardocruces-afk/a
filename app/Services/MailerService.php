@@ -38,11 +38,17 @@ class MailerService
             Log::info('CV email sent', [
                 'user_id' => $user->id,
                 'resume_id' => $resume->id,
+                'token_id' => $token->id,
             ]);
         } catch (\Exception $e) {
-            Log::error('Failed to send CV email', [
+            // Invalidate the orphan token so it can't be used and doesn't
+            // pollute the DB on each retry attempt
+            $token->update(['used' => true]);
+
+            Log::error('Failed to send CV email, token invalidated', [
                 'user_id' => $user->id,
                 'resume_id' => $resume->id,
+                'token_id' => $token->id,
                 'error' => $e->getMessage(),
             ]);
             throw $e;

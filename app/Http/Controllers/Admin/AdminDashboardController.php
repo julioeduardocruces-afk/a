@@ -122,6 +122,20 @@ class AdminDashboardController extends Controller
             return back()->withErrors(['status' => 'Solo CVs fallidos pueden reintentarse.']);
         }
 
+        // Prevent reprocessing a resume that already has a confirmed payment.
+        // If the failure was during delivery (delivery_error), the admin should
+        // use "Resend Email" instead. Reprocessing would send the user back to
+        // PreviewReady, losing their paid status and forcing them to pay again.
+        $hasPaidPayment = Payment::where('resume_id', $resume->id)
+            ->where('status', \App\Enums\PaymentStatus::Paid)
+            ->exists();
+
+        if ($hasPaidPayment) {
+            return back()->withErrors([
+                'status' => 'Este CV tiene un pago confirmado. Use "Reenviar Email" en vez de reprocesar.',
+            ]);
+        }
+
         $resume->transitionTo(ResumeStatus::Processing);
         $resume->update([
             'error_code' => null,
@@ -141,8 +155,22 @@ class AdminDashboardController extends Controller
     {
         $resume = Resume::findOrFail($id);
 
-        if (!in_array($resume->status, [ResumeStatus::Paid, ResumeStatus::Delivered])) {
-            return back()->withErrors(['status' => 'Solo CVs pagados/entregados.']);
+        // Allow resend for: Paid (first attempt), Delivered (re-send), or Failed
+        // with a confirmed payment (delivery_error — the resume was Paid but
+        // delivery failed and it transitioned to Failed)
+        $allowedDirectStatuses = [ResumeStatus::Paid, ResumeStatus::Delivered];
+
+        if ($resume->status === ResumeStatus::Failed) {
+            $hasPaidPayment = Payment::where('resume_id', $resume->id)
+                ->where('status', \App\Enums\PaymentStatus::Paid)
+                ->exists();
+            if (!$hasPaidPayment) {
+                return back()->withErrors(['status' => 'Este CV fallido no tiene pago confirmado.']);
+            }
+            // Clear error state; GenerateFinalCvJob accepts Failed resumes
+            // with confirmed payment (see job's status check)
+        } elseif (!in_array($resume->status, $allowedDirectStatuses)) {
+            return back()->withErrors(['status' => 'Solo CVs pagados/entregados/fallidos con pago.']);
         }
 
         GenerateFinalCvJob::dispatch($resume->id);
