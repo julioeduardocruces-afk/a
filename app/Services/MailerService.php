@@ -1,0 +1,50 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\DownloadToken;
+use App\Models\Resume;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+
+class MailerService
+{
+    /**
+     * Send the final CV download link to the user.
+     */
+    public function sendFinalCvEmail(Resume $resume): void
+    {
+        $user = $resume->user;
+        $token = DownloadToken::generate($resume->id, $user->id, 1440); // 24 hours
+
+        $downloadUrl = route('download.token', ['token' => $token->token]);
+
+        try {
+            Mail::send(
+                'emails.cv-ready',
+                [
+                    'userName' => $user->name,
+                    'downloadUrl' => $downloadUrl,
+                    'resumeId' => $resume->id,
+                    'expiresAt' => $token->expires_at->format('d/m/Y H:i'),
+                ],
+                function ($message) use ($user, $resume) {
+                    $message->to($user->email, $user->name)
+                        ->subject('Tu CV Optimizado ATS esta listo - #' . $resume->id);
+                }
+            );
+
+            Log::info('CV email sent', [
+                'user_id' => $user->id,
+                'resume_id' => $resume->id,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to send CV email', [
+                'user_id' => $user->id,
+                'resume_id' => $resume->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
+}
