@@ -83,6 +83,19 @@ class GenerateFinalCvJob implements ShouldQueue
             $docxPath = "finals/{$resume->id}/cv_optimizado_{$resume->id}.docx";
             Storage::put($docxPath, $docxContent);
 
+            // Re-check status from DB before sending email. Between the initial
+            // load and now, a concurrent job (from webhook crash-recovery re-dispatch)
+            // may have already completed delivery. Without this refresh, both jobs
+            // would send emails, resulting in duplicate emails with extra tokens.
+            $resume->refresh();
+
+            if ($resume->status === ResumeStatus::Delivered) {
+                Log::info('Resume already delivered by concurrent job, skipping email', [
+                    'resume_id' => $resume->id,
+                ]);
+                return;
+            }
+
             // Send email FIRST — if it fails, don't transition to Delivered
             // so the job can be retried and the state remains recoverable
             $mailer->sendFinalCvEmail($resume);
@@ -127,16 +140,25 @@ class GenerateFinalCvJob implements ShouldQueue
             return;
         }
 
-        // Only mark as failed if still in Paid state
-        // (skip if already Delivered from a concurrent admin resend,
-        // or if already Failed from a previous exhaustion)
+        // Mark as failed if still in Paid state (first delivery attempt exhausted).
+        // Skip if already Delivered from a concurrent admin resend.
         if ($resume->status === ResumeStatus::Paid) {
             $resume->markFailed('delivery_error', $exception->getMessage());
-
-            AuditLog::record('resume.delivery_exhausted', $resume->user_id, 'system', [
-                'resume_id' => $resume->id,
-                'error' => $exception->getMessage(),
+        } elseif ($resume->status === ResumeStatus::Failed) {
+            // Admin resend exhausted: update error info so admin sees the latest
+            // failure reason, not the stale one from the original failure.
+            $resume->update([
+                'error_code' => 'delivery_error',
+                'error_message' => $exception->getMessage(),
             ]);
+        } else {
+            // Already Delivered (concurrent job succeeded) — nothing to do
+            return;
         }
+
+        AuditLog::record('resume.delivery_exhausted', $resume->user_id, 'system', [
+            'resume_id' => $resume->id,
+            'error' => $exception->getMessage(),
+        ]);
     }
 }
