@@ -55,9 +55,10 @@ class PaymentController extends Controller
     public function webhook(Request $request)
     {
         try {
-            // handleWebhook is fully idempotent: duplicate webhooks return early
-            // without dispatching GenerateFinalCvJob again (dispatch is inside
-            // the payment transaction, guarded by lockForUpdate idempotency check)
+            // handleWebhook is idempotent: payment status is committed in a separate
+            // transaction first (to never lose confirmed money), then resume transition
+            // and job dispatch happen outside. Duplicate webhooks re-dispatch the job
+            // only if the resume is stuck in Paid state (crash recovery).
             $this->paymentService->handleWebhook($request->all());
 
             return response('OK', 200);
