@@ -88,6 +88,11 @@ class ResumeController extends Controller
     {
         $resume = $request->attributes->get('resume');
 
+        if (!in_array($resume->status, [ResumeStatus::Draft, ResumeStatus::Failed])) {
+            return redirect()->route('resumes.status', $resume->id)
+                ->with('info', 'El CV ya fue procesado. No se puede cambiar el rubro.');
+        }
+
         return view('app.target-role', compact('resume'));
     }
 
@@ -97,6 +102,12 @@ class ResumeController extends Controller
     public function setTargetRole(Request $request, int $id)
     {
         $resume = $request->attributes->get('resume');
+
+        // Only allow setting target role when resume is in Draft or Failed state
+        // Prevents inconsistency where target changes after AI already optimized
+        if (!in_array($resume->status, [ResumeStatus::Draft, ResumeStatus::Failed])) {
+            return back()->withErrors(['status' => 'No se puede cambiar el rubro/cargo en el estado actual. El CV ya fue procesado.']);
+        }
 
         $validated = $request->validate([
             'target_industry' => ['required', 'string', 'max:255'],
@@ -140,11 +151,7 @@ class ResumeController extends Controller
                     'structured_json' => $structured,
                 ]);
             } catch (\Exception $e) {
-                $resume->update([
-                    'status' => ResumeStatus::Failed,
-                    'error_code' => 'extraction_error',
-                    'error_message' => $e->getMessage(),
-                ]);
+                $resume->markFailed('extraction_error', $e->getMessage());
                 return back()->withErrors(['extraction' => 'Error al extraer el texto del CV. Verifica que el archivo sea válido.']);
             }
         }

@@ -59,8 +59,9 @@ class PaymentController extends Controller
         try {
             $payment = $this->paymentService->handleWebhook($request->all());
 
-            // If payment was successful, dispatch final CV generation
-            if ($payment->status === PaymentStatus::Paid) {
+            // Only dispatch final CV generation if the resume is in PreviewReady→Paid transition
+            // (not if it was already Paid/Delivered from a previous webhook — idempotency)
+            if ($payment->status === PaymentStatus::Paid && $payment->resume->status === ResumeStatus::Paid) {
                 GenerateFinalCvJob::dispatch($payment->resume_id);
             }
 

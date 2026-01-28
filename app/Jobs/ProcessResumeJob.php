@@ -102,9 +102,13 @@ class ProcessResumeJob implements ShouldQueue
             // Step 5: Transition to preview_ready
             $resume->transitionTo(ResumeStatus::PreviewReady);
 
-            MetricsDaily::incrementToday('previews');
+            // Note: 'previews' metric is incremented in ResumeController::preview()
+            // when the user actually views the preview, not here on processing completion.
 
             $elapsed = (int)((microtime(true) - $startTime) * 1000);
+
+            // Update average processing time metric
+            MetricsDaily::incrementToday('avg_process_time_ms', $elapsed);
             AuditLog::record('resume.processed', $resume->user_id, 'system', [
                 'resume_id' => $resume->id,
                 'version' => $versionNum,

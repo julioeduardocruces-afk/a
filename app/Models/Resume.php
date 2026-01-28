@@ -48,7 +48,7 @@ class Resume extends Model
 
     public function markFailed(string $errorCode, string $message = ''): void
     {
-        if (!in_array($this->status, [ResumeStatus::Processing, ResumeStatus::PreviewReady])) {
+        if (!in_array($this->status, [ResumeStatus::Draft, ResumeStatus::Processing, ResumeStatus::PreviewReady])) {
             throw new InvalidArgumentException(
                 "Cannot mark as failed from status: {$this->status->value}"
             );

@@ -35,8 +35,9 @@ class GenerateFinalCvJob implements ShouldQueue
     ): void {
         $resume = Resume::with('latestVersion', 'user')->findOrFail($this->resumeId);
 
-        if ($resume->status !== ResumeStatus::Paid) {
-            Log::warning('Resume not in paid state for final generation', [
+        // Allow both Paid (first generation) and Delivered (admin resend email)
+        if (!in_array($resume->status, [ResumeStatus::Paid, ResumeStatus::Delivered], true)) {
+            Log::warning('Resume not in paid/delivered state for final generation', [
                 'resume_id' => $resume->id,
                 'status' => $resume->status->value,
             ]);
@@ -68,11 +69,15 @@ class GenerateFinalCvJob implements ShouldQueue
             $docxPath = "finals/{$resume->id}/cv_optimizado_{$resume->id}.docx";
             Storage::put($docxPath, $docxContent);
 
-            // Transition to delivered
-            $resume->transitionTo(ResumeStatus::Delivered);
-
-            // Send email
+            // Send email FIRST — if it fails, don't transition to Delivered
+            // so the job can be retried and the state remains recoverable
             $mailer->sendFinalCvEmail($resume);
+
+            // Only transition to Delivered AFTER email succeeds
+            // Skip transition if already Delivered (admin resend scenario)
+            if ($resume->status === ResumeStatus::Paid) {
+                $resume->transitionTo(ResumeStatus::Delivered);
+            }
 
             AuditLog::record('resume.delivered', $resume->user_id, 'system', [
                 'resume_id' => $resume->id,
@@ -90,6 +95,8 @@ class GenerateFinalCvJob implements ShouldQueue
                 'resume_id' => $resume->id,
                 'error' => $e->getMessage(),
             ]);
+
+            throw $e; // Re-throw so the job retries via $tries/$backoff
         }
     }
 }

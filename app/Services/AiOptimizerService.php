@@ -211,10 +211,17 @@ PROMPT;
     {
         $report = $aiResponse['consistency_report'] ?? null;
 
+        // BLOCKING check: if the AI itself reports missing experiences, reject the output
         if ($report && isset($report['all_included']) && $report['all_included'] === false) {
-            Log::warning('AI consistency check: not all experiences included', [
+            $originalCount = $report['original_experiences_count'] ?? '?';
+            $includedCount = $report['included_experiences_count'] ?? '?';
+            Log::error('AI consistency check FAILED: not all experiences included', [
                 'report' => $report,
             ]);
+            throw new RuntimeException(
+                "La IA omitió experiencias laborales ({$includedCount}/{$originalCount} incluidas). "
+                . "Reintentando para garantizar integridad del CV."
+            );
         }
 
         // Additional heuristic: check experience section keywords match
@@ -241,10 +248,16 @@ PROMPT;
             }
         }
 
+        // BLOCKING: if too many significant keywords are missing, reject
         if (count($missing) > 5) {
-            Log::warning('Heuristic consistency: several original keywords missing from optimized CV', [
+            Log::error('Heuristic consistency FAILED: many original keywords missing', [
+                'missing_count' => count($missing),
                 'missing_sample' => array_slice($missing, 0, 10),
             ]);
+            throw new RuntimeException(
+                "El CV optimizado perdió demasiadas palabras clave del original (" . count($missing)
+                . " faltantes). Reintentando."
+            );
         }
     }
 }
