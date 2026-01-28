@@ -15,6 +15,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ProcessResumeJob implements ShouldQueue
@@ -23,6 +24,7 @@ class ProcessResumeJob implements ShouldQueue
 
     public int $tries = 2;
     public int $timeout = 300;
+    public array $backoff = [10, 60];
 
     public function __construct(
         private readonly int $resumeId,
@@ -77,19 +79,25 @@ class ProcessResumeJob implements ShouldQueue
                 $aiResult['ats_keywords'] ?? [],
             );
 
-            // Step 4: Save version
-            $versionNum = ResumeVersion::where('resume_id', $resume->id)->max('version') ?? 0;
+            // Step 4: Save version (atomic with DB lock to prevent race condition)
+            $versionNum = DB::transaction(function () use ($resume, $aiResult, $score) {
+                $versionNum = ResumeVersion::where('resume_id', $resume->id)
+                    ->lockForUpdate()
+                    ->max('version') ?? 0;
 
-            ResumeVersion::create([
-                'resume_id' => $resume->id,
-                'version' => $versionNum + 1,
-                'optimized_text_md' => $aiResult['optimized_text_md'],
-                'optimized_text_plain' => $aiResult['optimized_text_plain'],
-                'ats_keywords_json' => $aiResult['ats_keywords'] ?? [],
-                'score_json' => $score,
-                'consistency_report_json' => $aiResult['consistency_report'] ?? null,
-                'created_at' => now(),
-            ]);
+                ResumeVersion::create([
+                    'resume_id' => $resume->id,
+                    'version' => $versionNum + 1,
+                    'optimized_text_md' => $aiResult['optimized_text_md'],
+                    'optimized_text_plain' => $aiResult['optimized_text_plain'],
+                    'ats_keywords_json' => $aiResult['ats_keywords'] ?? [],
+                    'score_json' => $score,
+                    'consistency_report_json' => $aiResult['consistency_report'] ?? null,
+                    'created_at' => now(),
+                ]);
+
+                return $versionNum + 1;
+            });
 
             // Step 5: Transition to preview_ready
             $resume->transitionTo(ResumeStatus::PreviewReady);

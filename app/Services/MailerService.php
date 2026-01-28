@@ -15,7 +15,8 @@ class MailerService
     public function sendFinalCvEmail(Resume $resume): void
     {
         $user = $resume->user;
-        $token = DownloadToken::generate($resume->id, $user->id, 1440); // 24 hours
+        $ttlMinutes = (int) config('ats.download_token_ttl', 15);
+        $token = DownloadToken::generate($resume->id, $user->id, $ttlMinutes);
 
         $downloadUrl = route('download.token', ['token' => $token->token]);
 

@@ -50,7 +50,7 @@ class TextExtractorService
         // Path traversal protection
         $realPath = realpath($fullPath);
         $allowedBase = realpath(storage_path('app'));
-        if ($realPath === false || !str_starts_with($realPath, $allowedBase)) {
+        if ($realPath === false || $allowedBase === false || !str_starts_with($realPath, $allowedBase)) {
             throw new RuntimeException('Path traversal detectado.');
         }
 
@@ -95,15 +95,18 @@ class TextExtractorService
         return $this->normalizeText($text);
     }
 
-    private function extractElementText(mixed $element): string
+    private function extractElementText(mixed $element, int $depth = 0): string
     {
+        if ($depth > 50) {
+            return ''; // Prevent stack overflow from deeply nested/circular structures
+        }
         if (method_exists($element, 'getText')) {
             return $element->getText();
         }
         if (method_exists($element, 'getElements')) {
             $parts = [];
             foreach ($element->getElements() as $child) {
-                $parts[] = $this->extractElementText($child);
+                $parts[] = $this->extractElementText($child, $depth + 1);
             }
             return implode(' ', $parts);
         }

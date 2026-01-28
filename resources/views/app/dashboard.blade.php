@@ -73,6 +73,8 @@
                             @case('failed')
                                 <a href="{{ route('resumes.target-role', $resume->id) }}" class="btn btn-sm btn-danger">Reintentar</a>
                                 @break
+                            @default
+                                <span style="color:#999;">-</span>
                         @endswitch
                     </td>
                 </tr>

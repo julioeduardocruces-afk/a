@@ -81,7 +81,7 @@ class PaymentController extends Controller
     {
         $paymentModel = \App\Models\Payment::findOrFail($payment);
 
-        if (!$paymentModel->user_id === $request->user()?->id) {
+        if ($paymentModel->user_id !== $request->user()?->id) {
             abort(403);
         }
 

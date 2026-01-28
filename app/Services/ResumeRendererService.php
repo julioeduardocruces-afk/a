@@ -40,23 +40,50 @@ class ResumeRendererService
 
     private function markdownToHtml(string $md): string
     {
-        // Basic markdown to HTML conversion
-        $html = htmlspecialchars($md, ENT_QUOTES, 'UTF-8');
+        // Process line by line: escape text content first, then apply markdown
+        $lines = explode("\n", $md);
+        $htmlLines = [];
 
-        // Headers
-        $html = preg_replace('/^### (.+)$/m', '<h3>$1</h3>', $html);
-        $html = preg_replace('/^## (.+)$/m', '<h2>$1</h2>', $html);
-        $html = preg_replace('/^# (.+)$/m', '<h1>$1</h1>', $html);
+        foreach ($lines as $line) {
+            // Escape HTML entities in raw text content
+            $safe = htmlspecialchars($line, ENT_QUOTES, 'UTF-8');
 
-        // Bold
-        $html = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $html);
+            // Headers (must check before other transforms)
+            if (preg_match('/^### (.+)$/', $safe, $m)) {
+                $htmlLines[] = '<h3>' . $m[1] . '</h3>';
+                continue;
+            }
+            if (preg_match('/^## (.+)$/', $safe, $m)) {
+                $htmlLines[] = '<h2>' . $m[1] . '</h2>';
+                continue;
+            }
+            if (preg_match('/^# (.+)$/', $safe, $m)) {
+                $htmlLines[] = '<h1>' . $m[1] . '</h1>';
+                continue;
+            }
 
-        // Bullet lists
-        $html = preg_replace('/^- (.+)$/m', '<li>$1</li>', $html);
-        $html = preg_replace('/(<li>.*<\/li>\n?)+/', '<ul>$0</ul>', $html);
+            // Bullet list items
+            if (preg_match('/^- (.+)$/', $safe, $m)) {
+                $item = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $m[1]);
+                $htmlLines[] = '<li>' . $item . '</li>';
+                continue;
+            }
 
-        // Line breaks
-        $html = nl2br($html);
+            // Bold in normal text
+            $safe = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $safe);
+
+            // Empty line = paragraph break
+            if (trim($safe) === '') {
+                $htmlLines[] = '<br>';
+                continue;
+            }
+
+            $htmlLines[] = $safe . '<br>';
+        }
+
+        // Wrap consecutive <li> elements in <ul>
+        $html = implode("\n", $htmlLines);
+        $html = preg_replace('/(<li>.*?<\/li>\n?)+/s', '<ul>$0</ul>', $html);
 
         return $html;
     }
@@ -166,11 +193,13 @@ class ResumeRendererService
 
     private function renderWithWkhtmltoimage(string $html, string $binary): string
     {
-        $tmpHtml = tempnam(sys_get_temp_dir(), 'cv_preview_') . '.html';
-        $tmpPng = tempnam(sys_get_temp_dir(), 'cv_preview_') . '.png';
+        $tmpDir = sys_get_temp_dir();
+        $unique = bin2hex(random_bytes(16));
+        $tmpHtml = "{$tmpDir}/cv_preview_{$unique}.html";
+        $tmpPng = "{$tmpDir}/cv_preview_{$unique}.png";
 
         try {
-            file_put_contents($tmpHtml, $html);
+            file_put_contents($tmpHtml, $html, LOCK_EX);
 
             $cmd = escapeshellarg($binary)
                 . ' --width 800 --quality 85 --disable-javascript'
@@ -187,8 +216,12 @@ class ResumeRendererService
 
             return file_get_contents($tmpPng);
         } finally {
-            @unlink($tmpHtml);
-            @unlink($tmpPng);
+            if (file_exists($tmpHtml) && !unlink($tmpHtml)) {
+                \Illuminate\Support\Facades\Log::warning("Failed to clean temp file: {$tmpHtml}");
+            }
+            if (file_exists($tmpPng) && !unlink($tmpPng)) {
+                \Illuminate\Support\Facades\Log::warning("Failed to clean temp file: {$tmpPng}");
+            }
         }
     }
 

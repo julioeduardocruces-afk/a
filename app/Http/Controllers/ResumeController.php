@@ -145,7 +145,7 @@ class ResumeController extends Controller
                     'error_code' => 'extraction_error',
                     'error_message' => $e->getMessage(),
                 ]);
-                return back()->withErrors(['extraction' => $e->getMessage()]);
+                return back()->withErrors(['extraction' => 'Error al extraer el texto del CV. Verifica que el archivo sea válido.']);
             }
         }
 

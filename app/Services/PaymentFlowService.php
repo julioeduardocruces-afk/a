@@ -25,6 +25,20 @@ class PaymentFlowService
             throw new RuntimeException('El CV debe estar en estado preview_ready para pagar.');
         }
 
+        // Prevent double payment: check if there's already a pending/paid payment
+        $existingPayment = Payment::where('resume_id', $resume->id)
+            ->whereIn('status', [PaymentStatus::Pending, PaymentStatus::Paid])
+            ->first();
+
+        if ($existingPayment?->status === PaymentStatus::Paid) {
+            throw new RuntimeException('Este CV ya fue pagado.');
+        }
+
+        // If there's a pending payment, cancel it before creating a new one
+        if ($existingPayment?->status === PaymentStatus::Pending) {
+            $existingPayment->update(['status' => PaymentStatus::Failed]);
+        }
+
         $credential = ApiCredential::getNextForProvider('flow');
         if (!$credential) {
             throw new RuntimeException('No hay credenciales Flow activas.');
@@ -34,6 +48,10 @@ class PaymentFlowService
         $apiKey = $creds['api_key'] ?? '';
         $secretKey = $creds['secret_key'] ?? '';
         $apiUrl = $creds['api_url'] ?? 'https://www.flow.cl/api';
+
+        if (empty($apiKey) || empty($secretKey)) {
+            throw new RuntimeException('Credenciales Flow incompletas.');
+        }
 
         // Create payment record first
         $payment = Payment::create([
@@ -56,19 +74,14 @@ class PaymentFlowService
             'urlReturn' => route('payments.flow.return', ['payment' => $payment->id]),
         ];
 
-        // Sign the request
-        ksort($params);
-        $toSign = '';
-        foreach ($params as $key => $value) {
-            $toSign .= "{$key}{$value}";
-        }
-        $params['s'] = hash_hmac('sha256', $toSign, $secretKey);
+        // Sign the request (HMAC-SHA256 per Flow docs)
+        $params['s'] = $this->signParams($params, $secretKey);
 
         $response = Http::asForm()->post("{$apiUrl}/payment/create", $params);
 
         if (!$response->successful()) {
             $payment->update(['status' => PaymentStatus::Failed, 'raw_payload_json' => $response->json()]);
-            throw new RuntimeException('Error al crear pago en Flow: ' . $response->body());
+            throw new RuntimeException('Error al crear pago en Flow.');
         }
 
         $data = $response->json();
@@ -96,6 +109,7 @@ class PaymentFlowService
 
     /**
      * Handle Flow webhook confirmation (idempotent).
+     * Flow sends token via POST. We verify by calling getStatus with HMAC.
      */
     public function handleWebhook(array $payload): Payment
     {
@@ -104,7 +118,7 @@ class PaymentFlowService
             throw new RuntimeException('Webhook sin token.');
         }
 
-        // Verify the payment status with Flow
+        // Verify the payment status with Flow API (server-to-server verification)
         $credential = ApiCredential::getNextForProvider('flow');
         if (!$credential) {
             throw new RuntimeException('No hay credenciales Flow activas para verificar.');
@@ -115,22 +129,21 @@ class PaymentFlowService
         $secretKey = $creds['secret_key'] ?? '';
         $apiUrl = $creds['api_url'] ?? 'https://www.flow.cl/api';
 
+        if (empty($apiKey) || empty($secretKey)) {
+            throw new RuntimeException('Credenciales Flow incompletas para verificacion.');
+        }
+
         $params = [
             'apiKey' => $apiKey,
             'token' => $token,
         ];
-
-        ksort($params);
-        $toSign = '';
-        foreach ($params as $key => $value) {
-            $toSign .= "{$key}{$value}";
-        }
-        $params['s'] = hash_hmac('sha256', $toSign, $secretKey);
+        $params['s'] = $this->signParams($params, $secretKey);
 
         $response = Http::asForm()->get("{$apiUrl}/payment/getStatus", $params);
 
         if (!$response->successful()) {
-            throw new RuntimeException('Error verificando pago con Flow: ' . $response->body());
+            Log::error('Flow getStatus failed', ['status' => $response->status()]);
+            throw new RuntimeException('Error verificando pago con Flow.');
         }
 
         $flowData = $response->json();
@@ -138,23 +151,37 @@ class PaymentFlowService
         $commerceOrder = (string)($flowData['commerceOrder'] ?? '');
         $flowStatus = (int)($flowData['status'] ?? 0);
 
-        // Find payment - idempotency: use flow_order or commerce_order
-        $payment = Payment::where('flow_token', $token)
-            ->orWhere('flow_order', $flowOrder)
-            ->orWhere('id', $commerceOrder)
-            ->first();
+        // Find payment by flow_token first (most specific), then by commerce order ID
+        $payment = Payment::where('flow_token', $token)->first();
+        if (!$payment && !empty($commerceOrder)) {
+            $payment = Payment::find((int)$commerceOrder);
+        }
 
         if (!$payment) {
             throw new RuntimeException("Pago no encontrado para token: {$token}");
         }
 
-        // Idempotency: if already paid, return early
+        // Idempotency: if already paid, return early (no state change)
         if ($payment->status === PaymentStatus::Paid) {
             Log::info('Webhook duplicado ignorado', ['payment_id' => $payment->id]);
             return $payment;
         }
 
+        // Also skip if payment already failed or refunded (no going backward)
+        if (in_array($payment->status, [PaymentStatus::Refunded], true)) {
+            Log::info('Webhook para pago refunded ignorado', ['payment_id' => $payment->id]);
+            return $payment;
+        }
+
         return DB::transaction(function () use ($payment, $flowData, $flowOrder, $flowStatus) {
+            // Re-lock payment row inside transaction to prevent race conditions
+            $payment = Payment::lockForUpdate()->find($payment->id);
+
+            // Double-check idempotency inside transaction
+            if ($payment->status === PaymentStatus::Paid) {
+                return $payment;
+            }
+
             $payment->update([
                 'flow_order' => $flowOrder,
                 'raw_payload_json' => $flowData,
@@ -186,5 +213,18 @@ class PaymentFlowService
 
             return $payment->fresh();
         });
+    }
+
+    /**
+     * Sign parameters using HMAC-SHA256 per Flow API specification.
+     */
+    private function signParams(array $params, string $secretKey): string
+    {
+        ksort($params);
+        $toSign = '';
+        foreach ($params as $key => $value) {
+            $toSign .= "{$key}{$value}";
+        }
+        return hash_hmac('sha256', $toSign, $secretKey);
     }
 }

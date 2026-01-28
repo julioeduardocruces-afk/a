@@ -42,7 +42,9 @@ Route::middleware('guest')->group(function () {
     Route::post('/registro', [AuthController::class, 'register']);
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/magic-link', [AuthController::class, 'sendMagicLink'])->name('magic-link.send');
+    Route::post('/magic-link', [AuthController::class, 'sendMagicLink'])
+        ->middleware('throttle:3,5') // max 3 attempts per 5 minutes
+        ->name('magic-link.send');
     Route::get('/magic-link/{token}', [AuthController::class, 'loginWithMagicToken'])->name('magic-link.verify');
 });
 
