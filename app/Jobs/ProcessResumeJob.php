@@ -108,8 +108,10 @@ class ProcessResumeJob implements ShouldQueue
             $elapsed = (int)((microtime(true) - $startTime) * 1000);
 
             // Track total processing time and count for computing average in dashboard
-            MetricsDaily::incrementToday('total_process_time_ms', $elapsed);
-            MetricsDaily::incrementToday('processed_count');
+            MetricsDaily::batchIncrementToday([
+                'total_process_time_ms' => $elapsed,
+                'processed_count' => 1,
+            ]);
             AuditLog::record('resume.processed', $resume->user_id, 'system', [
                 'resume_id' => $resume->id,
                 'version' => $versionNum,

@@ -197,8 +197,10 @@ class PaymentFlowService
                 ]);
                 try {
                     $resume->transitionTo(ResumeStatus::Paid);
-                    MetricsDaily::incrementToday('paid');
-                    MetricsDaily::incrementToday('revenue', $payment->amount);
+                    MetricsDaily::batchIncrementToday([
+                        'paid' => 1,
+                        'revenue' => $payment->amount,
+                    ]);
                 } catch (\InvalidArgumentException $e) {
                     Log::error('Recovery transition failed for PreviewReady resume', [
                         'payment_id' => $payment->id,
@@ -310,8 +312,10 @@ class PaymentFlowService
                 return $payment;
             }
 
-            MetricsDaily::incrementToday('paid');
-            MetricsDaily::incrementToday('revenue', $payment->amount);
+            MetricsDaily::batchIncrementToday([
+                'paid' => 1,
+                'revenue' => $payment->amount,
+            ]);
 
             AuditLog::record('payment.confirmed', $payment->user_id, 'system', [
                 'payment_id' => $payment->id,
