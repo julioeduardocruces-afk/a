@@ -1,10 +1,13 @@
 <?php
 /**
  * ============================================================
- *  ATS CV Optimizer — Auto-Installer para Hostinger Business
+ *  ATS CV Optimizer — Auto-Installer (Universal)
  * ============================================================
  *
- *  Sube TODOS los archivos del proyecto al hosting.
+ *  Funciona en cualquier hosting: Hostinger, VPS, cPanel, etc.
+ *  Auto-detecta donde esta la app Laravel buscando el archivo artisan.
+ *
+ *  Sube los archivos al hosting.
  *  Navega a: https://tu-dominio.com/install.php
  *  Completa el formulario. No necesitas SSH, Artisan ni phpMyAdmin.
  *
@@ -17,9 +20,36 @@ error_reporting(E_ALL);
 ini_set('display_errors', '0');
 set_time_limit(300);
 
-// Si ya esta instalado, bloquear acceso
-// Hostinger: app lives in ../ats-app/, public_html is the web root
-$basePath = dirname(__DIR__) . '/ats-app';
+// ─── Auto-detectar ruta de la app Laravel ────────────────
+// Busca el archivo artisan en: directorio padre, ../ats-app/, o cualquier
+// carpeta hermana. Funciona en cualquier estructura de hosting.
+$basePath = null;
+$_candidates = [
+    dirname(__DIR__),                   // Standard: public/ dentro del proyecto
+    dirname(__DIR__) . '/ats-app',      // Hostinger: ats-app/ + public_html/
+];
+// Escanear carpetas hermanas
+$_parentDir = dirname(__DIR__);
+foreach (@scandir($_parentDir) ?: [] as $_entry) {
+    if ($_entry === '.' || $_entry === '..' || $_entry === basename(__DIR__)) continue;
+    $_p = $_parentDir . '/' . $_entry;
+    if (is_dir($_p) && !in_array($_p, $_candidates)) {
+        $_candidates[] = $_p;
+    }
+}
+foreach ($_candidates as $_c) {
+    $_real = @realpath($_c);
+    if ($_real && file_exists($_real . '/artisan') && file_exists($_real . '/bootstrap/app.php')) {
+        $basePath = $_real;
+        break;
+    }
+}
+
+if ($basePath === null) {
+    http_response_code(500);
+    die('Error: No se encontro la app Laravel. Asegurate de que la carpeta con artisan y bootstrap/ existe junto a ' . basename(__DIR__) . '/');
+}
+
 $envPath  = $basePath . '/.env';
 $lockFile = $basePath . '/storage/installed.lock';
 
@@ -30,7 +60,7 @@ if (file_exists($lockFile)) {
 
 // ─── Funciones auxiliares ─────────────────────────────────
 
-function checkRequirements(): array
+function checkRequirements(string $basePath): array
 {
     $checks = [];
 
@@ -39,6 +69,14 @@ function checkRequirements(): array
         'name'     => 'PHP >= 8.2',
         'ok'       => version_compare(PHP_VERSION, '8.2.0', '>='),
         'actual'   => PHP_VERSION,
+        'required' => true,
+    ];
+
+    // App path detected
+    $checks[] = [
+        'name'     => 'App Laravel detectada',
+        'ok'       => true,
+        'actual'   => $basePath,
         'required' => true,
     ];
 
@@ -69,7 +107,6 @@ function checkRequirements(): array
     ];
 
     // Directorios escribibles
-    $basePath = dirname(__DIR__) . '/ats-app';
     $dirs = ['storage', 'storage/app', 'storage/framework', 'storage/logs', 'bootstrap/cache'];
     foreach ($dirs as $dir) {
         $full = $basePath . '/' . $dir;
@@ -474,9 +511,8 @@ function createAdminUser(PDO $pdo, string $name, string $email, string $password
     }
 }
 
-function createStorageDirs(): void
+function createStorageDirs(string $basePath): void
 {
-    $basePath = dirname(__DIR__) . '/ats-app';
     $dirs = [
         'storage/app/uploads',
         'storage/app/finals',
@@ -499,11 +535,10 @@ function createStorageDirs(): void
     }
 }
 
-function createSymlink(): bool
+function createSymlink(string $basePath): bool
 {
-    $basePath = dirname(__DIR__) . '/ats-app';
     $target = $basePath . '/storage/app/public';
-    $link   = dirname(__DIR__) . '/public_html/storage';
+    $link   = __DIR__ . '/storage';  // symlink in same dir as install.php (public_html/)
 
     if (is_link($link)) return true;
     if (!is_dir($target)) @mkdir($target, 0775, true);
@@ -572,10 +607,10 @@ if ($step === 'install' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($error)) {
         // 3. Create storage dirs
-        createStorageDirs();
+        createStorageDirs($basePath);
 
         // 4. Create storage symlink
-        createSymlink();
+        createSymlink($basePath);
 
         // 5. Run migrations
         $dsn = "mysql:host={$data['db_host']};port={$data['db_port']};dbname={$data['db_name']};charset=utf8mb4";
@@ -635,7 +670,7 @@ if (empty($_SESSION['csrf_token'])) {
 }
 $csrfToken = $_SESSION['csrf_token'];
 
-$checks = checkRequirements();
+$checks = checkRequirements($basePath);
 $allRequired = !in_array(false, array_map(fn($c) => !$c['required'] || $c['ok'], $checks));
 
 // Auto-detect URL
@@ -704,7 +739,7 @@ h3{font-size:16px;margin:20px 0 10px;color:#333}
 <div class="container">
 <div class="card">
     <h1>CV Optimizer ATS</h1>
-    <p class="subtitle">Instalador automatico para Hostinger Business</p>
+    <p class="subtitle">Instalador automatico &mdash; detecta rutas automaticamente</p>
 
 <?php if ($step === 'done'): ?>
     <!-- ════════ PASO FINAL: COMPLETADO ════════ -->
