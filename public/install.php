@@ -337,7 +337,8 @@ function runMigrations(PDO $pdo): array
         // ── resumes ──
         "CREATE TABLE IF NOT EXISTS `resumes` (
             `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-            `user_id` BIGINT UNSIGNED NOT NULL,
+            `user_id` BIGINT UNSIGNED NULL,
+            `access_token` VARCHAR(64) NULL,
             `original_filename` VARCHAR(255) NOT NULL,
             `original_mime` VARCHAR(100) NOT NULL,
             `original_path` VARCHAR(500) NOT NULL COMMENT 'Storage path, never public',
@@ -345,14 +346,16 @@ function runMigrations(PDO $pdo): array
             `structured_json` JSON NULL COMMENT 'Parsed sections',
             `target_industry` VARCHAR(255) NULL COMMENT 'Rubro objetivo',
             `target_role` VARCHAR(255) NULL COMMENT 'Cargo objetivo',
+            `customer_email` VARCHAR(255) NULL COMMENT 'Email for anonymous delivery',
             `status` ENUM('draft','processing','preview_ready','paid','delivered','failed') NOT NULL DEFAULT 'draft',
             `error_code` VARCHAR(100) NULL,
             `error_message` TEXT NULL,
             `created_at` TIMESTAMP NULL,
             `updated_at` TIMESTAMP NULL,
+            UNIQUE KEY `resumes_access_token_unique` (`access_token`),
             INDEX `resumes_user_id_status_index` (`user_id`, `status`),
             INDEX `resumes_status_index` (`status`),
-            CONSTRAINT `resumes_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+            CONSTRAINT `resumes_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
 
         // ── resume_versions ──
@@ -374,7 +377,7 @@ function runMigrations(PDO $pdo): array
         // ── payments ──
         "CREATE TABLE IF NOT EXISTS `payments` (
             `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-            `user_id` BIGINT UNSIGNED NOT NULL,
+            `user_id` BIGINT UNSIGNED NULL,
             `resume_id` BIGINT UNSIGNED NOT NULL,
             `provider` ENUM('flow') NOT NULL DEFAULT 'flow',
             `amount` INT UNSIGNED NOT NULL COMMENT 'Amount in CLP',
@@ -389,7 +392,6 @@ function runMigrations(PDO $pdo): array
             UNIQUE KEY `payments_flow_order_unique` (`flow_order`),
             INDEX `payments_user_id_resume_id_index` (`user_id`, `resume_id`),
             INDEX `payments_status_index` (`status`),
-            CONSTRAINT `payments_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
             CONSTRAINT `payments_resume_id_foreign` FOREIGN KEY (`resume_id`) REFERENCES `resumes` (`id`) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
 
@@ -440,15 +442,14 @@ function runMigrations(PDO $pdo): array
         "CREATE TABLE IF NOT EXISTS `download_tokens` (
             `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
             `resume_id` BIGINT UNSIGNED NOT NULL,
-            `user_id` BIGINT UNSIGNED NOT NULL,
+            `user_id` BIGINT UNSIGNED NULL,
             `token` VARCHAR(64) NOT NULL,
             `used` TINYINT(1) NOT NULL DEFAULT 0,
             `expires_at` TIMESTAMP NOT NULL,
             `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             UNIQUE KEY `download_tokens_token_unique` (`token`),
             INDEX `download_tokens_token_used_index` (`token`, `used`),
-            CONSTRAINT `download_tokens_resume_id_foreign` FOREIGN KEY (`resume_id`) REFERENCES `resumes` (`id`) ON DELETE CASCADE,
-            CONSTRAINT `download_tokens_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+            CONSTRAINT `download_tokens_resume_id_foreign` FOREIGN KEY (`resume_id`) REFERENCES `resumes` (`id`) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
 
         // ── performance indexes ──
@@ -475,6 +476,7 @@ function runMigrations(PDO $pdo): array
         '2024_01_02_000006_create_metrics_daily_table',
         '2024_01_02_000007_create_download_tokens_table',
         '2024_01_02_000008_add_performance_indexes',
+        '2024_01_02_000009_add_anonymous_flow_fields',
     ];
 
     foreach ($sqls as $i => $sql) {

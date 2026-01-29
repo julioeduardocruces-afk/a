@@ -16,24 +16,29 @@ class PaymentController extends Controller
     ) {}
 
     /**
-     * POST /payments/flow/create - Initiate payment.
+     * POST /payments/flow/create - Initiate payment (anonymous).
      */
     public function create(Request $request)
     {
         $validated = $request->validate([
             'resume_id' => ['required', 'integer', 'exists:resumes,id'],
+            'customer_email' => ['required', 'email', 'max:255'],
         ]);
 
         $resume = Resume::findOrFail($validated['resume_id']);
 
-        // IDOR check
-        if (!$resume->belongsToUser($request->user()->id)) {
+        // Ownership check via session tokens
+        $sessionTokens = $request->session()->get('resume_tokens', []);
+        if (!in_array($resume->access_token, $sessionTokens, true)) {
             abort(403);
         }
 
         if ($resume->status !== ResumeStatus::PreviewReady) {
             return back()->withErrors(['status' => 'El CV debe estar listo para pago.']);
         }
+
+        // Store customer email for delivery
+        $resume->update(['customer_email' => $validated['customer_email']]);
 
         $amount = (int)config('ats.price_clp', 4990);
 
@@ -55,15 +60,10 @@ class PaymentController extends Controller
     public function webhook(Request $request)
     {
         try {
-            // handleWebhook is idempotent: payment status is committed in a separate
-            // transaction first (to never lose confirmed money), then resume transition
-            // and job dispatch happen outside. Duplicate webhooks re-dispatch the job
-            // only if the resume is stuck in Paid state (crash recovery).
             $this->paymentService->handleWebhook($request->all());
 
             return response('OK', 200);
         } catch (\Exception $e) {
-            // Log only safe fields — avoid leaking PII or secrets from webhook payload
             $safePayload = array_intersect_key($request->all(), array_flip(['token', 'commerceOrder', 'status']));
             Log::error('Flow webhook error', [
                 'payload' => $safePayload,
@@ -80,8 +80,13 @@ class PaymentController extends Controller
     {
         $paymentModel = \App\Models\Payment::findOrFail($payment);
 
-        if ($paymentModel->user_id !== $request->user()?->id) {
-            abort(403);
+        // Verify ownership via session tokens on the resume
+        $resume = $paymentModel->resume;
+        $sessionTokens = $request->session()->get('resume_tokens', []);
+        if (!$resume || !in_array($resume->access_token, $sessionTokens, true)) {
+            if (!$request->user()?->is_admin) {
+                abort(403);
+            }
         }
 
         if ($paymentModel->status === PaymentStatus::Paid) {

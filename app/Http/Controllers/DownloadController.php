@@ -22,8 +22,7 @@ class DownloadController extends Controller
             abort(404, 'Token no encontrado.');
         }
 
-        // Atomically check validity and mark as used to prevent race conditions
-        // (two concurrent requests could both pass isValid() before markUsed())
+        // Atomically check validity and mark as used
         $claimed = DB::table('download_tokens')
             ->where('id', $downloadToken->id)
             ->where('used', false)
@@ -40,11 +39,6 @@ class DownloadController extends Controller
             abort(403, 'El CV aun no esta disponible para descarga.');
         }
 
-        // Determine requested format FIRST, then check the corresponding file.
-        // Previous logic always checked PDF existence even for DOCX requests,
-        // which would 404 if PDF was missing but DOCX existed. It also silently
-        // fell back to PDF when DOCX was missing, confusing the user.
-        // Whitelist format parameter to prevent path traversal via query string
         $format = request()->query('format', 'pdf');
         if (!in_array($format, ['pdf', 'docx'], true)) {
             $format = 'pdf';
@@ -63,7 +57,7 @@ class DownloadController extends Controller
             abort(404, 'Archivo no encontrado.');
         }
 
-        AuditLog::record('resume.downloaded', $downloadToken->user_id, 'user', [
+        AuditLog::record('resume.downloaded', $downloadToken->user_id, $downloadToken->user_id ? 'user' : 'anonymous', [
             'resume_id' => $resume->id,
             'token_id' => $downloadToken->id,
             'format' => $format,

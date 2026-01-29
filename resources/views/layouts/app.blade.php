@@ -52,9 +52,10 @@
         <div class="container">
             <a href="{{ route('home') }}" class="nav-brand">CV Optimizer ATS</a>
             <div>
+                <a href="{{ route('upload.form') }}">Optimizar CV</a>
+                <a href="{{ route('how-it-works') }}">Como Funciona</a>
+                <a href="{{ route('faq') }}">FAQ</a>
                 @auth
-                    <a href="{{ route('dashboard') }}">Dashboard</a>
-                    <a href="{{ route('upload.form') }}">Subir CV</a>
                     @if(auth()->user()->is_admin)
                         <a href="{{ route('admin.dashboard') }}">Admin</a>
                     @endif
@@ -62,9 +63,6 @@
                         @csrf
                         <button type="submit" style="background:none;border:none;color:white;cursor:pointer;margin-left:20px;">Salir</button>
                     </form>
-                @else
-                    <a href="{{ route('login') }}">Iniciar Sesion</a>
-                    <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Registrarse</a>
                 @endauth
             </div>
         </div>

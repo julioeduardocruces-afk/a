@@ -61,16 +61,22 @@
         <form method="POST" action="{{ route('payments.flow.create') }}">
             @csrf
             <input type="hidden" name="resume_id" value="{{ $resume->id }}">
+            <div class="form-group" style="max-width:400px;margin:0 auto 16px;">
+                <label for="customer_email">Tu email (para recibir el CV optimizado)</label>
+                <input type="email" id="customer_email" name="customer_email"
+                       value="{{ old('customer_email', $resume->customer_email) }}"
+                       placeholder="tu@email.com" required>
+            </div>
             <button type="submit" class="btn btn-primary" style="font-size:1.1rem;padding:14px 48px;">
                 Pagar con Webpay
             </button>
         </form>
-        <p style="font-size:0.8rem;color:#999;margin-top:8px;">Pago seguro via Flow / Webpay</p>
+        <p style="font-size:0.8rem;color:#999;margin-top:8px;">Pago seguro via Flow / Webpay. Recibiras el CV en tu email.</p>
     </div>
     @endif
 
     <div style="margin-top:20px;">
-        <a href="{{ route('dashboard') }}">Volver al dashboard</a>
+        <a href="{{ route('home') }}">Volver al inicio</a>
     </div>
 </div>
 

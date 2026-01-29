@@ -21,21 +21,7 @@ class ResumeController extends Controller
     ) {}
 
     /**
-     * Show the user dashboard with their resumes.
-     */
-    public function dashboard(Request $request)
-    {
-        $resumes = $request->user()
-            ->resumes()
-            ->with('latestVersion')
-            ->orderByDesc('created_at')
-            ->paginate(10);
-
-        return view('app.dashboard', compact('resumes'));
-    }
-
-    /**
-     * Show upload form.
+     * Show upload form (public, no login required).
      */
     public function showUpload()
     {
@@ -43,7 +29,7 @@ class ResumeController extends Controller
     }
 
     /**
-     * POST /upload - Handle CV file upload.
+     * POST /upload - Handle CV file upload (anonymous).
      */
     public function upload(Request $request)
     {
@@ -59,19 +45,23 @@ class ResumeController extends Controller
         // Generate random filename (prevent path traversal)
         $ext = $file->getClientOriginalExtension();
         $safeName = Str::uuid() . '.' . $ext;
-        $path = $file->storeAs('uploads/' . $request->user()->id, $safeName);
+        $path = $file->storeAs('uploads/anonymous', $safeName);
 
         $resume = Resume::create([
-            'user_id' => $request->user()->id,
             'original_filename' => $file->getClientOriginalName(),
             'original_mime' => $file->getMimeType(),
             'original_path' => $path,
             'status' => ResumeStatus::Draft,
         ]);
 
+        // Store access_token in session for ownership verification
+        $tokens = $request->session()->get('resume_tokens', []);
+        $tokens[] = $resume->access_token;
+        $request->session()->put('resume_tokens', $tokens);
+
         MetricsDaily::incrementToday('uploads');
 
-        AuditLog::record('resume.uploaded', $request->user()->id, 'user', [
+        AuditLog::record('resume.uploaded', null, 'anonymous', [
             'resume_id' => $resume->id,
             'filename' => $file->getClientOriginalName(),
             'mime' => $file->getMimeType(),
@@ -103,8 +93,6 @@ class ResumeController extends Controller
     {
         $resume = $request->attributes->get('resume');
 
-        // Only allow setting target role when resume is in Draft or Failed state
-        // Prevents inconsistency where target changes after AI already optimized
         if (!in_array($resume->status, [ResumeStatus::Draft, ResumeStatus::Failed])) {
             return back()->withErrors(['status' => 'No se puede cambiar el rubro/cargo en el estado actual. El CV ya fue procesado.']);
         }
@@ -116,14 +104,12 @@ class ResumeController extends Controller
 
         $resume->update($validated);
 
-        AuditLog::record('resume.target_set', $request->user()->id, 'user', [
+        AuditLog::record('resume.target_set', null, 'anonymous', [
             'resume_id' => $resume->id,
             'target_industry' => $validated['target_industry'],
             'target_role' => $validated['target_role'],
         ], $request->ip());
 
-        // Trigger processing directly instead of redirecting to POST-only route
-        // (redirect sends GET which would result in 405 Method Not Allowed)
         return $this->process($request, $id);
     }
 
@@ -134,7 +120,6 @@ class ResumeController extends Controller
     {
         $resume = $request->attributes->get('resume');
 
-        // Validate prerequisites
         if (!$resume->target_role || !$resume->target_industry) {
             return back()->withErrors(['target_role' => 'Debes seleccionar rubro y cargo objetivo.']);
         }
@@ -158,13 +143,10 @@ class ResumeController extends Controller
             }
         }
 
-        // Set error fields as dirty attributes — transitionTo() calls save()
-        // which persists ALL dirty attributes in one query, avoiding a separate UPDATE.
         $resume->error_code = null;
         $resume->error_message = null;
         $resume->transitionTo(ResumeStatus::Processing);
 
-        // Dispatch async job
         ProcessResumeJob::dispatch($resume->id);
 
         return redirect()->route('resumes.status', $resume->id);
@@ -179,7 +161,6 @@ class ResumeController extends Controller
         $resume->load('latestVersion');
 
         if ($request->wantsJson()) {
-            // Return generic error message to avoid leaking internal details
             $errorMsg = $resume->error_message
                 ? 'Ocurrió un error procesando tu CV. Puedes reintentar.'
                 : null;
@@ -205,8 +186,6 @@ class ResumeController extends Controller
             abort(403, 'Preview no disponible.');
         }
 
-        // Explicit load avoids lazy-loading on every image request.
-        // With throttle:30,1, uncontrolled lazy loads = 30 extra queries/min/user.
         $resume->loadMissing('latestVersion');
         $version = $resume->latestVersion;
         if (!$version) {
@@ -215,16 +194,15 @@ class ResumeController extends Controller
 
         $page = max(1, (int)$request->query('page', 1));
 
+        // Use resume email or session ID for watermark
+        $watermarkId = $resume->getEmail() ?? 'session:' . substr($request->session()->getId(), 0, 8);
+
         $imageData = $this->renderer->renderPreviewPage(
             $version->optimized_text_md,
-            $request->user()->email,
+            $watermarkId,
             $resume->id,
             $page,
         );
-
-        // Note: 'previews' metric is incremented in previewPage() (the page load),
-        // not here (the per-page image endpoint), to avoid inflating the count
-        // when multi-page CVs render multiple images per view.
 
         return response($imageData, 200)
             ->header('Content-Type', 'image/png')

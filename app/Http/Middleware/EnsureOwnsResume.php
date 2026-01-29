@@ -10,7 +10,8 @@ use Symfony\Component\HttpFoundation\Response;
 class EnsureOwnsResume
 {
     /**
-     * IDOR protection: ensure the authenticated user owns the resume.
+     * Ownership protection: ensure the session holds the access_token for this resume.
+     * Anonymous users get access via session-stored tokens; admin users bypass via auth.
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -20,11 +21,22 @@ class EnsureOwnsResume
             $id = $resumeId instanceof Resume ? $resumeId->id : (int)$resumeId;
 
             $resume = Resume::find($id);
-            if (!$resume || !$resume->belongsToUser($request->user()->id)) {
+            if (!$resume) {
+                abort(404, 'CV no encontrado.');
+            }
+
+            // Admin users can access any resume
+            if ($request->user()?->is_admin) {
+                $request->attributes->set('resume', $resume);
+                return $next($request);
+            }
+
+            // Anonymous ownership: check session access_tokens array
+            $sessionTokens = $request->session()->get('resume_tokens', []);
+            if (!in_array($resume->access_token, $sessionTokens, true)) {
                 abort(403, 'No tienes acceso a este recurso.');
             }
 
-            // Share resume with request for downstream use
             $request->attributes->set('resume', $resume);
         }
 

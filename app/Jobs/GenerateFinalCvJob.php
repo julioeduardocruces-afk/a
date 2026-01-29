@@ -33,11 +33,9 @@ class GenerateFinalCvJob implements ShouldQueue
         PdfGeneratorService $pdfGenerator,
         MailerService $mailer,
     ): void {
-        $resume = Resume::with('latestVersion', 'user')->findOrFail($this->resumeId);
+        $resume = Resume::with('latestVersion')->findOrFail($this->resumeId);
         $initialStatus = $resume->status;
 
-        // Allow Paid (first generation), Delivered (admin resend), or Failed with
-        // a confirmed payment (admin resend after delivery_error marked resume Failed)
         $allowed = [ResumeStatus::Paid, ResumeStatus::Delivered];
         $isFailedWithPayment = false;
 
@@ -65,10 +63,12 @@ class GenerateFinalCvJob implements ShouldQueue
                 throw new \RuntimeException('No version found for resume.');
             }
 
+            $displayName = $resume->getDisplayName();
+
             // Generate final HTML then PDF
             $finalHtml = $renderer->renderFinalPdf(
                 $version->optimized_text_md,
-                $resume->user->name,
+                $displayName,
             );
             $pdfContent = $pdfGenerator->generatePdf($finalHtml);
 
@@ -79,19 +79,12 @@ class GenerateFinalCvJob implements ShouldQueue
             // Generate DOCX too
             $docxContent = $pdfGenerator->generateDocx(
                 $version->optimized_text_plain,
-                $resume->user->name,
+                $displayName,
             );
             $docxPath = "finals/{$resume->id}/cv_optimizado_{$resume->id}.docx";
             Storage::put($docxPath, $docxContent);
 
-            // Re-check status from DB before sending email. Between the initial
-            // load and now, a concurrent job (from webhook crash-recovery re-dispatch)
-            // may have already completed delivery. Without this refresh, both jobs
-            // would send emails, resulting in duplicate emails with extra tokens.
-            //
-            // Only skip if the status CHANGED to Delivered during execution (concurrent
-            // job). If the resume was already Delivered at entry ($initialStatus), this
-            // is a legitimate admin resend — don't skip.
+            // Re-check status from DB before sending email
             $resume->refresh();
 
             if ($resume->status === ResumeStatus::Delivered && $initialStatus !== ResumeStatus::Delivered) {
@@ -102,19 +95,16 @@ class GenerateFinalCvJob implements ShouldQueue
             }
 
             // Send email FIRST — if it fails, don't transition to Delivered
-            // so the job can be retried and the state remains recoverable
             $mailer->sendFinalCvEmail($resume);
 
             // Transition to Delivered AFTER email succeeds
-            // Handles: Paid → Delivered (normal), Failed → Delivered (admin recovery)
-            // Skips transition if already Delivered (admin resend scenario)
             if (in_array($resume->status, [ResumeStatus::Paid, ResumeStatus::Failed], true)) {
                 $resume->error_code = null;
                 $resume->error_message = null;
                 $resume->transitionTo(ResumeStatus::Delivered);
             }
 
-            AuditLog::record('resume.delivered', $resume->user_id, 'system', [
+            AuditLog::record('resume.delivered', $resume->user_id, $resume->user_id ? 'user' : 'system', [
                 'resume_id' => $resume->id,
                 'pdf_path' => $finalPath,
                 'docx_path' => $docxPath,
@@ -126,18 +116,17 @@ class GenerateFinalCvJob implements ShouldQueue
                 'error' => $e->getMessage(),
             ]);
 
-            AuditLog::record('resume.delivery_failed', $resume->user_id, 'system', [
+            AuditLog::record('resume.delivery_failed', $resume->user_id, $resume->user_id ? 'user' : 'system', [
                 'resume_id' => $resume->id,
                 'error' => $e->getMessage(),
             ]);
 
-            throw $e; // Re-throw so the job retries via $tries/$backoff
+            throw $e;
         }
     }
 
     /**
      * Called by Laravel when all retry attempts are exhausted.
-     * Marks the resume as failed so the admin can see delivery failed post-payment.
      */
     public function failed(\Throwable $exception): void
     {
@@ -146,23 +135,18 @@ class GenerateFinalCvJob implements ShouldQueue
             return;
         }
 
-        // Mark as failed if still in Paid state (first delivery attempt exhausted).
-        // Skip if already Delivered from a concurrent admin resend.
         if ($resume->status === ResumeStatus::Paid) {
             $resume->markFailed('delivery_error', $exception->getMessage());
         } elseif ($resume->status === ResumeStatus::Failed) {
-            // Admin resend exhausted: update error info so admin sees the latest
-            // failure reason, not the stale one from the original failure.
             $resume->update([
                 'error_code' => 'delivery_error',
                 'error_message' => mb_substr($exception->getMessage(), 0, 1000),
             ]);
         } else {
-            // Already Delivered (concurrent job succeeded) — nothing to do
             return;
         }
 
-        AuditLog::record('resume.delivery_exhausted', $resume->user_id, 'system', [
+        AuditLog::record('resume.delivery_exhausted', $resume->user_id, $resume->user_id ? 'user' : 'system', [
             'resume_id' => $resume->id,
             'error' => $exception->getMessage(),
         ]);

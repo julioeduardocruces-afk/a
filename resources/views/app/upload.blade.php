@@ -2,7 +2,8 @@
 @section('title', 'Subir CV')
 @section('content')
 <div style="max-width:600px;margin:30px auto;">
-    <h1 style="margin-bottom:20px;">Subir tu CV</h1>
+    <h1 style="margin-bottom:8px;">Paso 1: Sube tu CV</h1>
+    <p style="color:#666;margin-bottom:20px;">Sube tu CV y nosotros lo optimizamos para sistemas ATS. Sin registro necesario.</p>
     <div class="card">
         <form method="POST" action="{{ route('upload.store') }}" enctype="multipart/form-data">
             @csrf
@@ -16,6 +17,9 @@
             </p>
             <button type="submit" class="btn btn-primary" style="width:100%;">Subir CV</button>
         </form>
+    </div>
+    <div style="margin-top:16px;text-align:center;">
+        <a href="{{ route('home') }}">Volver al inicio</a>
     </div>
 </div>
 @endsection

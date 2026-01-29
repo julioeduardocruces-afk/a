@@ -48,7 +48,10 @@ class DownloadToken extends Model
         $this->update(['used' => true]);
     }
 
-    public static function generate(int $resumeId, int $userId, int $minutesTtl = 15): self
+    /**
+     * Generate a download token. user_id is nullable for anonymous users.
+     */
+    public static function generate(int $resumeId, ?int $userId, int $minutesTtl = 15): self
     {
         return static::create([
             'resume_id' => $resumeId,

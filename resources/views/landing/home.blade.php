@@ -24,13 +24,14 @@
         Los sistemas ATS filtran el 75% de los CVs antes de que un reclutador los vea.
         Nuestro servicio usa inteligencia artificial para optimizar tu CV y aumentar tu puntaje ATS.
     </p>
-    <a href="{{ route('register') }}" class="btn btn-primary" style="font-size:1.1rem;padding:14px 36px;">Comenzar Ahora</a>
+    <a href="{{ route('upload.form') }}" class="btn btn-primary" style="font-size:1.1rem;padding:14px 36px;">Optimizar mi CV Ahora</a>
+    <p style="margin-top:12px;color:#888;font-size:0.9rem;">Sin registro. Sube tu CV y recibe el resultado en minutos.</p>
 </div>
 
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin:40px 0;">
     <div class="card" style="text-align:center;">
         <h3 style="margin-bottom:8px;">1. Sube tu CV</h3>
-        <p>Acepta PDF y DOCX. Tu archivo se procesa de forma segura y privada.</p>
+        <p>Acepta PDF y DOCX. Tu archivo se procesa de forma segura y privada. Sin necesidad de crear cuenta.</p>
     </div>
     <div class="card" style="text-align:center;">
         <h3 style="margin-bottom:8px;">2. Elige tu Objetivo</h3>
@@ -38,7 +39,7 @@
     </div>
     <div class="card" style="text-align:center;">
         <h3 style="margin-bottom:8px;">3. Recibe tu CV Optimizado</h3>
-        <p>La IA optimiza keywords, estructura y formato ATS. Descarga PDF y DOCX listos para postular.</p>
+        <p>La IA optimiza keywords, estructura y formato ATS. Paga y recibe PDF y DOCX listos para postular en tu email.</p>
     </div>
 </div>
 
@@ -82,9 +83,9 @@
             </div>
         </div>
         <div class="card" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
-            <h3 itemprop="name">El servicio modifica mi experiencia?</h3>
+            <h3 itemprop="name">Necesito crear una cuenta?</h3>
             <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-                <p itemprop="text">No. Toda tu experiencia laboral se mantiene intacta. Solo optimizamos el formato, las palabras clave y la estructura para que los sistemas ATS puedan leer correctamente tu CV.</p>
+                <p itemprop="text">No. Nuestro servicio funciona sin registro. Solo sube tu CV, elige el rubro, y recibe el resultado en tu email despues del pago.</p>
             </div>
         </div>
         <div class="card" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">

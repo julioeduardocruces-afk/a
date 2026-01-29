@@ -22,21 +22,8 @@
             <button type="submit" class="btn btn-primary" style="width:100%;">Entrar</button>
         </form>
 
-        <hr style="margin:20px 0;">
-        <p style="text-align:center;margin-bottom:12px;">O accede con magic link:</p>
-        <form method="POST" action="{{ route('magic-link.send') }}">
-            @csrf
-            <div class="form-group">
-                <input type="email" name="email" placeholder="Tu email registrado" required>
-            </div>
-            <button type="submit" class="btn btn-secondary" style="width:100%;">Enviar enlace de acceso</button>
-        </form>
-        @if(session('status'))
-            <div class="alert alert-success" style="margin-top:12px;">{{ session('status') }}</div>
-        @endif
-
         <p style="margin-top:16px;text-align:center;">
-            No tienes cuenta? <a href="{{ route('register') }}">Registrarse</a>
+            <a href="{{ route('home') }}">Volver al inicio</a>
         </p>
     </div>
 </div>

@@ -65,7 +65,7 @@
     @endif
 
     <div style="margin-top:20px;">
-        <a href="{{ route('dashboard') }}">Volver al dashboard</a>
+        <a href="{{ route('home') }}">Volver al inicio</a>
     </div>
 </div>
 @endsection

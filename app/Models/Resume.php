@@ -7,12 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 
 class Resume extends Model
 {
     protected $fillable = [
         'user_id',
+        'access_token',
         'original_filename',
         'original_mime',
         'original_path',
@@ -20,6 +22,7 @@ class Resume extends Model
         'structured_json',
         'target_industry',
         'target_role',
+        'customer_email',
         'status',
         'error_code',
         'error_message',
@@ -31,6 +34,15 @@ class Resume extends Model
             'structured_json' => 'array',
             'status' => ResumeStatus::class,
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Resume $resume) {
+            if (empty($resume->access_token)) {
+                $resume->access_token = Str::random(64);
+            }
+        });
     }
 
     // --- State Machine ---
@@ -95,8 +107,23 @@ class Resume extends Model
             && $this->target_industry !== null;
     }
 
-    public function belongsToUser(int $userId): bool
+    /**
+     * Get display email: customer_email for anonymous, user->email for registered.
+     */
+    public function getEmail(): ?string
     {
-        return $this->user_id === $userId;
+        return $this->customer_email ?? $this->user?->email;
+    }
+
+    /**
+     * Get display name: customer_email username for anonymous, user->name for registered.
+     */
+    public function getDisplayName(): string
+    {
+        if ($this->user) {
+            return $this->user->name;
+        }
+        $email = $this->customer_email;
+        return $email ? explode('@', $email)[0] : 'Usuario';
     }
 }
