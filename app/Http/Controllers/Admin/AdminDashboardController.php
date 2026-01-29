@@ -245,6 +245,7 @@ class AdminDashboardController extends Controller
             ->selectRaw('error_code, COUNT(*) as count')
             ->groupBy('error_code')
             ->orderByDesc('count')
+            ->limit(20)
             ->get();
 
         return view('admin.metrics', compact('daily', 'byIndustry', 'errorsByStage'));
