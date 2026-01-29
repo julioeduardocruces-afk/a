@@ -161,7 +161,11 @@ class PaymentFlowService
         }
 
         $flowData = $response->json();
-        $flowOrder = (string)($flowData['flowOrder'] ?? '');
+        // Use null instead of empty string for missing flowOrder.
+        // The flow_order column has a UNIQUE constraint: NULL is allowed
+        // multiple times but '' (empty string) is not, so storing '' for
+        // every payment without a flowOrder would cause a constraint violation.
+        $flowOrder = !empty($flowData['flowOrder']) ? (string)$flowData['flowOrder'] : null;
         $commerceOrder = (string)($flowData['commerceOrder'] ?? '');
         $flowStatus = (int)($flowData['status'] ?? 0);
 
