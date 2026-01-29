@@ -264,16 +264,17 @@ class PaymentFlowService
                 return $payment;
             }
 
+            // Single UPDATE instead of two separate calls — reduces round-trips
+            // inside the locked transaction from 2 to 1.
+            $newStatus = $flowStatus === 2 ? PaymentStatus::Paid : PaymentStatus::Failed;
+
             $payment->update([
                 'flow_order' => $flowOrder,
                 'raw_payload_json' => $flowData,
+                'status' => $newStatus,
             ]);
 
-            if ($flowStatus === 2) {
-                $payment->update(['status' => PaymentStatus::Paid]);
-            } else {
-                $payment->update(['status' => PaymentStatus::Failed]);
-
+            if ($newStatus === PaymentStatus::Failed) {
                 AuditLog::record('payment.failed', $payment->user_id, 'system', [
                     'payment_id' => $payment->id,
                     'flow_status' => $flowStatus,

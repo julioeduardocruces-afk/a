@@ -38,8 +38,8 @@ class ApiCredential extends Model
 
     public function recordUsage(): void
     {
-        $this->increment('usage_count');
-        $this->update(['last_used_at' => now()]);
+        // Single query instead of two: increment() + update() each hit the DB.
+        $this->increment('usage_count', 1, ['last_used_at' => now()]);
     }
 
     /**

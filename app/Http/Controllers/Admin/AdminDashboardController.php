@@ -19,21 +19,27 @@ class AdminDashboardController extends Controller
     public function index()
     {
         $metrics = MetricsDaily::orderByDesc('date')->limit(30)->get();
-        $totals = [
-            'uploads' => $metrics->sum('uploads'),
-            'previews' => $metrics->sum('previews'),
-            'paid' => $metrics->sum('paid'),
-            'revenue' => $metrics->sum('revenue'),
-        ];
+
+        // DB-level aggregation instead of loading rows into PHP and summing.
+        // Cache for 2 minutes to avoid running the aggregate on every admin page load.
+        $totals = cache()->remember('admin:metrics_totals_30d', 120, function () {
+            return MetricsDaily::where('date', '>=', now()->subDays(30)->toDateString())
+                ->selectRaw('COALESCE(SUM(uploads),0) as uploads, COALESCE(SUM(previews),0) as previews, COALESCE(SUM(paid),0) as paid, COALESCE(SUM(revenue),0) as revenue')
+                ->first()
+                ?->toArray() ?? ['uploads' => 0, 'previews' => 0, 'paid' => 0, 'revenue' => 0];
+        });
 
         $recentResumes = Resume::with('user')
             ->orderByDesc('created_at')
             ->limit(20)
             ->get();
 
-        $statusCounts = Resume::selectRaw('status, COUNT(*) as count')
-            ->groupBy('status')
-            ->pluck('count', 'status');
+        // Cache status counts for 2 minutes — this is a full-table GROUP BY.
+        $statusCounts = cache()->remember('admin:status_counts', 120, function () {
+            return Resume::selectRaw('status, COUNT(*) as count')
+                ->groupBy('status')
+                ->pluck('count', 'status');
+        });
 
         return view('admin.dashboard', compact('metrics', 'totals', 'recentResumes', 'statusCounts'));
     }

@@ -207,6 +207,9 @@ class ResumeController extends Controller
             abort(403, 'Preview no disponible.');
         }
 
+        // Explicit load avoids lazy-loading on every image request.
+        // With throttle:30,1, uncontrolled lazy loads = 30 extra queries/min/user.
+        $resume->loadMissing('latestVersion');
         $version = $resume->latestVersion;
         if (!$version) {
             abort(404, 'Sin version generada.');
