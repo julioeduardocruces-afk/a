@@ -147,7 +147,19 @@ function generateAppKey(): string
 function buildEnvContent(array $data): string
 {
     $appKey = generateAppKey();
-    $hasRedis = extension_loaded('redis');
+
+    // Test actual Redis connection, not just extension
+    $hasRedis = false;
+    if (extension_loaded('redis')) {
+        try {
+            $redis = new \Redis();
+            $hasRedis = @$redis->connect('127.0.0.1', 6379, 2); // 2s timeout
+            @$redis->close();
+        } catch (\Throwable $e) {
+            $hasRedis = false;
+        }
+    }
+
     $queueDriver = $hasRedis ? 'redis' : 'database';
     $cacheDriver  = $hasRedis ? 'redis' : 'database';
 
