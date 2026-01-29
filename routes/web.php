@@ -39,13 +39,17 @@ Route::get('/robots.txt', function () {
 // ──────────────────────────────────────────────
 Route::middleware('guest')->group(function () {
     Route::get('/registro', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/registro', [AuthController::class, 'register']);
+    Route::post('/registro', [AuthController::class, 'register'])
+        ->middleware('throttle:5,1'); // 5 registrations per minute per IP
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])
+        ->middleware('throttle:5,1'); // 5 login attempts per minute per IP
     Route::post('/magic-link', [AuthController::class, 'sendMagicLink'])
         ->middleware('throttle:3,5') // max 3 attempts per 5 minutes
         ->name('magic-link.send');
-    Route::get('/magic-link/{token}', [AuthController::class, 'loginWithMagicToken'])->name('magic-link.verify');
+    Route::get('/magic-link/{token}', [AuthController::class, 'loginWithMagicToken'])
+        ->middleware('throttle:10,5') // 10 attempts per 5 minutes per IP
+        ->name('magic-link.verify');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])
@@ -75,11 +79,13 @@ Route::middleware(['auth', AuditRequest::class])->group(function () {
             ->middleware('throttle:5,1')
             ->name('resumes.process');
         Route::get('/resumes/{id}/status', [ResumeController::class, 'status'])
+            ->middleware('throttle:60,1') // polling endpoint: 60/min/user
             ->name('resumes.status');
         Route::get('/resumes/{id}/preview', [ResumeController::class, 'preview'])
             ->middleware('throttle:30,1')
             ->name('resumes.preview');
         Route::get('/resumes/{id}/preview-page', [ResumeController::class, 'previewPage'])
+            ->middleware('throttle:20,1') // page loads: 20/min/user
             ->name('resumes.preview-page');
     });
 
@@ -88,6 +94,7 @@ Route::middleware(['auth', AuditRequest::class])->group(function () {
         ->middleware('throttle:5,1')
         ->name('payments.flow.create');
     Route::get('/payments/flow/return/{payment}', [PaymentController::class, 'returnFromFlow'])
+        ->middleware('throttle:10,1') // return from payment: 10/min/user
         ->name('payments.flow.return');
 });
 

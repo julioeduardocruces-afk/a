@@ -92,12 +92,13 @@ class AuthController extends Controller
         if ($user) {
             $token = Str::random(64);
 
+            // Store hash of token — if DB is leaked, raw tokens are not exposed
             $user->update([
-                'magic_token' => $token,
+                'magic_token' => hash('sha256', $token),
                 'magic_token_expires_at' => now()->addMinutes(15),
             ]);
 
-            // In production, send email with the magic link
+            // In production, send email with the raw token (not the hash)
             // Mail::to($user)->send(new MagicLinkMail($token));
         }
 
@@ -106,8 +107,10 @@ class AuthController extends Controller
 
     public function loginWithMagicToken(string $token)
     {
-        // Look up user first to get the ID
-        $user = User::where('magic_token', $token)
+        // Hash the incoming token to compare against the stored hash
+        $hashedToken = hash('sha256', $token);
+
+        $user = User::where('magic_token', $hashedToken)
             ->where('magic_token_expires_at', '>', now())
             ->first();
 
@@ -121,7 +124,7 @@ class AuthController extends Controller
         // (same pattern as download tokens: UPDATE WHERE ensures single-use)
         $claimed = DB::table('users')
             ->where('id', $user->id)
-            ->where('magic_token', $token)
+            ->where('magic_token', $hashedToken)
             ->where('magic_token_expires_at', '>', now())
             ->update([
                 'magic_token' => null,

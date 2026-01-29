@@ -16,17 +16,31 @@ class TextExtractorService
 
     private const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 
+    /**
+     * MIME-to-extension mapping for cross-validation.
+     */
+    private const MIME_EXT_MAP = [
+        'application/pdf' => 'pdf',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+    ];
+
+    /**
+     * Magic bytes signatures for content-based type detection.
+     */
+    private const MAGIC_SIGNATURES = [
+        'pdf'  => '%PDF',
+        'docx' => "PK\x03\x04", // DOCX is a ZIP archive
+    ];
+
     public function validateFile(UploadedFile $file): void
     {
-        $mime = $file->getMimeType();
-        $ext = strtolower($file->getClientOriginalExtension());
-
-        if (!in_array($mime, self::ALLOWED_MIMES, true)) {
-            throw new RuntimeException(
-                "Tipo de archivo no permitido: {$mime}. Solo PDF y DOCX."
-            );
+        // 1. Size check first (cheapest)
+        if ($file->getSize() > self::MAX_SIZE_BYTES) {
+            throw new RuntimeException('El archivo excede el limite de 10 MB.');
         }
 
+        // 2. Extension whitelist
+        $ext = strtolower($file->getClientOriginalExtension());
         $allowedExts = ['pdf', 'docx'];
         if (!in_array($ext, $allowedExts, true)) {
             throw new RuntimeException(
@@ -34,8 +48,58 @@ class TextExtractorService
             );
         }
 
-        if ($file->getSize() > self::MAX_SIZE_BYTES) {
-            throw new RuntimeException('El archivo excede el limite de 10 MB.');
+        // 3. Block dangerous double extensions (e.g. file.php.pdf, file.phtml.docx)
+        $originalName = $file->getClientOriginalName();
+        if (preg_match('/\.(php|phtml|phar|sh|exe|bat|cmd|com|cgi|pl|py|rb|js|svg|html?|xml)\./i', $originalName)) {
+            throw new RuntimeException('Nombre de archivo con extension peligrosa detectada.');
+        }
+
+        // 4. MIME from finfo (content-based, not user-controlled)
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $detectedMime = $finfo->file($file->getRealPath());
+
+        // finfo returns inconclusive types for empty/small or DOCX (ZIP) files
+        $inconclusiveMimes = ['application/x-empty', 'application/zip', 'application/octet-stream'];
+        $effectiveMime = $detectedMime;
+
+        if (in_array($detectedMime, $inconclusiveMimes, true)) {
+            // Fall back to Laravel's getMimeType() which uses both finfo and extension
+            $effectiveMime = $file->getMimeType();
+        }
+
+        if (!in_array($effectiveMime, self::ALLOWED_MIMES, true)) {
+            throw new RuntimeException(
+                "Tipo de archivo no permitido: {$detectedMime}. Solo PDF y DOCX."
+            );
+        }
+
+        // 5. Cross-validate: extension must match detected MIME
+        $expectedExt = self::MIME_EXT_MAP[$effectiveMime] ?? null;
+        if ($expectedExt !== $ext) {
+            throw new RuntimeException(
+                "Extension .{$ext} no coincide con contenido detectado ({$detectedMime})."
+            );
+        }
+
+        // 6. Block dangerous file types masquerading as PDF/DOCX
+        // Check actual content for executable signatures (PHP, ELF, shell scripts)
+        $fileSize = $file->getSize();
+        if ($fileSize > 0) {
+            $header = file_get_contents($file->getRealPath(), false, null, 0, 64);
+            $dangerousSignatures = [
+                '<?php',
+                '<?=',
+                '#!/',
+                "\x7FELF",       // Linux ELF binary
+                "MZ",            // Windows PE binary
+            ];
+            foreach ($dangerousSignatures as $sig) {
+                if (str_starts_with($header, $sig)) {
+                    throw new RuntimeException(
+                        "El archivo contiene contenido ejecutable peligroso."
+                    );
+                }
+            }
         }
     }
 

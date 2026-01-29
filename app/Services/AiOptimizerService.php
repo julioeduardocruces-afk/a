@@ -152,8 +152,13 @@ PROMPT;
             throw new RuntimeException('Credencial Gemini sin api_key.');
         }
 
-        $response = Http::timeout(120)->post(
-            "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}",
+        // Pass API key via header instead of URL query string to avoid
+        // exposure in server access logs, proxy logs, and HTTP referrers.
+        $response = Http::withHeaders([
+            'x-goog-api-key' => $apiKey,
+            'Content-Type' => 'application/json',
+        ])->timeout(120)->post(
+            "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent",
             [
                 'contents' => [
                     [

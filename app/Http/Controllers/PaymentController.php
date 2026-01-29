@@ -63,8 +63,10 @@ class PaymentController extends Controller
 
             return response('OK', 200);
         } catch (\Exception $e) {
+            // Log only safe fields — avoid leaking PII or secrets from webhook payload
+            $safePayload = array_intersect_key($request->all(), array_flip(['token', 'commerceOrder', 'status']));
             Log::error('Flow webhook error', [
-                'payload' => $request->all(),
+                'payload' => $safePayload,
                 'error' => $e->getMessage(),
             ]);
             return response('Error', 400);

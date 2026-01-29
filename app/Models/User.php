@@ -17,7 +17,8 @@ class User extends Authenticatable
         'password',
         'magic_token',
         'magic_token_expires_at',
-        'is_admin',
+        // is_admin intentionally NOT fillable — prevents privilege escalation
+        // via mass-assignment. Set via DB seeder or direct query only.
     ];
 
     protected $hidden = [

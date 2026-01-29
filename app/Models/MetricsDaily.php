@@ -25,8 +25,21 @@ class MetricsDaily extends Model
         ];
     }
 
+    /**
+     * Allowed incrementable fields — prevents SQL injection via DB::raw()
+     * if field names ever come from external input.
+     */
+    private const INCREMENTABLE_FIELDS = [
+        'uploads', 'previews', 'paid', 'revenue',
+        'total_process_time_ms', 'processed_count',
+    ];
+
     public static function incrementToday(string $field, int $amount = 1): void
     {
+        if (!in_array($field, self::INCREMENTABLE_FIELDS, true)) {
+            throw new \InvalidArgumentException("Field not incrementable: {$field}");
+        }
+
         $metric = static::firstOrCreate(
             ['date' => now()->toDateString()],
         );
@@ -50,6 +63,9 @@ class MetricsDaily extends Model
 
         $updates = [];
         foreach ($increments as $field => $amount) {
+            if (!in_array($field, self::INCREMENTABLE_FIELDS, true)) {
+                throw new \InvalidArgumentException("Field not incrementable: {$field}");
+            }
             $updates[$field] = \Illuminate\Support\Facades\DB::raw("`{$field}` + " . (int)$amount);
         }
 
