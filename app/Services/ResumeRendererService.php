@@ -201,9 +201,10 @@ class ResumeRendererService
         try {
             file_put_contents($tmpHtml, $html, LOCK_EX);
 
-            $cmd = escapeshellarg($binary)
+            // timeout(30s) prevents resource exhaustion from malicious/complex HTML
+            $cmd = 'timeout 30 ' . escapeshellarg($binary)
                 . ' --width 800 --quality 85 --disable-javascript'
-                . ' --disable-local-file-access'
+                . ' --disable-local-file-access --no-stop-slow-scripts'
                 . ' ' . escapeshellarg($tmpHtml)
                 . ' ' . escapeshellarg($tmpPng)
                 . ' 2>&1';

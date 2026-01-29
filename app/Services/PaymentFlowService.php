@@ -113,7 +113,19 @@ class PaymentFlowService
             'amount' => $amount,
         ]);
 
-        $redirectUrl = ($data['url'] ?? $apiUrl . '/payment/pay') . '?token=' . $data['token'];
+        // Validate redirect URL comes from expected Flow domain to prevent open redirect
+        $rawUrl = $data['url'] ?? $apiUrl . '/payment/pay';
+        $parsedHost = parse_url($rawUrl, PHP_URL_HOST);
+        $allowedHosts = ['www.flow.cl', 'flow.cl', 'sandbox.flow.cl'];
+        if (!$parsedHost || !in_array($parsedHost, $allowedHosts, true)) {
+            Log::warning('Flow returned unexpected redirect URL', [
+                'payment_id' => $payment->id,
+                'url' => $rawUrl,
+            ]);
+            throw new RuntimeException('URL de pago no confiable.');
+        }
+
+        $redirectUrl = $rawUrl . '?token=' . urlencode($data['token']);
 
         return [
             'payment_id' => $payment->id,

@@ -119,6 +119,11 @@ PROMPT;
             throw new RuntimeException('Credencial OpenAI sin api_key.');
         }
 
+        // Validate model name to prevent injection via admin credential data
+        if (!preg_match('/^[a-zA-Z0-9][\w.\-:]{0,63}$/', $model)) {
+            throw new RuntimeException('Nombre de modelo OpenAI invalido.');
+        }
+
         $response = Http::withHeaders([
             'Authorization' => "Bearer {$apiKey}",
             'Content-Type' => 'application/json',
@@ -150,6 +155,11 @@ PROMPT;
 
         if (empty($apiKey)) {
             throw new RuntimeException('Credencial Gemini sin api_key.');
+        }
+
+        // Validate model name to prevent path traversal in URL
+        if (!preg_match('/^[a-zA-Z0-9][\w.\-]{0,63}$/', $model)) {
+            throw new RuntimeException('Nombre de modelo Gemini invalido.');
         }
 
         // Pass API key via header instead of URL query string to avoid

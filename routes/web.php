@@ -100,6 +100,7 @@ Route::middleware(['auth', AuditRequest::class])->group(function () {
 
 // Flow webhook (no auth - verified by signature; CSRF excluded in bootstrap/app.php)
 Route::post('/payments/flow/webhook', [PaymentController::class, 'webhook'])
+    ->middleware('throttle:30,1') // 30/min per IP — legitimate Flow server won't exceed this
     ->name('payments.flow.webhook');
 
 // Download (token-based, no session auth required)

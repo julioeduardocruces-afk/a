@@ -44,7 +44,11 @@ class DownloadController extends Controller
         // Previous logic always checked PDF existence even for DOCX requests,
         // which would 404 if PDF was missing but DOCX existed. It also silently
         // fell back to PDF when DOCX was missing, confusing the user.
+        // Whitelist format parameter to prevent path traversal via query string
         $format = request()->query('format', 'pdf');
+        if (!in_array($format, ['pdf', 'docx'], true)) {
+            $format = 'pdf';
+        }
         $basePath = "finals/{$resume->id}/cv_optimizado_{$resume->id}";
 
         if ($format === 'docx') {
