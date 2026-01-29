@@ -34,6 +34,7 @@ class GenerateFinalCvJob implements ShouldQueue
         MailerService $mailer,
     ): void {
         $resume = Resume::with('latestVersion', 'user')->findOrFail($this->resumeId);
+        $initialStatus = $resume->status;
 
         // Allow Paid (first generation), Delivered (admin resend), or Failed with
         // a confirmed payment (admin resend after delivery_error marked resume Failed)
@@ -87,9 +88,13 @@ class GenerateFinalCvJob implements ShouldQueue
             // load and now, a concurrent job (from webhook crash-recovery re-dispatch)
             // may have already completed delivery. Without this refresh, both jobs
             // would send emails, resulting in duplicate emails with extra tokens.
+            //
+            // Only skip if the status CHANGED to Delivered during execution (concurrent
+            // job). If the resume was already Delivered at entry ($initialStatus), this
+            // is a legitimate admin resend — don't skip.
             $resume->refresh();
 
-            if ($resume->status === ResumeStatus::Delivered) {
+            if ($resume->status === ResumeStatus::Delivered && $initialStatus !== ResumeStatus::Delivered) {
                 Log::info('Resume already delivered by concurrent job, skipping email', [
                     'resume_id' => $resume->id,
                 ]);
