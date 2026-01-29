@@ -77,6 +77,22 @@ class AdminDashboardController extends Controller
     public function toggleCredential(Request $request, int $id)
     {
         $cred = ApiCredential::findOrFail($id);
+
+        // Prevent deactivating the last active credential for a provider.
+        // Without this guard, admin can accidentally break all CV processing
+        // or payment creation by deactivating every credential for a provider.
+        if ($cred->is_active) {
+            $activeCount = ApiCredential::where('provider', $cred->provider)
+                ->where('is_active', true)
+                ->count();
+
+            if ($activeCount <= 1) {
+                return back()->withErrors([
+                    'credential' => "No se puede desactivar la unica credencial activa para {$cred->provider}.",
+                ]);
+            }
+        }
+
         $cred->update(['is_active' => !$cred->is_active]);
 
         AuditLog::record('admin.credential_toggled', $request->user()->id, 'admin', [

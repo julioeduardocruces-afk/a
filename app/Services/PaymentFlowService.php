@@ -90,8 +90,17 @@ class PaymentFlowService
         }
 
         $data = $response->json();
+
+        // Validate Flow returned a payment token. If the API returns 200
+        // but omits the token, the user would be redirected to an invalid
+        // URL and the payment stays Pending forever with no recovery path.
+        if (empty($data['token'])) {
+            $payment->update(['status' => PaymentStatus::Failed, 'raw_payload_json' => $data]);
+            throw new RuntimeException('Flow API no devolvio token de pago.');
+        }
+
         $payment->update([
-            'flow_token' => $data['token'] ?? null,
+            'flow_token' => $data['token'],
             'flow_order' => $data['flowOrder'] ?? null,
             'raw_payload_json' => $data,
         ]);
@@ -104,7 +113,7 @@ class PaymentFlowService
             'amount' => $amount,
         ]);
 
-        $redirectUrl = ($data['url'] ?? $apiUrl . '/payment/pay') . '?token=' . ($data['token'] ?? '');
+        $redirectUrl = ($data['url'] ?? $apiUrl . '/payment/pay') . '?token=' . $data['token'];
 
         return [
             'payment_id' => $payment->id,
@@ -172,6 +181,9 @@ class PaymentFlowService
         // 2. Crash after resume transition but BEFORE job dispatch (resume stuck in Paid)
         if ($payment->status === PaymentStatus::Paid) {
             $resume = $payment->resume;
+            // Refresh to get current DB state — without this, a concurrent
+            // admin action (e.g. markFailed) could be overwritten by stale data.
+            $resume?->refresh();
             if ($resume && $resume->status === ResumeStatus::PreviewReady) {
                 // Resume stuck in PreviewReady = crash between payment commit and
                 // resume transition. Complete the transition and dispatch.
