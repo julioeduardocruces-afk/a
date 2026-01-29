@@ -11,7 +11,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Hostinger deploy: app lives in ats-app/, web root is ../public_html/
+        $hostingerPublic = dirname($this->app->basePath()) . '/public_html';
+        if (is_dir($hostingerPublic)) {
+            $this->app->usePublicPath($hostingerPublic);
+        }
     }
 
     /**

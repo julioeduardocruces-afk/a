@@ -18,7 +18,8 @@ ini_set('display_errors', '0');
 set_time_limit(300);
 
 // Si ya esta instalado, bloquear acceso
-$basePath = dirname(__DIR__);
+// Hostinger: app lives in ../ats-app/, public_html is the web root
+$basePath = dirname(__DIR__) . '/ats-app';
 $envPath  = $basePath . '/.env';
 $lockFile = $basePath . '/storage/installed.lock';
 
@@ -68,7 +69,7 @@ function checkRequirements(): array
     ];
 
     // Directorios escribibles
-    $basePath = dirname(__DIR__);
+    $basePath = dirname(__DIR__) . '/ats-app';
     $dirs = ['storage', 'storage/app', 'storage/framework', 'storage/logs', 'bootstrap/cache'];
     foreach ($dirs as $dir) {
         $full = $basePath . '/' . $dir;
@@ -475,7 +476,7 @@ function createAdminUser(PDO $pdo, string $name, string $email, string $password
 
 function createStorageDirs(): void
 {
-    $basePath = dirname(__DIR__);
+    $basePath = dirname(__DIR__) . '/ats-app';
     $dirs = [
         'storage/app/uploads',
         'storage/app/finals',
@@ -500,9 +501,9 @@ function createStorageDirs(): void
 
 function createSymlink(): bool
 {
-    $basePath = dirname(__DIR__);
+    $basePath = dirname(__DIR__) . '/ats-app';
     $target = $basePath . '/storage/app/public';
-    $link   = $basePath . '/public/storage';
+    $link   = dirname(__DIR__) . '/public_html/storage';
 
     if (is_link($link)) return true;
     if (!is_dir($target)) @mkdir($target, 0775, true);
