@@ -109,7 +109,8 @@ class GenerateFinalCvJob implements ShouldQueue
             // Handles: Paid → Delivered (normal), Failed → Delivered (admin recovery)
             // Skips transition if already Delivered (admin resend scenario)
             if (in_array($resume->status, [ResumeStatus::Paid, ResumeStatus::Failed], true)) {
-                $resume->update(['error_code' => null, 'error_message' => null]);
+                $resume->error_code = null;
+                $resume->error_message = null;
                 $resume->transitionTo(ResumeStatus::Delivered);
             }
 

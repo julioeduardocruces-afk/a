@@ -158,12 +158,10 @@ class ResumeController extends Controller
             }
         }
 
-        // Clear stale error fields from any previous failure before transitioning.
-        // Without this, a successful retry would leave error_code/error_message set,
-        // causing status() to show a phantom error even though the CV is ready.
-        $resume->update(['error_code' => null, 'error_message' => null]);
-
-        // Transition to processing
+        // Set error fields as dirty attributes — transitionTo() calls save()
+        // which persists ALL dirty attributes in one query, avoiding a separate UPDATE.
+        $resume->error_code = null;
+        $resume->error_message = null;
         $resume->transitionTo(ResumeStatus::Processing);
 
         // Dispatch async job

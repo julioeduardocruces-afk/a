@@ -283,7 +283,9 @@ class PaymentFlowService
                 ]);
             }
 
-            return $payment->fresh();
+            // update() already set in-memory attributes; fresh() is redundant
+            // while we hold the lockForUpdate (no concurrent modification possible).
+            return $payment;
         });
 
         // Step 2: If payment was confirmed, transition resume and dispatch job.

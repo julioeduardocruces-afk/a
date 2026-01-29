@@ -174,10 +174,10 @@ class AdminDashboardController extends Controller
             ]);
         }
 
-        // Clear stale error fields BEFORE transitioning (same order as user flow
-        // in ResumeController::process) to avoid phantom errors if transition
-        // succeeds but the subsequent update fails.
-        $resume->update(['error_code' => null, 'error_message' => null]);
+        // Set error fields as dirty attributes — transitionTo() calls save()
+        // which persists ALL dirty attributes in one query, avoiding a separate UPDATE.
+        $resume->error_code = null;
+        $resume->error_message = null;
         $resume->transitionTo(ResumeStatus::Processing);
 
         ProcessResumeJob::dispatch($resume->id);
