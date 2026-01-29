@@ -106,6 +106,22 @@ class AdminDashboardController extends Controller
     public function destroyCredential(Request $request, int $id)
     {
         $cred = ApiCredential::findOrFail($id);
+
+        // Prevent deleting the last active credential for a provider.
+        // toggleCredential() blocks deactivation, but without this guard
+        // an admin could bypass that protection by deleting instead.
+        if ($cred->is_active) {
+            $activeCount = ApiCredential::where('provider', $cred->provider)
+                ->where('is_active', true)
+                ->count();
+
+            if ($activeCount <= 1) {
+                return back()->withErrors([
+                    'credential' => "No se puede eliminar la unica credencial activa para {$cred->provider}. Desactivela primero o agregue otra.",
+                ]);
+            }
+        }
+
         $cred->delete();
 
         AuditLog::record('admin.credential_deleted', $request->user()->id, 'admin', [
