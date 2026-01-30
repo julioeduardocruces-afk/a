@@ -242,7 +242,24 @@ class ResumeController extends Controller
         $resume->error_message = null;
         $resume->transitionTo(ResumeStatus::Processing);
 
-        ProcessResumeJob::dispatch($resume->id);
+        try {
+            ProcessResumeJob::dispatch($resume->id);
+        } catch (\Exception $e) {
+            // With sync queue driver, job exceptions bubble up here.
+            // Mark resume as failed so user can retry.
+            \Illuminate\Support\Facades\Log::error('ProcessResumeJob failed (sync)', [
+                'resume_id' => $resume->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            $resume->refresh();
+            if ($resume->status === ResumeStatus::Processing) {
+                $resume->markFailed('processing_error', $e->getMessage());
+            }
+
+            return redirect()->route('resumes.status', $resume->id)
+                ->withErrors(['processing' => 'Error al procesar el CV. Puedes reintentar.']);
+        }
 
         return redirect()->route('resumes.status', $resume->id);
     }

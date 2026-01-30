@@ -11,8 +11,8 @@ use App\Models\Resume;
 use App\Models\User;
 use App\Services\PaymentFlowService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class WebhookIdempotencyTest extends TestCase
@@ -61,7 +61,7 @@ class WebhookIdempotencyTest extends TestCase
 
     public function test_webhook_idempotency_paid_stays_paid(): void
     {
-        Queue::fake();
+        Bus::fake([GenerateFinalCvJob::class]);
 
         $payment = $this->setupPaymentScenario();
 
@@ -89,9 +89,7 @@ class WebhookIdempotencyTest extends TestCase
 
         // Duplicate webhook should re-dispatch the job for a stuck Paid resume
         // (recovery mechanism for crash between payment commit and job dispatch)
-        Queue::assertPushed(GenerateFinalCvJob::class, function ($job) use ($payment) {
-            return true; // Job was dispatched for the stuck resume
-        });
+        Bus::assertDispatched(GenerateFinalCvJob::class);
     }
 
     public function test_webhook_missing_token_throws(): void

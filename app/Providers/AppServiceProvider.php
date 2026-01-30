@@ -32,6 +32,36 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        $this->ensureStorageDirs();
+    }
+
+    /**
+     * Ensure required storage directories exist.
+     * Runs once per deployment — checked via a simple flag file.
+     */
+    private function ensureStorageDirs(): void
+    {
+        $flag = storage_path('framework/.dirs_created');
+        if (file_exists($flag)) {
+            return;
+        }
+
+        $dirs = [
+            storage_path('app/uploads'),
+            storage_path('app/uploads/anonymous'),
+            storage_path('app/finals'),
+            storage_path('framework/cache'),
+            storage_path('framework/sessions'),
+            storage_path('framework/views'),
+            storage_path('logs'),
+        ];
+
+        foreach ($dirs as $dir) {
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0775, true);
+            }
+        }
+
+        @file_put_contents($flag, date('Y-m-d H:i:s'));
     }
 }

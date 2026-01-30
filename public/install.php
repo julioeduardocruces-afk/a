@@ -160,7 +160,8 @@ function buildEnvContent(array $data): string
         }
     }
 
-    $queueDriver = $hasRedis ? 'redis' : 'database';
+    // Queue: use redis if available, otherwise sync (shared hosting has no queue worker)
+    $queueDriver = $hasRedis ? 'redis' : 'sync';
     $cacheDriver  = $hasRedis ? 'redis' : 'database';
 
     return <<<ENV

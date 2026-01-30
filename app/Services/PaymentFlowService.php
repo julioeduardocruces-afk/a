@@ -200,13 +200,13 @@ class PaymentFlowService
                     ]);
                     return $payment;
                 }
-                GenerateFinalCvJob::dispatch($resume->id);
+                GenerateFinalCvJob::dispatchAfterResponse($resume->id);
             } elseif ($resume && $resume->status === ResumeStatus::Paid) {
                 Log::info('Webhook duplicado: re-dispatching job for stuck Paid resume', [
                     'payment_id' => $payment->id,
                     'resume_id' => $resume->id,
                 ]);
-                GenerateFinalCvJob::dispatch($resume->id);
+                GenerateFinalCvJob::dispatchAfterResponse($resume->id);
             } else {
                 Log::info('Webhook duplicado ignorado', ['payment_id' => $payment->id]);
             }
@@ -297,7 +297,7 @@ class PaymentFlowService
                 'flow_order' => $flowOrder,
             ]);
 
-            GenerateFinalCvJob::dispatch($resume->id);
+            GenerateFinalCvJob::dispatchAfterResponse($resume->id);
         }
 
         return $payment;
