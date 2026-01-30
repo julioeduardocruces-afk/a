@@ -35,7 +35,7 @@
                 <td>{{ Str::limit($r->target_industry ?? '-', 20) }}</td>
                 <td><span class="badge badge-{{ $r->status->value }}">{{ $r->status->value }}</span></td>
                 <td>{{ $r->latestVersion?->score_json['overall'] ?? '-' }}</td>
-                <td style="color:#dc3545;">{{ Str::limit($r->error_message ?? '', 30) }}</td>
+                <td style="color:#dc3545;" title="{{ $r->error_message ?? '' }}">{{ Str::limit($r->error_message ?? '', 30) }}</td>
                 <td>{{ $r->created_at->format('d/m H:i') }}</td>
                 <td style="display:flex;gap:4px;">
                     @if($r->status->value === 'failed')

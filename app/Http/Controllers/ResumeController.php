@@ -250,6 +250,7 @@ class ResumeController extends Controller
             \Illuminate\Support\Facades\Log::error('ProcessResumeJob failed (sync)', [
                 'resume_id' => $resume->id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             $resume->refresh();

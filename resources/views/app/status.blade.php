@@ -4,6 +4,15 @@
 <div style="max-width:700px;margin:30px auto;">
     <h1 style="margin-bottom:20px;">Estado de tu CV</h1>
 
+    @if($errors->any())
+    <div class="card" style="border-left:4px solid #dc3545;background:#fff5f5;margin-bottom:16px;">
+        @foreach($errors->all() as $error)
+            <p style="color:#dc3545;margin:4px 0;">{{ $error }}</p>
+        @endforeach
+    </div>
+    <script>console.error('[ATS Debug] Form errors:', @json($errors->all()));</script>
+    @endif
+
     <div class="card">
         <table>
             <tr><th style="width:150px;">Archivo</th><td>{{ $resume->original_filename }}</td></tr>
@@ -62,6 +71,11 @@
                 <button type="submit" class="btn btn-danger">Reintentar Procesamiento</button>
             </form>
         </div>
+        <script>
+            console.error('[ATS Debug] Resume #{{ $resume->id }} failed');
+            console.error('[ATS Debug] error_code:', @json($resume->error_code));
+            console.error('[ATS Debug] error_message:', @json($resume->error_message));
+        </script>
     @endif
 
     <div style="margin-top:20px;">
