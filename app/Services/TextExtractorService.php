@@ -105,36 +105,43 @@ class TextExtractorService
 
     public function extract(string $storagePath, string $mime): string
     {
-        $fullPath = storage_path("app/{$storagePath}");
-
-        if (!file_exists($fullPath)) {
-            throw new RuntimeException(
-                "Archivo no encontrado en storage: {$storagePath}. "
-                . "Ruta completa: {$fullPath}"
-            );
-        }
-
-        // Path traversal protection — realpath() resolves symlinks which is
-        // important on shared hosting where storage may be symlinked.
-        $realPath = realpath($fullPath);
-        $allowedBase = realpath(storage_path('app'));
-
-        // On some shared hosts, realpath() may fail due to open_basedir or
-        // symlink configurations. Fall back to string-based check if both resolve.
-        if ($realPath === false || $allowedBase === false) {
-            // Fallback: ensure the path doesn't contain traversal sequences
-            if (str_contains($storagePath, '..') || str_contains($storagePath, "\0")) {
-                throw new RuntimeException('Path traversal detectado.');
-            }
-            $realPath = $fullPath;
-        } elseif (!str_starts_with($realPath, $allowedBase)) {
+        // Path traversal protection first
+        if (str_contains($storagePath, '..') || str_contains($storagePath, "\0")) {
             throw new RuntimeException('Path traversal detectado.');
         }
 
+        // Use Storage facade to get the real disk path — this respects
+        // the configured disk root and works consistently with storeAs().
+        $disk = \Illuminate\Support\Facades\Storage::disk('local');
+
+        if (!$disk->exists($storagePath)) {
+            // Log diagnostic info to help debug on shared hosting
+            $diskRoot = config('filesystems.disks.local.root', storage_path('app'));
+            $legacyPath = storage_path("app/{$storagePath}");
+            throw new RuntimeException(
+                "Archivo no encontrado en storage: {$storagePath}. "
+                . "Disk root: {$diskRoot}. "
+                . "Legacy path: {$legacyPath}, exists: " . (file_exists($legacyPath) ? 'YES' : 'NO')
+            );
+        }
+
+        $fullPath = $disk->path($storagePath);
+
+        // Additional traversal check with realpath if available
+        $realPath = realpath($fullPath);
+        $allowedBase = realpath($disk->path(''));
+
+        if ($realPath !== false && $allowedBase !== false && !str_starts_with($realPath, $allowedBase)) {
+            throw new RuntimeException('Path traversal detectado.');
+        }
+
+        // Use realPath if resolved, otherwise fall back to direct path
+        $filePath = $realPath ?: $fullPath;
+
         return match ($mime) {
-            'application/pdf' => $this->extractFromPdf($realPath),
+            'application/pdf' => $this->extractFromPdf($filePath),
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-                => $this->extractFromDocx($realPath),
+                => $this->extractFromDocx($filePath),
             default => throw new RuntimeException("Formato no soportado: {$mime}"),
         };
     }

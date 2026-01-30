@@ -49,10 +49,30 @@ class ResumeController extends Controller
         // Generate random filename (prevent path traversal)
         $ext = $file->getClientOriginalExtension();
         $safeName = Str::uuid() . '.' . $ext;
+
+        // Ensure the upload directory exists
+        $uploadDir = storage_path('app/uploads/anonymous');
+        if (!is_dir($uploadDir)) {
+            @mkdir($uploadDir, 0775, true);
+        }
+
         $path = $file->storeAs('uploads/anonymous', $safeName);
 
         if (!$path) {
             return back()->withErrors(['cv_file' => 'Error al almacenar el archivo. Verifica permisos de storage.']);
+        }
+
+        // Verify the file actually landed on disk
+        if (!Storage::exists($path)) {
+            \Illuminate\Support\Facades\Log::error('Upload verification failed: file not on disk', [
+                'storage_path' => $path,
+                'full_path' => storage_path('app/' . $path),
+                'storage_base' => storage_path('app'),
+                'disk_root' => config('filesystems.disks.local.root'),
+                'upload_dir_exists' => is_dir($uploadDir),
+                'upload_dir_writable' => is_writable($uploadDir),
+            ]);
+            return back()->withErrors(['cv_file' => 'El archivo se subio pero no se guardo correctamente. Verifica permisos en storage/app/uploads/anonymous/']);
         }
 
         $resume = Resume::create([

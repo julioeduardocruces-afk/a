@@ -74,9 +74,34 @@ Route::get('/health-check', function () {
     }
 
     // Storage writable
+    $checks['storage_path'] = storage_path();
+    $checks['base_path'] = base_path();
     $checks['storage_app'] = is_writable(storage_path('app')) ? 'OK' : 'NOT WRITABLE';
     $checks['storage_uploads'] = is_writable(storage_path('app/uploads')) ? 'OK' : (is_dir(storage_path('app/uploads')) ? 'NOT WRITABLE' : 'MISSING');
+    $checks['storage_uploads_anon'] = is_writable(storage_path('app/uploads/anonymous')) ? 'OK' : (is_dir(storage_path('app/uploads/anonymous')) ? 'NOT WRITABLE' : 'MISSING');
     $checks['storage_logs'] = is_writable(storage_path('logs')) ? 'OK' : 'NOT WRITABLE';
+
+    // Storage write/read test — writes a temp file and verifies it exists on disk
+    try {
+        $testFile = 'uploads/anonymous/_health_test_' . uniqid() . '.txt';
+        \Illuminate\Support\Facades\Storage::put($testFile, 'health-check');
+        $fullTestPath = storage_path('app/' . $testFile);
+        if (file_exists($fullTestPath)) {
+            $checks['storage_write_test'] = 'OK';
+        } else {
+            $checks['storage_write_test'] = 'FAIL: Storage::put succeeded but file not at ' . $fullTestPath;
+            // Check if it ended up somewhere else
+            $diskRoot = config('filesystems.disks.local.root', storage_path('app'));
+            $altPath = $diskRoot . '/' . $testFile;
+            $checks['storage_disk_root'] = $diskRoot;
+            if ($altPath !== $fullTestPath && file_exists($altPath)) {
+                $checks['storage_write_test'] .= ' — FOUND at ' . $altPath;
+            }
+        }
+        \Illuminate\Support\Facades\Storage::delete($testFile);
+    } catch (\Throwable $e) {
+        $checks['storage_write_test'] = 'FAIL: ' . $e->getMessage();
+    }
 
     // APP_KEY
     $checks['app_key'] = config('app.key') ? 'SET (' . substr(config('app.key'), 0, 10) . '...)' : 'MISSING';

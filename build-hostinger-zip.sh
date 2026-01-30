@@ -41,6 +41,7 @@ fi
 
 echo "==> Creando directorios de storage..."
 mkdir -p "$BUILD_DIR/ats-app/storage/app/uploads"
+mkdir -p "$BUILD_DIR/ats-app/storage/app/uploads/anonymous"
 mkdir -p "$BUILD_DIR/ats-app/storage/app/finals"
 mkdir -p "$BUILD_DIR/ats-app/storage/app/public"
 mkdir -p "$BUILD_DIR/ats-app/storage/framework/cache"
@@ -51,6 +52,7 @@ mkdir -p "$BUILD_DIR/ats-app/bootstrap/cache"
 
 # Ensure .gitkeep files so empty dirs are in the zip
 for d in "$BUILD_DIR/ats-app/storage/app/uploads" \
+         "$BUILD_DIR/ats-app/storage/app/uploads/anonymous" \
          "$BUILD_DIR/ats-app/storage/app/finals" \
          "$BUILD_DIR/ats-app/storage/app/public" \
          "$BUILD_DIR/ats-app/storage/framework/cache" \
