@@ -40,12 +40,20 @@ class ResumeController extends Controller
         $file = $request->file('cv_file');
 
         // Validate file type and security
-        $this->extractor->validateFile($file);
+        try {
+            $this->extractor->validateFile($file);
+        } catch (\RuntimeException $e) {
+            return back()->withErrors(['cv_file' => $e->getMessage()]);
+        }
 
         // Generate random filename (prevent path traversal)
         $ext = $file->getClientOriginalExtension();
         $safeName = Str::uuid() . '.' . $ext;
         $path = $file->storeAs('uploads/anonymous', $safeName);
+
+        if (!$path) {
+            return back()->withErrors(['cv_file' => 'Error al almacenar el archivo. Verifica permisos de storage.']);
+        }
 
         $resume = Resume::create([
             'original_filename' => $file->getClientOriginalName(),

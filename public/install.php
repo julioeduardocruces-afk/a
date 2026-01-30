@@ -189,9 +189,9 @@ DB_DATABASE={$data['db_name']}
 DB_USERNAME={$data['db_user']}
 DB_PASSWORD="{$data['db_pass']}"
 
-SESSION_DRIVER=database
+SESSION_DRIVER=file
 SESSION_LIFETIME=120
-SESSION_ENCRYPT=true
+SESSION_ENCRYPT=false
 SESSION_PATH=/
 SESSION_DOMAIN=null
 SESSION_SECURE_COOKIE=true
@@ -529,6 +529,7 @@ function createStorageDirs(string $basePath): void
 {
     $dirs = [
         'storage/app/uploads',
+        'storage/app/uploads/anonymous',
         'storage/app/finals',
         'storage/framework/cache',
         'storage/framework/sessions',

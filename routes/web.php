@@ -47,6 +47,74 @@ Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
 
+// Health check / diagnostics (remove after deploy is stable)
+Route::get('/health-check', function () {
+    $checks = [];
+
+    // DB
+    try {
+        \Illuminate\Support\Facades\DB::select('SELECT 1');
+        $checks['database'] = 'OK';
+    } catch (\Throwable $e) {
+        $checks['database'] = 'FAIL: ' . $e->getMessage();
+    }
+
+    // Sessions table (for database driver)
+    try {
+        $driver = config('session.driver');
+        $checks['session_driver'] = $driver;
+        if ($driver === 'database') {
+            \Illuminate\Support\Facades\DB::select('SELECT COUNT(*) as c FROM sessions');
+            $checks['sessions_table'] = 'OK';
+        } else {
+            $checks['sessions_dir'] = is_writable(storage_path('framework/sessions')) ? 'OK' : 'NOT WRITABLE';
+        }
+    } catch (\Throwable $e) {
+        $checks['sessions_table'] = 'FAIL: ' . $e->getMessage();
+    }
+
+    // Storage writable
+    $checks['storage_app'] = is_writable(storage_path('app')) ? 'OK' : 'NOT WRITABLE';
+    $checks['storage_uploads'] = is_writable(storage_path('app/uploads')) ? 'OK' : (is_dir(storage_path('app/uploads')) ? 'NOT WRITABLE' : 'MISSING');
+    $checks['storage_logs'] = is_writable(storage_path('logs')) ? 'OK' : 'NOT WRITABLE';
+
+    // APP_KEY
+    $checks['app_key'] = config('app.key') ? 'SET (' . substr(config('app.key'), 0, 10) . '...)' : 'MISSING';
+
+    // Encryption
+    try {
+        $enc = encrypt('test');
+        decrypt($enc);
+        $checks['encryption'] = 'OK';
+    } catch (\Throwable $e) {
+        $checks['encryption'] = 'FAIL: ' . $e->getMessage();
+    }
+
+    // PHP extensions
+    $checks['ext_fileinfo'] = extension_loaded('fileinfo') ? 'OK' : 'MISSING';
+    $checks['ext_pdo_mysql'] = extension_loaded('pdo_mysql') ? 'OK' : 'MISSING';
+    $checks['ext_mbstring'] = extension_loaded('mbstring') ? 'OK' : 'MISSING';
+
+    // Cache
+    try {
+        cache()->put('_health', 'ok', 10);
+        $checks['cache'] = cache()->get('_health') === 'ok' ? 'OK' : 'FAIL: read mismatch';
+        cache()->forget('_health');
+    } catch (\Throwable $e) {
+        $checks['cache'] = 'FAIL: ' . $e->getMessage();
+    }
+
+    // Resumes table
+    try {
+        $cols = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM resumes LIKE 'access_token'");
+        $checks['resumes_access_token'] = count($cols) > 0 ? 'OK' : 'COLUMN MISSING';
+    } catch (\Throwable $e) {
+        $checks['resumes_table'] = 'FAIL: ' . $e->getMessage();
+    }
+
+    return response()->json($checks);
+});
+
 // ──────────────────────────────────────────────
 // PUBLIC CV FLOW (anonymous, no login required)
 // ──────────────────────────────────────────────
