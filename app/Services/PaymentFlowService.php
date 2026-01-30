@@ -168,9 +168,9 @@ class PaymentFlowService
         $commerceOrder = (string)($flowData['commerceOrder'] ?? '');
         $flowStatus = (int)($flowData['status'] ?? 0);
 
-        $payment = Payment::where('flow_token', $token)->first();
+        $payment = Payment::with('resume')->where('flow_token', $token)->first();
         if (!$payment && !empty($commerceOrder)) {
-            $payment = Payment::find((int)$commerceOrder);
+            $payment = Payment::with('resume')->find((int)$commerceOrder);
         }
 
         if (!$payment) {

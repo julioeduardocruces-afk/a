@@ -14,7 +14,6 @@ class Resume extends Model
 {
     protected $fillable = [
         'user_id',
-        'access_token',
         'original_filename',
         'original_mime',
         'original_path',

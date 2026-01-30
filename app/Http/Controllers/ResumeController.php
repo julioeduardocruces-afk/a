@@ -55,8 +55,12 @@ class ResumeController extends Controller
         ]);
 
         // Store access_token in session for ownership verification
+        // Cap at 50 tokens to prevent session bloat from repeated uploads
         $tokens = $request->session()->get('resume_tokens', []);
         $tokens[] = $resume->access_token;
+        if (count($tokens) > 50) {
+            $tokens = array_slice($tokens, -50);
+        }
         $request->session()->put('resume_tokens', $tokens);
 
         MetricsDaily::incrementToday('uploads');

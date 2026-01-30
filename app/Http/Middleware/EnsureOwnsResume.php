@@ -17,28 +17,30 @@ class EnsureOwnsResume
     {
         $resumeId = $request->route('resume') ?? $request->route('id');
 
-        if ($resumeId) {
-            $id = $resumeId instanceof Resume ? $resumeId->id : (int)$resumeId;
-
-            $resume = Resume::find($id);
-            if (!$resume) {
-                abort(404, 'CV no encontrado.');
-            }
-
-            // Admin users can access any resume
-            if ($request->user()?->is_admin) {
-                $request->attributes->set('resume', $resume);
-                return $next($request);
-            }
-
-            // Anonymous ownership: check session access_tokens array
-            $sessionTokens = $request->session()->get('resume_tokens', []);
-            if (!in_array($resume->access_token, $sessionTokens, true)) {
-                abort(403, 'No tienes acceso a este recurso.');
-            }
-
-            $request->attributes->set('resume', $resume);
+        if (!$resumeId) {
+            abort(400, 'Resume ID requerido.');
         }
+
+        $id = $resumeId instanceof Resume ? $resumeId->id : (int)$resumeId;
+
+        $resume = Resume::find($id);
+        if (!$resume) {
+            abort(404, 'CV no encontrado.');
+        }
+
+        // Admin users can access any resume
+        if ($request->user()?->is_admin) {
+            $request->attributes->set('resume', $resume);
+            return $next($request);
+        }
+
+        // Anonymous ownership: check session access_tokens array
+        $sessionTokens = $request->session()->get('resume_tokens', []);
+        if (!in_array($resume->access_token, $sessionTokens, true)) {
+            abort(403, 'No tienes acceso a este recurso.');
+        }
+
+        $request->attributes->set('resume', $resume);
 
         return $next($request);
     }

@@ -78,7 +78,7 @@ class PaymentController extends Controller
      */
     public function returnFromFlow(Request $request, int $payment)
     {
-        $paymentModel = \App\Models\Payment::findOrFail($payment);
+        $paymentModel = \App\Models\Payment::with('resume')->findOrFail($payment);
 
         // Verify ownership via session tokens on the resume
         $resume = $paymentModel->resume;

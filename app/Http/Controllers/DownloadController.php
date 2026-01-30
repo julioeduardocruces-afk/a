@@ -16,7 +16,7 @@ class DownloadController extends Controller
      */
     public function download(string $token)
     {
-        $downloadToken = DownloadToken::where('token', $token)->first();
+        $downloadToken = DownloadToken::with('resume')->where('token', $token)->first();
 
         if (!$downloadToken) {
             abort(404, 'Token no encontrado.');
