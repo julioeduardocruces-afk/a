@@ -99,6 +99,26 @@ class ResumeController extends Controller
     }
 
     /**
+     * Whitelist of allowed industries from the select dropdown.
+     */
+    private const ALLOWED_INDUSTRIES = [
+        'Tecnologias de la Informacion',
+        'Salud / Hemodialisis',
+        'Ventas y Comercial',
+        'Finanzas / Factoring',
+        'Ingenieria',
+        'Educacion',
+        'Logistica y Transporte',
+        'Marketing Digital',
+        'Recursos Humanos',
+        'Administracion',
+        'Construccion',
+        'Legal',
+        'Mineria',
+        'Otro',
+    ];
+
+    /**
      * POST /resumes/{id}/target-role - Set target role and industry.
      */
     public function setTargetRole(Request $request, int $id)
@@ -109,17 +129,42 @@ class ResumeController extends Controller
             return back()->withErrors(['status' => 'No se puede cambiar el rubro/cargo en el estado actual. El CV ya fue procesado.']);
         }
 
-        $validated = $request->validate([
-            'target_industry' => ['required', 'string', 'max:255'],
+        $rules = [
+            'target_industry' => ['required', 'string', 'in:' . implode(',', self::ALLOWED_INDUSTRIES)],
             'target_role' => ['required', 'string', 'max:255'],
-        ]);
+        ];
 
-        $resume->update($validated);
+        // If "Otro" is selected, require and validate custom_industry
+        if ($request->input('target_industry') === 'Otro') {
+            $rules['custom_industry'] = ['required', 'string', 'max:255'];
+        }
+
+        $validated = $request->validate($rules);
+
+        // Resolve final industry: use custom text if "Otro"
+        $industry = $validated['target_industry'];
+        if ($industry === 'Otro') {
+            $industry = $this->sanitizeUserText($validated['custom_industry']);
+            if (empty($industry)) {
+                return back()->withErrors(['custom_industry' => 'Debes especificar un rubro valido.'])->withInput();
+            }
+        }
+
+        // Sanitize target_role too (free-text field)
+        $role = $this->sanitizeUserText($validated['target_role']);
+        if (empty($role)) {
+            return back()->withErrors(['target_role' => 'Debes especificar un cargo valido.'])->withInput();
+        }
+
+        $resume->update([
+            'target_industry' => $industry,
+            'target_role' => $role,
+        ]);
 
         AuditLog::record('resume.target_set', null, 'anonymous', [
             'resume_id' => $resume->id,
-            'target_industry' => $validated['target_industry'],
-            'target_role' => $validated['target_role'],
+            'target_industry' => $industry,
+            'target_role' => $role,
         ], $request->ip());
 
         return $this->process($request, $id);
@@ -246,5 +291,24 @@ class ResumeController extends Controller
         }
 
         return view('app.preview', compact('resume', 'score', 'pageCount'));
+    }
+
+    /**
+     * Sanitize free-text input: strip tags, control chars, collapse whitespace.
+     * Returns only safe alphanumeric + basic punctuation text.
+     */
+    private function sanitizeUserText(string $input): string
+    {
+        // Strip HTML/PHP tags
+        $clean = strip_tags($input);
+        // Remove control characters (null bytes, tabs, etc.) except spaces and newlines
+        $clean = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $clean);
+        // Remove any characters that could be used for injection attacks
+        // Allow: letters (unicode), numbers, spaces, common punctuation (.,;:-/()')
+        $clean = preg_replace('/[^\p{L}\p{N}\s\.\,\;\:\-\/\(\)\'\"\&]/u', '', $clean);
+        // Collapse multiple spaces
+        $clean = preg_replace('/\s+/', ' ', $clean);
+
+        return trim($clean);
     }
 }
