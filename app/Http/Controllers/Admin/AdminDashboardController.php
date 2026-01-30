@@ -57,10 +57,21 @@ class AdminDashboardController extends Controller
             ->where('is_active', true)->first();
         $activeFlow = ApiCredential::where('provider', 'flow')->where('is_active', true)->first();
 
-        $currentAi = $activeAi ? $activeAi->getDecryptedCredentials() : [];
+        $currentAi = [];
         $currentAiProvider = $activeAi?->provider;
-        $currentFlow = $activeFlow ? $activeFlow->getDecryptedCredentials() : [];
+        $currentFlow = [];
         $flowEnabled = $activeFlow?->is_active ?? false;
+
+        try {
+            $currentAi = $activeAi ? $activeAi->getDecryptedCredentials() : [];
+        } catch (\Exception $e) {
+            // Legacy encrypted data unreadable — user must re-save
+        }
+        try {
+            $currentFlow = $activeFlow ? $activeFlow->getDecryptedCredentials() : [];
+        } catch (\Exception $e) {
+            // Legacy encrypted data unreadable — user must re-save
+        }
 
         $defaultPrompt = AiOptimizerService::DEFAULT_SYSTEM_PROMPT;
         $systemPrompt = Setting::getValue('ai_system_prompt', $defaultPrompt);

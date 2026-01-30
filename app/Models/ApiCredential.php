@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Crypt;
 
 class ApiCredential extends Model
 {
@@ -26,27 +25,55 @@ class ApiCredential extends Model
         ];
     }
 
+    /**
+     * Get credentials stored as plain JSON in encrypted_json column.
+     * Column name kept for backward compatibility.
+     */
     public function getDecryptedCredentials(): array
     {
-        try {
-            return json_decode(Crypt::decryptString($this->encrypted_json), true);
-        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
-            throw new \RuntimeException(
-                "No se pudo descifrar la credencial '{$this->name}' (ID:{$this->id}). "
-                . "Esto ocurre si el APP_KEY cambió después de guardar las credenciales. "
-                . "Ve a Admin > Credenciales y vuelve a guardar la API key."
-            );
+        $raw = $this->encrypted_json;
+
+        if (empty($raw)) {
+            return [];
         }
+
+        // Try plain JSON first (new format)
+        $data = json_decode($raw, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($data)) {
+            return $data;
+        }
+
+        // Fallback: try decrypting legacy encrypted data
+        try {
+            $decrypted = \Illuminate\Support\Facades\Crypt::decryptString($raw);
+            $data = json_decode($decrypted, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($data)) {
+                // Auto-migrate: save as plain JSON so it won't break again
+                $this->timestamps = false;
+                $this->update(['encrypted_json' => $decrypted]);
+                $this->timestamps = true;
+                return $data;
+            }
+        } catch (\Exception $e) {
+            // Can't decrypt either — data is corrupted
+        }
+
+        throw new \RuntimeException(
+            "No se pudo leer la credencial '{$this->name}' (ID:{$this->id}). "
+            . "Los datos están corruptos. Ve a Admin > Credenciales y vuelve a guardarla."
+        );
     }
 
+    /**
+     * Store credentials as plain JSON.
+     */
     public function setCredentials(array $data): void
     {
-        $this->encrypted_json = Crypt::encryptString(json_encode($data));
+        $this->encrypted_json = json_encode($data);
     }
 
     public function recordUsage(): void
     {
-        // Single query instead of two: increment() + update() each hit the DB.
         $this->increment('usage_count', 1, ['last_used_at' => now()]);
     }
 
