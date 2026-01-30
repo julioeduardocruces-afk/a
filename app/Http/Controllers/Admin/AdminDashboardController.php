@@ -368,6 +368,27 @@ class AdminDashboardController extends Controller
         return back()->with('success', 'Reenvio de email programado.');
     }
 
+    public function destroyResume(Request $request, int $id)
+    {
+        $resume = Resume::findOrFail($id);
+
+        // Delete associated file from storage
+        if ($resume->original_path && \Illuminate\Support\Facades\Storage::disk('local')->exists($resume->original_path)) {
+            \Illuminate\Support\Facades\Storage::disk('local')->delete($resume->original_path);
+        }
+
+        // Delete related records
+        $resume->versions()->delete();
+        $resume->payments()->delete();
+        $resume->delete();
+
+        AuditLog::record('admin.resume_deleted', $request->user()->id, 'admin', [
+            'resume_id' => $id,
+        ], $request->ip());
+
+        return back()->with('success', 'CV eliminado exitosamente.');
+    }
+
     // --- Audit Logs ---
 
     public function auditLogs(Request $request)

@@ -50,6 +50,11 @@
                         <button type="submit" class="btn btn-sm btn-secondary">Reenviar</button>
                     </form>
                     @endif
+                    <form method="POST" action="{{ route('admin.resumes.destroy', $r->id) }}" onsubmit="return confirm('¿Eliminar este CV? Esta acción no se puede deshacer.')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                    </form>
                 </td>
             </tr>
             @endforeach

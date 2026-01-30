@@ -209,6 +209,7 @@ Route::middleware(['auth', EnsureIsAdmin::class, AuditRequest::class])
         Route::get('/resumes', [AdminDashboardController::class, 'resumes'])->name('resumes');
         Route::post('/resumes/{id}/retry', [AdminDashboardController::class, 'retryResume'])->name('resumes.retry');
         Route::post('/resumes/{id}/resend-email', [AdminDashboardController::class, 'resendEmail'])->name('resumes.resend-email');
+        Route::delete('/resumes/{id}', [AdminDashboardController::class, 'destroyResume'])->name('resumes.destroy');
 
         // Audit & Metrics
         Route::get('/audit-logs', [AdminDashboardController::class, 'auditLogs'])->name('audit-logs');
