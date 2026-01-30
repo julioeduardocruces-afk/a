@@ -28,7 +28,15 @@ class ApiCredential extends Model
 
     public function getDecryptedCredentials(): array
     {
-        return json_decode(Crypt::decryptString($this->encrypted_json), true);
+        try {
+            return json_decode(Crypt::decryptString($this->encrypted_json), true);
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            throw new \RuntimeException(
+                "No se pudo descifrar la credencial '{$this->name}' (ID:{$this->id}). "
+                . "Esto ocurre si el APP_KEY cambió después de guardar las credenciales. "
+                . "Ve a Admin > Credenciales y vuelve a guardar la API key."
+            );
+        }
     }
 
     public function setCredentials(array $data): void
