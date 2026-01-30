@@ -108,13 +108,26 @@ class TextExtractorService
         $fullPath = storage_path("app/{$storagePath}");
 
         if (!file_exists($fullPath)) {
-            throw new RuntimeException('Archivo no encontrado en storage.');
+            throw new RuntimeException(
+                "Archivo no encontrado en storage: {$storagePath}. "
+                . "Ruta completa: {$fullPath}"
+            );
         }
 
-        // Path traversal protection
+        // Path traversal protection — realpath() resolves symlinks which is
+        // important on shared hosting where storage may be symlinked.
         $realPath = realpath($fullPath);
         $allowedBase = realpath(storage_path('app'));
-        if ($realPath === false || $allowedBase === false || !str_starts_with($realPath, $allowedBase)) {
+
+        // On some shared hosts, realpath() may fail due to open_basedir or
+        // symlink configurations. Fall back to string-based check if both resolve.
+        if ($realPath === false || $allowedBase === false) {
+            // Fallback: ensure the path doesn't contain traversal sequences
+            if (str_contains($storagePath, '..') || str_contains($storagePath, "\0")) {
+                throw new RuntimeException('Path traversal detectado.');
+            }
+            $realPath = $fullPath;
+        } elseif (!str_starts_with($realPath, $allowedBase)) {
             throw new RuntimeException('Path traversal detectado.');
         }
 

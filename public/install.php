@@ -452,6 +452,15 @@ function runMigrations(PDO $pdo): array
             CONSTRAINT `download_tokens_resume_id_foreign` FOREIGN KEY (`resume_id`) REFERENCES `resumes` (`id`) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
 
+        // ── settings ──
+        "CREATE TABLE IF NOT EXISTS `settings` (
+            `key` VARCHAR(100) NOT NULL,
+            `value` LONGTEXT NULL,
+            `created_at` TIMESTAMP NULL,
+            `updated_at` TIMESTAMP NULL,
+            PRIMARY KEY (`key`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+
         // ── performance indexes ──
         "CREATE INDEX `payments_resume_id_status_index` ON `payments` (`resume_id`, `status`)",
 
@@ -477,6 +486,7 @@ function runMigrations(PDO $pdo): array
         '2024_01_02_000007_create_download_tokens_table',
         '2024_01_02_000008_add_performance_indexes',
         '2024_01_02_000009_add_anonymous_flow_fields',
+        '2024_01_02_000010_create_settings_table',
     ];
 
     foreach ($sqls as $i => $sql) {

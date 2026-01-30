@@ -4,13 +4,14 @@ namespace App\Services;
 
 use App\Models\ApiCredential;
 use App\Models\AuditLog;
+use App\Models\Setting;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 class AiOptimizerService
 {
-    private const SYSTEM_PROMPT = <<<'PROMPT'
+    public const DEFAULT_SYSTEM_PROMPT = <<<'PROMPT'
 Eres un experto en optimización de Currículum Vitae para sistemas ATS (Applicant Tracking System).
 
 REGLAS ABSOLUTAS - NO PUEDES VIOLARLAS:
@@ -46,6 +47,14 @@ ESTRUCTURA DE SALIDA (JSON):
 
 Devuelve SOLO el JSON, sin texto adicional antes ni después.
 PROMPT;
+
+    /**
+     * Get the active system prompt (custom from settings or default).
+     */
+    private function getSystemPrompt(): string
+    {
+        return Setting::getValue('ai_system_prompt') ?? self::DEFAULT_SYSTEM_PROMPT;
+    }
 
     public function optimize(string $extractedText, array $structuredData, string $targetIndustry, string $targetRole): array
     {
@@ -130,7 +139,7 @@ PROMPT;
         ])->timeout(120)->post('https://api.openai.com/v1/chat/completions', [
             'model' => $model,
             'messages' => [
-                ['role' => 'system', 'content' => self::SYSTEM_PROMPT],
+                ['role' => 'system', 'content' => $this->getSystemPrompt()],
                 ['role' => 'user', 'content' => $userPrompt],
             ],
             'temperature' => 0.3,
@@ -173,7 +182,7 @@ PROMPT;
                 'contents' => [
                     [
                         'parts' => [
-                            ['text' => self::SYSTEM_PROMPT . "\n\n" . $userPrompt],
+                            ['text' => $this->getSystemPrompt() . "\n\n" . $userPrompt],
                         ],
                     ],
                 ],

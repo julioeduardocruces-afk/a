@@ -195,8 +195,26 @@ class ResumeController extends Controller
                     'structured_json' => $structured,
                 ]);
             } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('CV text extraction failed', [
+                    'resume_id' => $resume->id,
+                    'path' => $resume->original_path,
+                    'mime' => $resume->original_mime,
+                    'error' => $e->getMessage(),
+                    'file_exists' => file_exists(storage_path('app/' . $resume->original_path)),
+                ]);
+
                 $resume->markFailed('extraction_error', $e->getMessage());
-                return back()->withErrors(['extraction' => 'Error al extraer el texto del CV. Verifica que el archivo sea válido.']);
+
+                $userMsg = 'Error al extraer el texto del CV.';
+                if (str_contains($e->getMessage(), 'escaneado') || str_contains($e->getMessage(), 'imagen')) {
+                    $userMsg = 'El PDF parece ser una imagen escaneada. Sube un PDF con texto seleccionable.';
+                } elseif (str_contains($e->getMessage(), 'no encontrado')) {
+                    $userMsg = 'Archivo no encontrado en el servidor. Intenta subir el CV nuevamente.';
+                } elseif (str_contains($e->getMessage(), 'Path traversal')) {
+                    $userMsg = 'Error de seguridad en la ruta del archivo.';
+                }
+
+                return back()->withErrors(['extraction' => $userMsg]);
             }
         }
 

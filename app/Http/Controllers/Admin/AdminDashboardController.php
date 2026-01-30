@@ -8,6 +8,8 @@ use App\Models\AuditLog;
 use App\Models\MetricsDaily;
 use App\Models\Resume;
 use App\Models\Payment;
+use App\Models\Setting;
+use App\Services\AiOptimizerService;
 use App\Enums\ResumeStatus;
 use App\Jobs\ProcessResumeJob;
 use App\Jobs\GenerateFinalCvJob;
@@ -60,8 +62,12 @@ class AdminDashboardController extends Controller
         $currentFlow = $activeFlow ? $activeFlow->getDecryptedCredentials() : [];
         $flowEnabled = $activeFlow?->is_active ?? false;
 
+        $defaultPrompt = AiOptimizerService::DEFAULT_SYSTEM_PROMPT;
+        $systemPrompt = Setting::getValue('ai_system_prompt', $defaultPrompt);
+
         return view('admin.credentials', compact(
-            'credentials', 'currentAi', 'currentAiProvider', 'currentFlow', 'flowEnabled'
+            'credentials', 'currentAi', 'currentAiProvider', 'currentFlow', 'flowEnabled',
+            'systemPrompt', 'defaultPrompt'
         ));
     }
 
@@ -75,6 +81,10 @@ class AdminDashboardController extends Controller
 
         if ($formType === 'flow') {
             return $this->storeFlowCredential($request);
+        }
+
+        if ($formType === 'prompt') {
+            return $this->storeSystemPrompt($request);
         }
 
         return back()->withErrors(['form_type' => 'Tipo de formulario no reconocido.']);
@@ -194,6 +204,28 @@ class AdminDashboardController extends Controller
         ], $request->ip());
 
         return back()->with('success', 'Credencial de Flow guardada exitosamente.');
+    }
+
+    private function storeSystemPrompt(Request $request)
+    {
+        $validated = $request->validate([
+            'system_prompt' => ['nullable', 'string', 'max:10000'],
+        ]);
+
+        $prompt = trim($validated['system_prompt'] ?? '');
+
+        // If empty, remove custom prompt (will use default)
+        if (empty($prompt)) {
+            Setting::setValue('ai_system_prompt', null);
+        } else {
+            Setting::setValue('ai_system_prompt', $prompt);
+        }
+
+        AuditLog::record('admin.system_prompt_updated', $request->user()->id, 'admin', [
+            'prompt_length' => strlen($prompt),
+        ], $request->ip());
+
+        return back()->with('success', 'Prompt del sistema actualizado exitosamente.');
     }
 
     public function toggleCredential(Request $request, int $id)

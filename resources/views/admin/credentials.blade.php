@@ -66,6 +66,26 @@
 </div>
 
 {{-- ════════════════════════════════════════ --}}
+{{-- CONFIGURACION DEL PROMPT IA              --}}
+{{-- ════════════════════════════════════════ --}}
+<div class="card">
+    <h3 style="margin-bottom:16px;">Prompt del Sistema (IA)</h3>
+    <p style="color:#666;margin-bottom:12px;">Este es el prompt que se envia a la IA para optimizar los CVs. Puedes personalizarlo segun tus necesidades. Si lo dejas vacio se usara el prompt por defecto.</p>
+    <form method="POST" action="{{ route('admin.credentials.store') }}">
+        @csrf
+        <input type="hidden" name="form_type" value="prompt">
+        <div class="form-group">
+            <label for="system_prompt">Prompt del Sistema</label>
+            <textarea name="system_prompt" id="system_prompt" rows="14" style="width:100%;font-family:monospace;font-size:0.85rem;line-height:1.4;">{{ old('system_prompt', $systemPrompt ?? '') }}</textarea>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;">
+            <button type="submit" class="btn btn-primary btn-sm">Guardar Prompt</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="restoreDefaultPrompt()">Restaurar por Defecto</button>
+        </div>
+    </form>
+</div>
+
+{{-- ════════════════════════════════════════ --}}
 {{-- CONFIGURACION DE PASARELAS DE PAGO       --}}
 {{-- ════════════════════════════════════════ --}}
 <div class="card">
@@ -186,5 +206,10 @@ function toggleAiFields() {
     }
 }
 toggleAiFields();
+
+function restoreDefaultPrompt() {
+    if (!confirm('Restaurar el prompt por defecto? Se perdera el prompt actual al guardar.')) return;
+    document.getElementById('system_prompt').value = @json($defaultPrompt ?? '');
+}
 </script>
 @endsection
