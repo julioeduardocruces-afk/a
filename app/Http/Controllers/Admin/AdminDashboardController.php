@@ -264,21 +264,6 @@ class AdminDashboardController extends Controller
     {
         $cred = ApiCredential::findOrFail($id);
 
-        // Prevent deactivating the last active credential for a provider.
-        // Without this guard, admin can accidentally break all CV processing
-        // or payment creation by deactivating every credential for a provider.
-        if ($cred->is_active) {
-            $activeCount = ApiCredential::where('provider', $cred->provider)
-                ->where('is_active', true)
-                ->count();
-
-            if ($activeCount <= 1) {
-                return back()->withErrors([
-                    'credential' => "No se puede desactivar la unica credencial activa para {$cred->provider}.",
-                ]);
-            }
-        }
-
         $cred->update(['is_active' => !$cred->is_active]);
 
         AuditLog::record('admin.credential_toggled', $request->user()->id, 'admin', [
@@ -292,21 +277,6 @@ class AdminDashboardController extends Controller
     public function destroyCredential(Request $request, int $id)
     {
         $cred = ApiCredential::findOrFail($id);
-
-        // Prevent deleting the last active credential for a provider.
-        // toggleCredential() blocks deactivation, but without this guard
-        // an admin could bypass that protection by deleting instead.
-        if ($cred->is_active) {
-            $activeCount = ApiCredential::where('provider', $cred->provider)
-                ->where('is_active', true)
-                ->count();
-
-            if ($activeCount <= 1) {
-                return back()->withErrors([
-                    'credential' => "No se puede eliminar la unica credencial activa para {$cred->provider}. Desactivela primero o agregue otra.",
-                ]);
-            }
-        }
 
         $cred->delete();
 
