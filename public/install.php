@@ -401,7 +401,7 @@ function runMigrations(PDO $pdo): array
             `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
             `provider` ENUM('openai','gemini','flow','smtp') NOT NULL,
             `name` VARCHAR(255) NOT NULL COMMENT 'Human-readable label',
-            `encrypted_json` TEXT NOT NULL COMMENT 'Laravel encrypted JSON',
+            `encrypted_json` TEXT NOT NULL COMMENT 'JSON credentials (plain text)',
             `is_active` TINYINT(1) NOT NULL DEFAULT 1,
             `usage_count` INT UNSIGNED NOT NULL DEFAULT 0,
             `last_used_at` TIMESTAMP NULL,

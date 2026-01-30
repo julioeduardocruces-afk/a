@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->enum('provider', ['openai', 'gemini', 'flow', 'smtp']);
             $table->string('name', 255)->comment('Human-readable label');
-            $table->text('encrypted_json')->comment('Laravel encrypted JSON with keys/secrets');
+            $table->text('encrypted_json')->comment('JSON credentials (plain text)');
             $table->boolean('is_active')->default(true);
             $table->unsignedInteger('usage_count')->default(0);
             $table->timestamp('last_used_at')->nullable();

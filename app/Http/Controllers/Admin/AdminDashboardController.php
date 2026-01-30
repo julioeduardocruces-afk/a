@@ -135,9 +135,13 @@ class AdminDashboardController extends Controller
             // Check if there's an existing credential to preserve the key
             $existing = ApiCredential::where('provider', $provider)->where('is_active', true)->first();
             if ($existing) {
-                $existingData = $existing->getDecryptedCredentials();
-                if (!empty($existingData['api_key'])) {
-                    $credData['api_key'] = $existingData['api_key'];
+                try {
+                    $existingData = $existing->getDecryptedCredentials();
+                    if (!empty($existingData['api_key'])) {
+                        $credData['api_key'] = $existingData['api_key'];
+                    }
+                } catch (\Exception $e) {
+                    // Can't read old credential — user must provide key
                 }
             }
             if (empty($credData['api_key'])) {
@@ -146,6 +150,11 @@ class AdminDashboardController extends Controller
         }
 
         $providerLabels = ['openai' => 'OpenAI', 'gemini' => 'Google Gemini'];
+
+        // Deactivate previous credentials for this provider
+        ApiCredential::whereIn('provider', ['openai', 'gemini'])
+            ->where('is_active', true)
+            ->update(['is_active' => false]);
 
         $cred = new ApiCredential();
         $cred->provider = $provider;
@@ -184,7 +193,14 @@ class AdminDashboardController extends Controller
 
         // Preserve existing keys if not provided
         $existing = ApiCredential::where('provider', 'flow')->where('is_active', true)->first();
-        $existingData = $existing ? $existing->getDecryptedCredentials() : [];
+        $existingData = [];
+        if ($existing) {
+            try {
+                $existingData = $existing->getDecryptedCredentials();
+            } catch (\Exception $e) {
+                // Can't read old credential — user must provide keys
+            }
+        }
 
         if (!empty($validated['flow_api_key'])) {
             $credData['api_key'] = $validated['flow_api_key'];
@@ -201,6 +217,11 @@ class AdminDashboardController extends Controller
         } else {
             return back()->withErrors(['flow_secret_key' => 'Se requiere un Secret Key de Flow.'])->withInput();
         }
+
+        // Deactivate previous Flow credentials
+        ApiCredential::where('provider', 'flow')
+            ->where('is_active', true)
+            ->update(['is_active' => false]);
 
         $cred = new ApiCredential();
         $cred->provider = 'flow';
