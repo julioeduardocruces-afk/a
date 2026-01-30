@@ -36,7 +36,7 @@ class AuthController extends Controller
 
         AuditLog::record('user.registered', $user->id, 'user', [], $request->ip());
 
-        return redirect()->route('dashboard');
+        return redirect()->route('admin.dashboard');
     }
 
     public function showLogin()
@@ -56,7 +56,7 @@ class AuthController extends Controller
 
             AuditLog::record('user.login', Auth::id(), 'user', [], $request->ip());
 
-            return redirect()->intended(route('dashboard'));
+            return redirect()->intended(route('admin.dashboard'));
         }
 
         return back()->withErrors([
@@ -140,6 +140,6 @@ class AuthController extends Controller
         Auth::login($user);
         session()->regenerate();
 
-        return redirect()->route('dashboard');
+        return redirect()->route('admin.dashboard');
     }
 }

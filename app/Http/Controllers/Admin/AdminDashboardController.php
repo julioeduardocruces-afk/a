@@ -49,26 +49,87 @@ class AdminDashboardController extends Controller
     public function credentials()
     {
         $credentials = ApiCredential::orderBy('provider')->orderBy('name')->get();
-        return view('admin.credentials', compact('credentials'));
+
+        // Load current active configs for pre-populating forms
+        $activeAi = ApiCredential::whereIn('provider', ['openai', 'gemini'])
+            ->where('is_active', true)->first();
+        $activeFlow = ApiCredential::where('provider', 'flow')->where('is_active', true)->first();
+
+        $currentAi = $activeAi ? $activeAi->getDecryptedCredentials() : [];
+        $currentAiProvider = $activeAi?->provider;
+        $currentFlow = $activeFlow ? $activeFlow->getDecryptedCredentials() : [];
+        $flowEnabled = $activeFlow?->is_active ?? false;
+
+        return view('admin.credentials', compact(
+            'credentials', 'currentAi', 'currentAiProvider', 'currentFlow', 'flowEnabled'
+        ));
     }
 
     public function storeCredential(Request $request)
     {
-        $validated = $request->validate([
-            'provider' => ['required', 'in:openai,gemini,flow,smtp'],
-            'name' => ['required', 'string', 'max:255'],
-            'credentials' => ['required', 'string'], // JSON string
-        ]);
+        $formType = $request->input('form_type');
 
-        $jsonData = json_decode($validated['credentials'], true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            return back()->withErrors(['credentials' => 'JSON invalido.']);
+        if ($formType === 'ai') {
+            return $this->storeAiCredential($request);
         }
 
+        if ($formType === 'flow') {
+            return $this->storeFlowCredential($request);
+        }
+
+        return back()->withErrors(['form_type' => 'Tipo de formulario no reconocido.']);
+    }
+
+    private function storeAiCredential(Request $request)
+    {
+        $validated = $request->validate([
+            'ai_provider' => ['required', 'in:openai,gemini'],
+            'ai_model' => ['required', 'string', 'max:100'],
+            'ai_api_key' => ['nullable', 'string', 'max:500'],
+            'ai_max_tokens' => ['required', 'integer', 'min:100', 'max:8000'],
+            'ai_temperature' => ['required', 'numeric', 'min:0', 'max:2'],
+        ]);
+
+        // Validate model matches provider
+        $allowedModels = [
+            'openai' => ['gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo'],
+            'gemini' => ['gemini-1.5-pro', 'gemini-1.5-flash'],
+        ];
+
+        $provider = $validated['ai_provider'];
+        if (!in_array($validated['ai_model'], $allowedModels[$provider] ?? [], true)) {
+            return back()->withErrors(['ai_model' => 'Modelo no valido para el proveedor seleccionado.'])->withInput();
+        }
+
+        $credData = [
+            'model' => $validated['ai_model'],
+            'max_tokens' => (int) $validated['ai_max_tokens'],
+            'temperature' => (float) $validated['ai_temperature'],
+        ];
+
+        // Only include API key if provided (allows updating other fields without changing key)
+        if (!empty($validated['ai_api_key'])) {
+            $credData['api_key'] = $validated['ai_api_key'];
+        } else {
+            // Check if there's an existing credential to preserve the key
+            $existing = ApiCredential::where('provider', $provider)->where('is_active', true)->first();
+            if ($existing) {
+                $existingData = $existing->getDecryptedCredentials();
+                if (!empty($existingData['api_key'])) {
+                    $credData['api_key'] = $existingData['api_key'];
+                }
+            }
+            if (empty($credData['api_key'])) {
+                return back()->withErrors(['ai_api_key' => 'Se requiere una API Key.'])->withInput();
+            }
+        }
+
+        $providerLabels = ['openai' => 'OpenAI', 'gemini' => 'Google Gemini'];
+
         $cred = new ApiCredential();
-        $cred->provider = $validated['provider'];
-        $cred->name = $validated['name'];
-        $cred->setCredentials($jsonData);
+        $cred->provider = $provider;
+        $cred->name = ($providerLabels[$provider] ?? $provider) . ' - ' . $validated['ai_model'];
+        $cred->setCredentials($credData);
         $cred->is_active = true;
         $cred->save();
 
@@ -77,7 +138,62 @@ class AdminDashboardController extends Controller
             'provider' => $cred->provider,
         ], $request->ip());
 
-        return back()->with('success', 'Credencial creada exitosamente.');
+        return back()->with('success', 'Credencial de IA guardada exitosamente.');
+    }
+
+    private function storeFlowCredential(Request $request)
+    {
+        $validated = $request->validate([
+            'flow_enabled' => ['nullable'],
+            'flow_environment' => ['required', 'in:sandbox,production'],
+            'flow_api_key' => ['nullable', 'string', 'max:500'],
+            'flow_secret_key' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $environment = $validated['flow_environment'];
+        $apiUrls = [
+            'sandbox' => 'https://sandbox.flow.cl/api',
+            'production' => 'https://www.flow.cl/api',
+        ];
+
+        $credData = [
+            'environment' => $environment,
+            'api_url' => $apiUrls[$environment],
+        ];
+
+        // Preserve existing keys if not provided
+        $existing = ApiCredential::where('provider', 'flow')->where('is_active', true)->first();
+        $existingData = $existing ? $existing->getDecryptedCredentials() : [];
+
+        if (!empty($validated['flow_api_key'])) {
+            $credData['api_key'] = $validated['flow_api_key'];
+        } elseif (!empty($existingData['api_key'])) {
+            $credData['api_key'] = $existingData['api_key'];
+        } else {
+            return back()->withErrors(['flow_api_key' => 'Se requiere una API Key de Flow.'])->withInput();
+        }
+
+        if (!empty($validated['flow_secret_key'])) {
+            $credData['secret_key'] = $validated['flow_secret_key'];
+        } elseif (!empty($existingData['secret_key'])) {
+            $credData['secret_key'] = $existingData['secret_key'];
+        } else {
+            return back()->withErrors(['flow_secret_key' => 'Se requiere un Secret Key de Flow.'])->withInput();
+        }
+
+        $cred = new ApiCredential();
+        $cred->provider = 'flow';
+        $cred->name = 'Flow - ' . ucfirst($environment);
+        $cred->setCredentials($credData);
+        $cred->is_active = (bool) $request->input('flow_enabled', false);
+        $cred->save();
+
+        AuditLog::record('admin.credential_created', $request->user()->id, 'admin', [
+            'credential_id' => $cred->id,
+            'provider' => 'flow',
+        ], $request->ip());
+
+        return back()->with('success', 'Credencial de Flow guardada exitosamente.');
     }
 
     public function toggleCredential(Request $request, int $id)
