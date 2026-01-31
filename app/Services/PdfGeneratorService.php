@@ -76,11 +76,16 @@ class PdfGeneratorService
                 continue;
             }
 
-            // Bullet points
-            if (str_starts_with($trimmed, '- ') || str_starts_with($trimmed, '* ')) {
-                $bulletText = ltrim($trimmed, '-* ');
+            // Bullet points (- , * , or • prefix)
+            if (str_starts_with($trimmed, '- ') || str_starts_with($trimmed, '* ') || str_starts_with($trimmed, '• ')) {
+                $bulletText = $trimmed;
+                if (str_starts_with($bulletText, '• ')) {
+                    $bulletText = mb_substr($bulletText, 2);
+                } else {
+                    $bulletText = ltrim($bulletText, '-* ');
+                }
                 $section->addListItem(
-                    htmlspecialchars($bulletText, ENT_QUOTES, 'UTF-8'),
+                    htmlspecialchars(trim($bulletText), ENT_QUOTES, 'UTF-8'),
                     0,
                     ['size' => 11],
                 );
@@ -118,6 +123,8 @@ class PdfGeneratorService
             'HABILIDADES', 'CERTIFICACIONES', 'IDIOMAS', 'DATOS PERSONALES',
             'SUMMARY', 'EXPERIENCE', 'EDUCATION', 'SKILLS', 'CERTIFICATIONS',
             'LANGUAGES', 'PROFESSIONAL', 'FORMACION', 'FORMACIÓN',
+            'COMPETENCIAS', 'HERRAMIENTAS', 'TECNOLOGÍAS', 'TECNOLOGIAS',
+            'DISPONIBILIDAD', 'LOGROS', 'REFERENCIAS',
         ];
 
         $upper = mb_strtoupper(trim($line));

@@ -40,30 +40,43 @@ class ResumeRendererService
 
     private function markdownToHtml(string $md): string
     {
-        // Process line by line: escape text content first, then apply markdown
         $lines = explode("\n", $md);
         $htmlLines = [];
+        $afterH1 = false; // Track lines right after name for subtitle/contact styling
 
         foreach ($lines as $line) {
-            // Escape HTML entities in raw text content
             $safe = htmlspecialchars($line, ENT_QUOTES, 'UTF-8');
 
-            // Headers (must check before other transforms)
+            // Headers
             if (preg_match('/^### (.+)$/', $safe, $m)) {
-                $htmlLines[] = '<h3>' . $m[1] . '</h3>';
+                $afterH1 = false;
+                $content = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $m[1]);
+                $htmlLines[] = '<h3>' . $content . '</h3>';
                 continue;
             }
             if (preg_match('/^## (.+)$/', $safe, $m)) {
+                $afterH1 = false;
                 $htmlLines[] = '<h2>' . $m[1] . '</h2>';
                 continue;
             }
             if (preg_match('/^# (.+)$/', $safe, $m)) {
                 $htmlLines[] = '<h1>' . $m[1] . '</h1>';
+                $afterH1 = true;
                 continue;
             }
 
-            // Bullet list items
+            // Unicode bullet items (•)
+            if (preg_match('/^[\x{2022}]\s*(.+)$/u', $line, $m)) {
+                $afterH1 = false;
+                $item = htmlspecialchars($m[1], ENT_QUOTES, 'UTF-8');
+                $item = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $item);
+                $htmlLines[] = '<li class="bullet-item">' . $item . '</li>';
+                continue;
+            }
+
+            // Dash bullet list items
             if (preg_match('/^- (.+)$/', $safe, $m)) {
+                $afterH1 = false;
                 $item = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $m[1]);
                 $htmlLines[] = '<li>' . $item . '</li>';
                 continue;
@@ -72,18 +85,26 @@ class ResumeRendererService
             // Bold in normal text
             $safe = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $safe);
 
-            // Empty line = paragraph break
+            // Empty line
             if (trim($safe) === '') {
-                $htmlLines[] = '<br>';
+                $afterH1 = false;
+                $htmlLines[] = '<div class="spacer"></div>';
                 continue;
             }
 
-            $htmlLines[] = $safe . '<br>';
+            // Lines right after h1 (subtitle, address, contact) get special class
+            if ($afterH1) {
+                $htmlLines[] = '<div class="contact-line">' . $safe . '</div>';
+                continue;
+            }
+
+            $htmlLines[] = '<p>' . $safe . '</p>';
         }
 
         // Wrap consecutive <li> elements in <ul>
         $html = implode("\n", $htmlLines);
-        $html = preg_replace('/(<li>.*?<\/li>\n?)+/s', '<ul>$0</ul>', $html);
+        $html = preg_replace('/(<li class="bullet-item">.*?<\/li>\n?)+/s', '<ul class="bullet-list">$0</ul>', $html);
+        $html = preg_replace('/(<li>(?:(?!class=).).*?<\/li>\n?)+/s', '<ul>$0</ul>', $html);
 
         return $html;
     }
@@ -155,17 +176,34 @@ class ResumeRendererService
             body {
                 width:800px; min-height:1100px; padding:40px 50px;
                 font-family: Arial, Helvetica, sans-serif;
-                font-size: 13px; line-height: 1.5; color: #222;
+                font-size: 12px; line-height: 1.55; color: #222;
                 background: white; position: relative; overflow: hidden;
             }
-            h1 { font-size:20px; margin-bottom:8px; text-transform:uppercase; }
-            h2 { font-size:15px; margin:14px 0 6px; border-bottom:1px solid #999;
-                 padding-bottom:3px; text-transform:uppercase; color:#333; }
-            h3 { font-size:13px; margin:8px 0 4px; }
-            ul { padding-left:18px; margin:4px 0; }
-            li { margin-bottom:2px; }
-            strong { font-weight:bold; }
-            /* Blur bottom third for preview */
+            h1 {
+                font-size: 22px; font-weight: bold; margin-bottom: 2px;
+                text-transform: uppercase; color: #111; letter-spacing: 0.5px;
+            }
+            h2 {
+                font-size: 13px; font-weight: bold; margin: 16px 0 6px;
+                border-bottom: 1.5px solid #333; padding-bottom: 3px;
+                text-transform: uppercase; color: #111; letter-spacing: 0.3px;
+            }
+            h3 {
+                font-size: 12px; font-weight: bold; margin: 10px 0 1px;
+                color: #222;
+            }
+            .contact-line {
+                font-size: 11px; color: #444; line-height: 1.4; margin: 0;
+            }
+            .contact-line strong { color: #222; }
+            .spacer { height: 6px; }
+            p { margin: 2px 0; }
+            ul { padding-left: 16px; margin: 4px 0; }
+            ul.bullet-list { padding-left: 12px; list-style: none; }
+            ul.bullet-list li { margin-bottom: 2px; }
+            ul.bullet-list li::before { content: "• "; font-weight: bold; }
+            li { margin-bottom: 2px; }
+            strong { font-weight: bold; }
             .blur-zone { filter:blur(6px); }
         </style>
         </head><body>
@@ -301,14 +339,33 @@ class ResumeRendererService
             body {
                 width:100%; padding:30px 40px;
                 font-family: Arial, Helvetica, sans-serif;
-                font-size: 12px; line-height: 1.5; color: #222;
+                font-size: 11px; line-height: 1.5; color: #222;
             }
-            h1 { font-size:18px; margin-bottom:6px; text-transform:uppercase; }
-            h2 { font-size:14px; margin:12px 0 5px; border-bottom:1px solid #999;
-                 padding-bottom:2px; text-transform:uppercase; }
-            h3 { font-size:12px; margin:6px 0 3px; }
-            ul { padding-left:16px; margin:3px 0; }
-            li { margin-bottom:2px; }
+            h1 {
+                font-size: 20px; font-weight: bold; margin-bottom: 2px;
+                text-transform: uppercase; color: #111; letter-spacing: 0.5px;
+            }
+            h2 {
+                font-size: 12px; font-weight: bold; margin: 14px 0 5px;
+                border-bottom: 1.5px solid #333; padding-bottom: 2px;
+                text-transform: uppercase; color: #111; letter-spacing: 0.3px;
+            }
+            h3 {
+                font-size: 11px; font-weight: bold; margin: 8px 0 1px;
+                color: #222;
+            }
+            .contact-line {
+                font-size: 10px; color: #444; line-height: 1.4; margin: 0;
+            }
+            .contact-line strong { color: #222; }
+            .spacer { height: 5px; }
+            p { margin: 2px 0; }
+            ul { padding-left: 14px; margin: 3px 0; }
+            ul.bullet-list { padding-left: 10px; list-style: none; }
+            ul.bullet-list li { margin-bottom: 2px; }
+            ul.bullet-list li::before { content: "• "; font-weight: bold; }
+            li { margin-bottom: 2px; }
+            strong { font-weight: bold; }
         </style>
         </head><body>{$html}</body></html>
         HTML;
