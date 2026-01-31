@@ -13,6 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->validateCsrfTokens(except: [
             'payments/flow/webhook',
+            'payments/flow/return/*',
         ]);
 
         // Security headers on all web responses

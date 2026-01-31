@@ -177,7 +177,7 @@ Route::middleware(AuditRequest::class)->group(function () {
     Route::post('/payments/flow/create', [PaymentController::class, 'create'])
         ->middleware('throttle:5,1')
         ->name('payments.flow.create');
-    Route::get('/payments/flow/return/{payment}', [PaymentController::class, 'returnFromFlow'])
+    Route::match(['get', 'post'], '/payments/flow/return/{payment}', [PaymentController::class, 'returnFromFlow'])
         ->middleware('throttle:10,1')
         ->name('payments.flow.return');
 });
