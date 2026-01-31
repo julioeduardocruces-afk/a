@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('content')
-<div class="admin-layout" style="margin: -30px -20px;">
+<div class="admin-layout" style="margin-top: -30px; margin-bottom: -30px;">
     <aside class="admin-sidebar">
         <div class="sidebar-section">General</div>
         <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>

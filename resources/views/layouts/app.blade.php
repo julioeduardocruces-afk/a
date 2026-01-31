@@ -46,7 +46,7 @@
         .badge-failed { background: #f8d7da; color: #721c24; }
         .score-badge { display: inline-block; width: 48px; height: 48px; line-height: 48px; text-align: center; border-radius: 50%; font-weight: bold; font-size: 1.1rem; color: white; }
         /* Admin sidebar */
-        .admin-layout { display: flex; gap: 0; }
+        .admin-layout { display: flex; gap: 0; width: 100vw; margin-left: calc(-50vw + 50%); }
         .admin-sidebar { width: 230px; min-width: 230px; background: #1a1a2e; min-height: calc(100vh - 60px); padding: 20px 0; }
         .admin-sidebar a { display: block; color: #ccc; text-decoration: none; padding: 8px 20px; font-size: 0.9rem; border-left: 3px solid transparent; }
         .admin-sidebar a:hover { background: rgba(255,255,255,0.05); color: white; }
