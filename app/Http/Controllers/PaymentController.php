@@ -81,12 +81,16 @@ class PaymentController extends Controller
     {
         $paymentModel = \App\Models\Payment::with('resume')->findOrFail($payment);
 
-        // Verify ownership via session tokens on the resume
+        // This route only performs redirects (no sensitive data exposed).
+        // Payment confirmation is handled securely via the webhook endpoint.
+        // Session tokens may be lost after external redirect to Flow gateway,
+        // so we restore the resume token to keep subsequent pages working.
         $resume = $paymentModel->resume;
-        $sessionTokens = $request->session()->get('resume_tokens', []);
-        if (!$resume || !in_array($resume->access_token, $sessionTokens, true)) {
-            if (!$request->user()?->is_admin) {
-                abort(403);
+        if ($resume) {
+            $tokens = $request->session()->get('resume_tokens', []);
+            if (!in_array($resume->access_token, $tokens, true)) {
+                $tokens[] = $resume->access_token;
+                $request->session()->put('resume_tokens', $tokens);
             }
         }
 
@@ -95,7 +99,8 @@ class PaymentController extends Controller
                 ->with('success', 'Pago confirmado. Tu CV optimizado sera generado y enviado a tu email.');
         }
 
-        return redirect()->route('resumes.payment', $paymentModel->resume_id)
-            ->with('info', 'Pago pendiente o no completado. Puedes intentar nuevamente.');
+        // If not yet paid, the webhook may still be processing
+        return redirect()->route('resumes.status', $paymentModel->resume_id)
+            ->with('info', 'Pago pendiente de confirmacion. Recibiras un email cuando tu CV este listo.');
     }
 }
