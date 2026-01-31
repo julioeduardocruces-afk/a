@@ -13,7 +13,7 @@
         <div style="color:#666;">Total Reembolsos</div>
     </div>
     <div class="card" style="text-align:center;border-left:4px solid #ffc107;">
-        <div style="font-size:1.8rem;font-weight:bold;color:#ffc107;">${{ number_format($totalRefundAmount / 100, 0, ',', '.') }}</div>
+        <div style="font-size:1.8rem;font-weight:bold;color:#ffc107;">${{ number_format($totalRefundAmount, 0, ',', '.') }}</div>
         <div style="color:#666;">Monto Reembolsado (CLP)</div>
     </div>
     <div class="card" style="text-align:center;border-left:4px solid #6c757d;">
@@ -47,9 +47,9 @@
                         <td>{{ $p->created_at->format('d/m/Y H:i') }}</td>
                         <td>{{ $p->resume?->customer_email ?? $p->user?->email ?? 'N/A' }}</td>
                         <td>{{ $p->resume_id }}</td>
-                        <td style="font-weight:bold;">${{ number_format($p->amount / 100, 0, ',', '.') }}</td>
+                        <td style="font-weight:bold;">${{ number_format($p->amount, 0, ',', '.') }}</td>
                         <td>
-                            <form method="POST" action="{{ route('admin.finance.process-refund', $p) }}" style="display:flex;gap:4px;align-items:center;" onsubmit="return confirm('Confirmar reembolso del pago #{{ $p->id }} por ${{ number_format($p->amount / 100, 0, ',', '.') }} CLP?')">
+                            <form method="POST" action="{{ route('admin.finance.process-refund', $p) }}" style="display:flex;gap:4px;align-items:center;" onsubmit="return confirm('Confirmar reembolso del pago #{{ $p->id }} por ${{ number_format($p->amount, 0, ',', '.') }} CLP?')">
                                 @csrf
                                 <input type="text" name="reason" placeholder="Razon del reembolso" required style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;width:200px;font-size:0.85rem;">
                                 <button type="submit" class="btn btn-danger btn-sm">Reembolsar</button>
@@ -102,8 +102,8 @@
                     <td>{{ $r->refunded_at?->format('d/m/Y H:i') ?? '-' }}</td>
                     <td>{{ $r->resume?->customer_email ?? $r->user?->email ?? 'N/A' }}</td>
                     <td>{{ $r->resume_id }}</td>
-                    <td>${{ number_format($r->amount / 100, 0, ',', '.') }}</td>
-                    <td style="color:#dc3545;font-weight:bold;">${{ number_format(($r->refund_amount ?? $r->amount) / 100, 0, ',', '.') }}</td>
+                    <td>${{ number_format($r->amount, 0, ',', '.') }}</td>
+                    <td style="color:#dc3545;font-weight:bold;">${{ number_format($r->refund_amount ?? $r->amount, 0, ',', '.') }}</td>
                     <td style="font-size:0.85rem;">{{ $r->refund_reason ?? '-' }}</td>
                 </tr>
                 @empty

@@ -17,7 +17,7 @@
         <div>Pagados</div>
     </div>
     <div class="card" style="text-align:center;">
-        <div style="font-size:2rem;font-weight:bold;color:#28a745;">${{ number_format($totals['revenue'] / 100, 0, ',', '.') }}</div>
+        <div style="font-size:2rem;font-weight:bold;color:#28a745;">${{ number_format($totals['revenue'], 0, ',', '.') }}</div>
         <div>Revenue (CLP)</div>
     </div>
 </div>

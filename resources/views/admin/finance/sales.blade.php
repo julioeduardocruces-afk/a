@@ -13,16 +13,16 @@
         <div style="color:#666;">Pagados</div>
     </div>
     <div class="card" style="text-align:center;border-left:4px solid #0066ff;">
-        <div style="font-size:1.6rem;font-weight:bold;color:#0066ff;">${{ number_format($summary->total_revenue / 100, 0, ',', '.') }}</div>
+        <div style="font-size:1.6rem;font-weight:bold;color:#0066ff;">${{ number_format($summary->total_revenue, 0, ',', '.') }}</div>
         <div style="color:#666;">Ingresos Brutos</div>
     </div>
     <div class="card" style="text-align:center;border-left:4px solid #dc3545;">
         <div style="font-size:1.6rem;font-weight:bold;color:#dc3545;">{{ $summary->total_refunded }}</div>
         <div style="color:#666;">Reembolsados</div>
-        <div style="font-size:0.8rem;color:#999;">${{ number_format($summary->total_refund_amount / 100, 0, ',', '.') }}</div>
+        <div style="font-size:0.8rem;color:#999;">${{ number_format($summary->total_refund_amount, 0, ',', '.') }}</div>
     </div>
     <div class="card" style="text-align:center;border-left:4px solid #17a2b8;">
-        <div style="font-size:1.6rem;font-weight:bold;color:#17a2b8;">${{ number_format($summary->net_revenue / 100, 0, ',', '.') }}</div>
+        <div style="font-size:1.6rem;font-weight:bold;color:#17a2b8;">${{ number_format($summary->net_revenue, 0, ',', '.') }}</div>
         <div style="color:#666;">Ingreso Neto</div>
     </div>
     <div class="card" style="text-align:center;border-left:4px solid #ffc107;">
@@ -90,7 +90,7 @@
                     <td>{{ $p->resume?->customer_email ?? $p->user?->email ?? 'N/A' }}</td>
                     <td>{{ $p->resume_id }}</td>
                     <td>{{ $p->resume?->target_industry ?? '-' }}</td>
-                    <td style="font-weight:bold;">${{ number_format($p->amount / 100, 0, ',', '.') }}</td>
+                    <td style="font-weight:bold;">${{ number_format($p->amount, 0, ',', '.') }}</td>
                     <td>
                         @php
                             $statusColors = ['pending' => '#ffc107', 'paid' => '#28a745', 'failed' => '#dc3545', 'refunded' => '#6c757d'];

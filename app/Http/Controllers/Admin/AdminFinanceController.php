@@ -51,7 +51,7 @@ class AdminFinanceController extends Controller
                 ->selectRaw('status, COUNT(*) as count, COALESCE(SUM(amount), 0) as total')
                 ->groupBy('status')
                 ->get()
-                ->keyBy('status');
+                ->keyBy(fn($item) => $item->status instanceof \BackedEnum ? $item->status->value : (string) $item->status);
         });
 
         // Conversion funnel
@@ -101,12 +101,14 @@ class AdminFinanceController extends Controller
             ->get();
 
         // Profit calculation (now includes refunds)
+        // NOTE: amounts in payments table are stored as whole CLP (not cents)
+        // AI costs are in USD cents
         $totalRevenueCLP = ($revenueStats['total_revenue'] ?? 0);
         $totalRefundedCLP = ($refundStats['total_refunded'] ?? 0);
         $netRevenueCLP = $totalRevenueCLP - $totalRefundedCLP;
-        $totalAiCostUSD = ($aiCosts['total_cost_cents'] ?? 0);
+        $totalAiCostUSD = ($aiCosts['total_cost_cents'] ?? 0); // USD cents
         $usdToClp = (float) config('ats.usd_to_clp', 950);
-        $aiCostCLP = ($totalAiCostUSD / 100) * $usdToClp * 100;
+        $aiCostCLP = ($totalAiCostUSD / 100) * $usdToClp; // convert USD cents to CLP
         $grossProfit = $netRevenueCLP - $aiCostCLP;
         $margin = $netRevenueCLP > 0 ? ($grossProfit / $netRevenueCLP) * 100 : 0;
 
@@ -297,7 +299,7 @@ class AdminFinanceController extends Controller
             $aiCostCents = AiUsageLog::whereBetween('created_at', [$monthStart, $monthEnd . ' 23:59:59'])
                 ->sum('cost_usd_cents');
 
-            $aiCostCLP = ($aiCostCents / 100) * $usdToClp * 100;
+            $aiCostCLP = ($aiCostCents / 100) * $usdToClp; // USD cents -> CLP
             $net = $revenue - $refunds;
             $profit = $net - $aiCostCLP;
 
@@ -318,7 +320,7 @@ class AdminFinanceController extends Controller
             ->selectRaw('COALESCE(SUM(COALESCE(refund_amount, amount)), 0) as total')
             ->value('total') ?? 0;
         $allTimeAiCostCents = AiUsageLog::sum('cost_usd_cents');
-        $allTimeAiCostCLP = ($allTimeAiCostCents / 100) * $usdToClp * 100;
+        $allTimeAiCostCLP = ($allTimeAiCostCents / 100) * $usdToClp; // USD cents -> CLP
         $allTimeNet = $allTimeRevenue - $allTimeRefunds;
         $allTimeProfit = $allTimeNet - $allTimeAiCostCLP;
 
@@ -421,13 +423,13 @@ class AdminFinanceController extends Controller
                         $p->resume?->customer_email ?? $p->user?->email ?? '',
                         $p->resume_id,
                         $p->resume?->target_industry ?? '',
-                        $p->amount / 100,
+                        $p->amount,
                         $p->status->value ?? $p->status,
                         $p->provider,
                         $p->flow_order ?? '',
                         $p->failure_reason ?? '',
                         $p->refund_reason ?? '',
-                        $p->refund_amount ? $p->refund_amount / 100 : '',
+                        $p->refund_amount ?? '',
                         $p->refunded_at?->format('Y-m-d H:i:s') ?? '',
                     ]);
                 }

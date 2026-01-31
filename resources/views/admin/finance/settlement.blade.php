@@ -17,15 +17,15 @@
 {{-- All-time Totals --}}
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px;">
     <div class="card" style="text-align:center;border-left:4px solid #28a745;">
-        <div style="font-size:1.6rem;font-weight:bold;color:#28a745;">${{ number_format($allTimeRevenue / 100, 0, ',', '.') }}</div>
+        <div style="font-size:1.6rem;font-weight:bold;color:#28a745;">${{ number_format($allTimeRevenue, 0, ',', '.') }}</div>
         <div style="color:#666;">Ingresos Totales (CLP)</div>
     </div>
     <div class="card" style="text-align:center;border-left:4px solid #dc3545;">
-        <div style="font-size:1.6rem;font-weight:bold;color:#dc3545;">-${{ number_format($allTimeRefunds / 100, 0, ',', '.') }}</div>
+        <div style="font-size:1.6rem;font-weight:bold;color:#dc3545;">-${{ number_format($allTimeRefunds, 0, ',', '.') }}</div>
         <div style="color:#666;">Reembolsos Totales</div>
     </div>
     <div class="card" style="text-align:center;border-left:4px solid #0066ff;">
-        <div style="font-size:1.6rem;font-weight:bold;color:#0066ff;">${{ number_format($allTimeNet / 100, 0, ',', '.') }}</div>
+        <div style="font-size:1.6rem;font-weight:bold;color:#0066ff;">${{ number_format($allTimeNet, 0, ',', '.') }}</div>
         <div style="color:#666;">Ingreso Neto</div>
     </div>
     <div class="card" style="text-align:center;border-left:4px solid #ffc107;">
@@ -33,7 +33,7 @@
         <div style="color:#666;">Costo IA Total</div>
     </div>
     <div class="card" style="text-align:center;border-left:4px solid {{ $allTimeProfit >= 0 ? '#28a745' : '#dc3545' }};">
-        <div style="font-size:1.6rem;font-weight:bold;color:{{ $allTimeProfit >= 0 ? '#28a745' : '#dc3545' }};">${{ number_format($allTimeProfit / 100, 0, ',', '.') }}</div>
+        <div style="font-size:1.6rem;font-weight:bold;color:{{ $allTimeProfit >= 0 ? '#28a745' : '#dc3545' }};">${{ number_format($allTimeProfit, 0, ',', '.') }}</div>
         <div style="color:#666;">Ganancia Neta (CLP)</div>
     </div>
 </div>
@@ -62,14 +62,14 @@
                 <tr>
                     <td><strong>{{ $m->label }}</strong></td>
                     <td>{{ $m->sales }}</td>
-                    <td style="color:#28a745;">${{ number_format($m->revenue / 100, 0, ',', '.') }}</td>
+                    <td style="color:#28a745;">${{ number_format($m->revenue, 0, ',', '.') }}</td>
                     <td>{{ $m->refundCount }}</td>
-                    <td style="color:#dc3545;">{{ $m->refunds > 0 ? '-$' . number_format($m->refunds / 100, 0, ',', '.') : '-' }}</td>
-                    <td style="font-weight:bold;">${{ number_format($m->net / 100, 0, ',', '.') }}</td>
+                    <td style="color:#dc3545;">{{ $m->refunds > 0 ? '-$' . number_format($m->refunds, 0, ',', '.') : '-' }}</td>
+                    <td style="font-weight:bold;">${{ number_format($m->net, 0, ',', '.') }}</td>
                     <td style="color:#ffc107;">${{ number_format($m->aiCostCents / 100, 2) }}</td>
-                    <td style="color:#ffc107;">${{ number_format($m->aiCostCLP / 100, 0, ',', '.') }}</td>
+                    <td style="color:#ffc107;">${{ number_format($m->aiCostCLP, 0, ',', '.') }}</td>
                     <td style="font-weight:bold;color:{{ $m->profit >= 0 ? '#28a745' : '#dc3545' }};">
-                        ${{ number_format($m->profit / 100, 0, ',', '.') }}
+                        ${{ number_format($m->profit, 0, ',', '.') }}
                     </td>
                     <td>
                         @if($m->net > 0)
@@ -85,13 +85,13 @@
                 <tr>
                     <td>TOTAL</td>
                     <td>{{ collect($monthly)->sum('sales') }}</td>
-                    <td style="color:#28a745;">${{ number_format(collect($monthly)->sum('revenue') / 100, 0, ',', '.') }}</td>
+                    <td style="color:#28a745;">${{ number_format(collect($monthly)->sum('revenue'), 0, ',', '.') }}</td>
                     <td>{{ collect($monthly)->sum('refundCount') }}</td>
-                    <td style="color:#dc3545;">-${{ number_format(collect($monthly)->sum('refunds') / 100, 0, ',', '.') }}</td>
-                    <td>${{ number_format(collect($monthly)->sum('net') / 100, 0, ',', '.') }}</td>
+                    <td style="color:#dc3545;">-${{ number_format(collect($monthly)->sum('refunds'), 0, ',', '.') }}</td>
+                    <td>${{ number_format(collect($monthly)->sum('net'), 0, ',', '.') }}</td>
                     <td style="color:#ffc107;">${{ number_format(collect($monthly)->sum('aiCostCents') / 100, 2) }}</td>
-                    <td style="color:#ffc107;">${{ number_format(collect($monthly)->sum('aiCostCLP') / 100, 0, ',', '.') }}</td>
-                    <td style="color:{{ collect($monthly)->sum('profit') >= 0 ? '#28a745' : '#dc3545' }};">${{ number_format(collect($monthly)->sum('profit') / 100, 0, ',', '.') }}</td>
+                    <td style="color:#ffc107;">${{ number_format(collect($monthly)->sum('aiCostCLP'), 0, ',', '.') }}</td>
+                    <td style="color:{{ collect($monthly)->sum('profit') >= 0 ? '#28a745' : '#dc3545' }};">${{ number_format(collect($monthly)->sum('profit'), 0, ',', '.') }}</td>
                     <td>
                         @php $totalNet = collect($monthly)->sum('net'); @endphp
                         @if($totalNet > 0)
