@@ -21,14 +21,14 @@ class MailerService
         }
 
         $displayName = $resume->getDisplayName();
-        $ttlMinutes = (int) config('ats.download_token_ttl', 15);
+        $ttlMinutes = (int) config('ats.download_token_ttl', 1440);
+        $maxDownloads = (int) config('ats.max_downloads', 3);
 
-        // Generate separate tokens for each format
-        $pdfToken = DownloadToken::generate($resume->id, $resume->user_id, $ttlMinutes);
-        $docxToken = DownloadToken::generate($resume->id, $resume->user_id, $ttlMinutes);
+        // Single token for both formats, allows up to max_downloads uses
+        $token = DownloadToken::generate($resume->id, $resume->user_id, $ttlMinutes, $maxDownloads);
 
-        $downloadPdfUrl = route('download.token', ['token' => $pdfToken->token]);
-        $downloadDocxUrl = route('download.token', ['token' => $docxToken->token, 'format' => 'docx']);
+        $downloadPdfUrl = route('download.token', ['token' => $token->token]);
+        $downloadDocxUrl = route('download.token', ['token' => $token->token, 'format' => 'docx']);
 
         try {
             Mail::send(
@@ -38,7 +38,8 @@ class MailerService
                     'downloadPdfUrl' => $downloadPdfUrl,
                     'downloadDocxUrl' => $downloadDocxUrl,
                     'resumeId' => $resume->id,
-                    'expiresAt' => $pdfToken->expires_at->format('d/m/Y H:i'),
+                    'expiresAt' => $token->expires_at->format('d/m/Y H:i'),
+                    'maxDownloads' => $maxDownloads,
                 ],
                 function ($message) use ($email, $displayName, $resume) {
                     $message->to($email, $displayName)
@@ -49,18 +50,16 @@ class MailerService
             Log::info('CV email sent', [
                 'email' => $email,
                 'resume_id' => $resume->id,
-                'pdf_token_id' => $pdfToken->id,
-                'docx_token_id' => $docxToken->id,
+                'token_id' => $token->id,
+                'max_downloads' => $maxDownloads,
             ]);
         } catch (\Exception $e) {
-            $pdfToken->update(['used' => true]);
-            $docxToken->update(['used' => true]);
+            $token->update(['used' => true]);
 
-            Log::error('Failed to send CV email, tokens invalidated', [
+            Log::error('Failed to send CV email, token invalidated', [
                 'email' => $email,
                 'resume_id' => $resume->id,
-                'pdf_token_id' => $pdfToken->id,
-                'docx_token_id' => $docxToken->id,
+                'token_id' => $token->id,
                 'error' => $e->getMessage(),
             ]);
             throw $e;

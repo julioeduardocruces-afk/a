@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Storage;
 class DownloadController extends Controller
 {
     /**
-     * GET /download/{token} - Download final CV via signed single-use token.
+     * GET /download/{token} - Download final CV (up to max_downloads times per token).
      */
     public function download(string $token)
     {
@@ -22,15 +22,33 @@ class DownloadController extends Controller
             abort(404, 'Token no encontrado.');
         }
 
-        // Atomically check validity and mark as used
+        // Atomically increment download_count only if within limits
         $claimed = DB::table('download_tokens')
             ->where('id', $downloadToken->id)
             ->where('used', false)
+            ->whereColumn('download_count', '<', 'max_downloads')
             ->where('expires_at', '>', now())
-            ->update(['used' => true]);
+            ->update([
+                'download_count' => DB::raw('download_count + 1'),
+            ]);
 
         if ($claimed === 0) {
-            abort(403, 'El enlace ha expirado o ya fue utilizado.');
+            // Refresh to give accurate message
+            $downloadToken->refresh();
+
+            if ($downloadToken->expires_at->isPast()) {
+                abort(403, 'El enlace ha expirado.');
+            }
+
+            abort(403, 'Has alcanzado el limite de descargas (' . $downloadToken->max_downloads . '). Contacta soporte si necesitas ayuda.');
+        }
+
+        // Refresh to get updated count
+        $downloadToken->refresh();
+
+        // Auto-mark as used when max reached
+        if ($downloadToken->download_count >= $downloadToken->max_downloads) {
+            $downloadToken->update(['used' => true]);
         }
 
         $resume = $downloadToken->resume;
@@ -61,6 +79,8 @@ class DownloadController extends Controller
             'resume_id' => $resume->id,
             'token_id' => $downloadToken->id,
             'format' => $format,
+            'download_number' => $downloadToken->download_count,
+            'remaining' => $downloadToken->remainingDownloads(),
         ]);
 
         return Storage::download($filePath, $fileName);

@@ -15,6 +15,8 @@ class DownloadToken extends Model
         'user_id',
         'token',
         'used',
+        'download_count',
+        'max_downloads',
         'expires_at',
         'created_at',
     ];
@@ -23,6 +25,8 @@ class DownloadToken extends Model
     {
         return [
             'used' => 'boolean',
+            'download_count' => 'integer',
+            'max_downloads' => 'integer',
             'expires_at' => 'datetime',
             'created_at' => 'datetime',
         ];
@@ -40,7 +44,12 @@ class DownloadToken extends Model
 
     public function isValid(): bool
     {
-        return !$this->used && $this->expires_at->isFuture();
+        return !$this->used && $this->download_count < $this->max_downloads && $this->expires_at->isFuture();
+    }
+
+    public function remainingDownloads(): int
+    {
+        return max(0, $this->max_downloads - $this->download_count);
     }
 
     public function markUsed(): void
@@ -51,12 +60,14 @@ class DownloadToken extends Model
     /**
      * Generate a download token. user_id is nullable for anonymous users.
      */
-    public static function generate(int $resumeId, ?int $userId, int $minutesTtl = 15): self
+    public static function generate(int $resumeId, ?int $userId, int $minutesTtl = 1440, int $maxDownloads = 3): self
     {
         return static::create([
             'resume_id' => $resumeId,
             'user_id' => $userId,
             'token' => Str::random(64),
+            'download_count' => 0,
+            'max_downloads' => $maxDownloads,
             'expires_at' => now()->addMinutes($minutesTtl),
             'created_at' => now(),
         ]);

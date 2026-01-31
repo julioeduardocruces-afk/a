@@ -21,8 +21,7 @@
     </p>
 
     <p style="color:#999;font-size:0.9rem;">
-        Cada enlace es de un solo uso y expiran el {{ $expiresAt }}.
-        Si necesitas nuevos enlaces, accede a tu dashboard.
+        Puedes descargar tu CV hasta {{ $maxDownloads }} veces (en PDF o DOCX). Los enlaces expiran el {{ $expiresAt }}.
     </p>
 
     <hr style="border:none;border-top:1px solid #eee;margin:20px 0;">

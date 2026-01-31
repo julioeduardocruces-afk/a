@@ -446,6 +446,8 @@ function runMigrations(PDO $pdo): array
             `user_id` BIGINT UNSIGNED NULL,
             `token` VARCHAR(64) NOT NULL,
             `used` TINYINT(1) NOT NULL DEFAULT 0,
+            `download_count` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+            `max_downloads` TINYINT UNSIGNED NOT NULL DEFAULT 3,
             `expires_at` TIMESTAMP NOT NULL,
             `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             UNIQUE KEY `download_tokens_token_unique` (`token`),
@@ -461,6 +463,10 @@ function runMigrations(PDO $pdo): array
             `updated_at` TIMESTAMP NULL,
             PRIMARY KEY (`key`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+
+        // ── download_tokens: add download_count/max_downloads (idempotent) ──
+        "ALTER TABLE `download_tokens` ADD COLUMN IF NOT EXISTS `download_count` TINYINT UNSIGNED NOT NULL DEFAULT 0 AFTER `used`",
+        "ALTER TABLE `download_tokens` ADD COLUMN IF NOT EXISTS `max_downloads` TINYINT UNSIGNED NOT NULL DEFAULT 3 AFTER `download_count`",
 
         // ── performance indexes ──
         "CREATE INDEX `payments_resume_id_status_index` ON `payments` (`resume_id`, `status`)",
@@ -488,6 +494,7 @@ function runMigrations(PDO $pdo): array
         '2024_01_02_000008_add_performance_indexes',
         '2024_01_02_000009_add_anonymous_flow_fields',
         '2024_01_02_000010_create_settings_table',
+        '2024_01_02_000013_add_download_count_to_download_tokens',
     ];
 
     foreach ($sqls as $i => $sql) {
