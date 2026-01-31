@@ -18,6 +18,11 @@
             <button type="submit" class="btn btn-primary" style="width:100%;">Subir CV</button>
         </form>
     </div>
+    <div class="card" style="text-align:center;background:#f0f7ff;border:1px dashed #0066ff;">
+        <p style="margin-bottom:8px;font-weight:600;">No tienes tu CV en archivo?</p>
+        <a href="{{ route('cv-builder.form') }}" class="btn btn-success">Crear CV desde Formulario</a>
+        <p style="font-size:0.85rem;color:#666;margin-top:8px;">Completa tus datos y nosotros generamos tu CV optimizado.</p>
+    </div>
     <div style="margin-top:16px;text-align:center;">
         <a href="{{ route('home') }}">Volver al inicio</a>
     </div>

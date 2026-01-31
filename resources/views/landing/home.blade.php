@@ -24,14 +24,17 @@
         Los sistemas ATS filtran el 75% de los CVs antes de que un reclutador los vea.
         Nuestro servicio usa inteligencia artificial para optimizar tu CV y aumentar tu puntaje ATS.
     </p>
-    <a href="{{ route('upload.form') }}" class="btn btn-primary" style="font-size:1.1rem;padding:14px 36px;">Optimizar mi CV Ahora</a>
-    <p style="margin-top:12px;color:#888;font-size:0.9rem;">Sin registro. Sube tu CV y recibe el resultado en minutos.</p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+        <a href="{{ route('upload.form') }}" class="btn btn-primary" style="font-size:1.1rem;padding:14px 36px;">Subir mi CV</a>
+        <a href="{{ route('cv-builder.form') }}" class="btn btn-success" style="font-size:1.1rem;padding:14px 36px;">Crear CV desde Cero</a>
+    </div>
+    <p style="margin-top:12px;color:#888;font-size:0.9rem;">Sin registro. Sube tu CV o crealo con nuestro formulario. Resultado en minutos.</p>
 </div>
 
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin:40px 0;">
     <div class="card" style="text-align:center;">
-        <h3 style="margin-bottom:8px;">1. Sube tu CV</h3>
-        <p>Acepta PDF y DOCX. Tu archivo se procesa de forma segura y privada. Sin necesidad de crear cuenta.</p>
+        <h3 style="margin-bottom:8px;">1. Sube o Crea tu CV</h3>
+        <p>Sube tu CV en PDF/DOCX o crealo desde cero con nuestro formulario. Sin necesidad de crear cuenta.</p>
     </div>
     <div class="card" style="text-align:center;">
         <h3 style="margin-bottom:8px;">2. Elige tu Objetivo</h3>
@@ -91,7 +94,7 @@
         <div class="card" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
             <h3 itemprop="name">Que formatos acepta?</h3>
             <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-                <p itemprop="text">PDF y DOCX. El archivo no debe superar los 10 MB.</p>
+                <p itemprop="text">PDF y DOCX (max 10 MB). Si no tienes tu CV en archivo, puedes crearlo directamente desde nuestro formulario.</p>
             </div>
         </div>
     </div>

@@ -3,7 +3,13 @@
 @section('content')
 <div style="max-width:600px;margin:30px auto;">
     <h1 style="margin-bottom:8px;">Paso 2: Rubro y Cargo Objetivo</h1>
-    <p style="color:#666;margin-bottom:20px;">Archivo: {{ $resume->original_filename }}</p>
+    <p style="color:#666;margin-bottom:20px;">
+        @if($resume->original_mime === 'text/plain')
+            CV creado desde formulario
+        @else
+            Archivo: {{ $resume->original_filename }}
+        @endif
+    </p>
 
     <div class="card">
         <form method="POST" action="{{ route('resumes.set-target-role', $resume->id) }}">

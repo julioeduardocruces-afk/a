@@ -146,11 +146,17 @@ Route::get('/health-check', function () {
 // ──────────────────────────────────────────────
 Route::middleware(AuditRequest::class)->group(function () {
 
-    // Upload
+    // Upload (file)
     Route::get('/upload', [ResumeController::class, 'showUpload'])->name('upload.form');
     Route::post('/upload', [ResumeController::class, 'upload'])
         ->middleware('throttle:10,1')
         ->name('upload.store');
+
+    // CV Builder (form-based alternative)
+    Route::get('/cv-builder', [ResumeController::class, 'showCvBuilder'])->name('cv-builder.form');
+    Route::post('/cv-builder', [ResumeController::class, 'storeCvBuilder'])
+        ->middleware('throttle:10,1')
+        ->name('cv-builder.store');
 
     // Resume operations (ownership verified via session access_token)
     Route::middleware(EnsureOwnsResume::class)->group(function () {

@@ -371,10 +371,178 @@ class ResumeController extends Controller
     }
 
     /**
+     * Show CV builder form (alternative to file upload).
+     */
+    public function showCvBuilder()
+    {
+        return view('app.cv-builder');
+    }
+
+    /**
+     * POST /cv-builder - Process CV builder form and create resume.
+     */
+    public function storeCvBuilder(Request $request)
+    {
+        $validated = $request->validate([
+            'full_name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'location' => ['nullable', 'string', 'max:255'],
+            'linkedin' => ['nullable', 'string', 'max:255'],
+            'summary' => ['required', 'string', 'max:2000'],
+            'experiences' => ['required', 'array', 'min:1'],
+            'experiences.*.company' => ['required', 'string', 'max:255'],
+            'experiences.*.position' => ['required', 'string', 'max:255'],
+            'experiences.*.period' => ['nullable', 'string', 'max:100'],
+            'experiences.*.description' => ['nullable', 'string', 'max:3000'],
+            'education' => ['required', 'array', 'min:1'],
+            'education.*.institution' => ['required', 'string', 'max:255'],
+            'education.*.degree' => ['required', 'string', 'max:255'],
+            'education.*.period' => ['nullable', 'string', 'max:100'],
+            'skills' => ['required', 'string', 'max:2000'],
+            'certifications' => ['nullable', 'string', 'max:2000'],
+            'languages' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        // Sanitize all text fields
+        $name = $this->sanitizeUserText($validated['full_name']);
+        $email = $validated['email'];
+        $phone = $this->sanitizeUserText($validated['phone'] ?? '');
+        $location = $this->sanitizeUserText($validated['location'] ?? '');
+        $linkedin = $this->sanitizeUserText($validated['linkedin'] ?? '');
+        $summary = $this->sanitizeUserText($validated['summary']);
+        $skillsRaw = $this->sanitizeUserText($validated['skills']);
+        $certsRaw = $this->sanitizeUserText($validated['certifications'] ?? '');
+        $langsRaw = $this->sanitizeUserText($validated['languages'] ?? '');
+
+        // Build structured_json (same format as TextExtractorService::structureText)
+        $experienceEntries = [];
+        $experienceText = [];
+        foreach ($validated['experiences'] as $exp) {
+            $company = $this->sanitizeUserText($exp['company']);
+            $position = $this->sanitizeUserText($exp['position']);
+            $period = $this->sanitizeUserText($exp['period'] ?? '');
+            $desc = $this->sanitizeUserText($exp['description'] ?? '', true);
+
+            $entry = $position . ' - ' . $company;
+            if ($period) $entry .= ' (' . $period . ')';
+            $experienceEntries[] = $entry;
+
+            $block = $company . ' - ' . $position;
+            if ($period) $block .= "\n" . $period;
+            if ($desc) $block .= "\n" . $desc;
+            $experienceText[] = $block;
+        }
+
+        $educationEntries = [];
+        $educationText = [];
+        foreach ($validated['education'] as $edu) {
+            $institution = $this->sanitizeUserText($edu['institution']);
+            $degree = $this->sanitizeUserText($edu['degree']);
+            $period = $this->sanitizeUserText($edu['period'] ?? '');
+
+            $entry = $degree . ' - ' . $institution;
+            if ($period) $entry .= ' (' . $period . ')';
+            $educationEntries[] = $entry;
+
+            $block = $institution . ' - ' . $degree;
+            if ($period) $block .= "\n" . $period;
+            $educationText[] = $block;
+        }
+
+        $skills = array_map('trim', explode(',', $skillsRaw));
+        $skills = array_filter($skills);
+
+        $certs = [];
+        if ($certsRaw) {
+            $certs = array_filter(array_map('trim', preg_split('/[\n,]+/', $certsRaw)));
+        }
+
+        $langs = [];
+        if ($langsRaw) {
+            $langs = array_filter(array_map('trim', preg_split('/[\n,]+/', $langsRaw)));
+        }
+
+        // Header text
+        $headerParts = [$name];
+        if ($email) $headerParts[] = $email;
+        if ($phone) $headerParts[] = $phone;
+        if ($location) $headerParts[] = $location;
+        if ($linkedin) $headerParts[] = $linkedin;
+
+        $structuredJson = [
+            'header' => implode("\n", $headerParts),
+            'summary' => $summary,
+            'experience' => $experienceEntries,
+            'education' => $educationEntries,
+            'skills' => array_values($skills),
+            'certifications' => array_values($certs),
+            'languages' => array_values($langs),
+            'other' => '',
+        ];
+
+        // Build extracted_text (plain text CV, same as PDF extraction would produce)
+        $textParts = [];
+        $textParts[] = implode(' | ', $headerParts);
+        $textParts[] = '';
+        $textParts[] = 'PERFIL PROFESIONAL';
+        $textParts[] = $summary;
+        $textParts[] = '';
+        $textParts[] = 'EXPERIENCIA LABORAL';
+        $textParts[] = implode("\n\n", $experienceText);
+        $textParts[] = '';
+        $textParts[] = 'EDUCACION';
+        $textParts[] = implode("\n\n", $educationText);
+        $textParts[] = '';
+        $textParts[] = 'HABILIDADES';
+        $textParts[] = implode(', ', $skills);
+        if (!empty($certs)) {
+            $textParts[] = '';
+            $textParts[] = 'CERTIFICACIONES';
+            $textParts[] = implode("\n", $certs);
+        }
+        if (!empty($langs)) {
+            $textParts[] = '';
+            $textParts[] = 'IDIOMAS';
+            $textParts[] = implode(', ', $langs);
+        }
+
+        $extractedText = implode("\n", $textParts);
+
+        // Create Resume (no file upload, mark as form-built)
+        $resume = Resume::create([
+            'original_filename' => 'formulario_cv_' . Str::slug($name) . '.txt',
+            'original_mime' => 'text/plain',
+            'original_path' => '',
+            'extracted_text' => $extractedText,
+            'structured_json' => $structuredJson,
+            'customer_email' => $email,
+            'status' => ResumeStatus::Draft,
+        ]);
+
+        // Store access_token in session
+        $tokens = $request->session()->get('resume_tokens', []);
+        $tokens[] = $resume->access_token;
+        if (count($tokens) > 50) {
+            $tokens = array_slice($tokens, -50);
+        }
+        $request->session()->put('resume_tokens', $tokens);
+
+        MetricsDaily::incrementToday('uploads');
+
+        AuditLog::record('resume.created_from_form', null, 'anonymous', [
+            'resume_id' => $resume->id,
+            'name' => $name,
+        ], $request->ip());
+
+        return redirect()->route('resumes.target-role', $resume->id);
+    }
+
+    /**
      * Sanitize free-text input: strip tags, control chars, collapse whitespace.
      * Returns only safe alphanumeric + basic punctuation text.
      */
-    private function sanitizeUserText(string $input): string
+    private function sanitizeUserText(string $input, bool $preserveNewlines = false): string
     {
         // Strip HTML/PHP tags
         $clean = strip_tags($input);
@@ -382,9 +550,17 @@ class ResumeController extends Controller
         $clean = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $clean);
         // Remove any characters that could be used for injection attacks
         // Allow: letters (unicode), numbers, spaces, common punctuation (.,;:-/()')
-        $clean = preg_replace('/[^\p{L}\p{N}\s\.\,\;\:\-\/\(\)\'\"\&]/u', '', $clean);
-        // Collapse multiple spaces
-        $clean = preg_replace('/\s+/', ' ', $clean);
+        $clean = preg_replace('/[^\p{L}\p{N}\s\.\,\;\:\-\/\(\)\'\"\&\@\+\%\#]/u', '', $clean);
+
+        if ($preserveNewlines) {
+            // Collapse spaces within lines but keep newlines
+            $lines = explode("\n", $clean);
+            $lines = array_map(fn($l) => trim(preg_replace('/[ \t]+/', ' ', $l)), $lines);
+            $clean = implode("\n", array_filter($lines, fn($l) => $l !== ''));
+        } else {
+            // Collapse all whitespace to single space
+            $clean = preg_replace('/\s+/', ' ', $clean);
+        }
 
         return trim($clean);
     }
