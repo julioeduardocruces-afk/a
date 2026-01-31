@@ -84,9 +84,10 @@ class PaymentController extends Controller
         // This route only performs redirects (no sensitive data exposed).
         // Payment confirmation is handled securely via the webhook endpoint.
         // Session tokens may be lost after external redirect to Flow gateway,
-        // so we restore the resume token to keep subsequent pages working.
+        // so we restore the resume token only for recent payments (< 30 min)
+        // to limit the window if someone guesses a payment ID.
         $resume = $paymentModel->resume;
-        if ($resume) {
+        if ($resume && $paymentModel->created_at->diffInMinutes(now()) < 30) {
             $tokens = $request->session()->get('resume_tokens', []);
             if (!in_array($resume->access_token, $tokens, true)) {
                 $tokens[] = $resume->access_token;

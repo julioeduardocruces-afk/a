@@ -412,7 +412,7 @@ class ResumeController extends Controller
         $linkedin = $this->sanitizeUserText($validated['linkedin'] ?? '');
         $summary = $this->sanitizeUserText($validated['summary']);
         $skillsRaw = $this->sanitizeUserText($validated['skills']);
-        $certsRaw = $this->sanitizeUserText($validated['certifications'] ?? '');
+        $certsRaw = $this->sanitizeUserText($validated['certifications'] ?? '', true);
         $langsRaw = $this->sanitizeUserText($validated['languages'] ?? '');
 
         // Build structured_json (same format as TextExtractorService::structureText)

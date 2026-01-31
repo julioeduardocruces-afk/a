@@ -502,8 +502,8 @@ function runMigrations(PDO $pdo): array
             $pdo->exec($sql);
             $log[] = ['ok' => true, 'msg' => "OK: " . mb_substr($sql, 0, 60) . '...'];
         } catch (PDOException $e) {
-            // Duplicate index is OK (re-run safe)
-            if (str_contains($e->getMessage(), 'Duplicate key name') || str_contains($e->getMessage(), 'Duplicate entry')) {
+            // Duplicate index/column/entry is OK (re-run safe)
+            if (str_contains($e->getMessage(), 'Duplicate key name') || str_contains($e->getMessage(), 'Duplicate entry') || str_contains($e->getMessage(), 'Duplicate column')) {
                 $log[] = ['ok' => true, 'msg' => "SKIP (ya existe): " . mb_substr($sql, 0, 60) . '...'];
             } else {
                 $log[] = ['ok' => false, 'msg' => "ERROR: " . $e->getMessage()];
