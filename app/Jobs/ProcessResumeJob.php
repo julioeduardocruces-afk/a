@@ -66,7 +66,7 @@ class ProcessResumeJob implements ShouldQueue
             $structured = $resume->structured_json ?? [];
 
             // Step 2: AI Optimization
-            $aiResult = $aiOptimizer->optimize(
+            $aiResult = $aiOptimizer->setResumeId($resume->id)->optimize(
                 $text,
                 $structured,
                 $resume->target_industry ?? '',

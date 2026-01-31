@@ -6,6 +6,7 @@ use App\Http\Controllers\LandingController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ResumeController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminFinanceController;
 use App\Http\Middleware\AuditRequest;
 use App\Http\Middleware\EnsureIsAdmin;
 use App\Http\Middleware\EnsureOwnsResume;
@@ -216,4 +217,12 @@ Route::middleware(['auth', EnsureIsAdmin::class, AuditRequest::class])
         // Audit & Metrics
         Route::get('/audit-logs', [AdminDashboardController::class, 'auditLogs'])->name('audit-logs');
         Route::get('/metrics', [AdminDashboardController::class, 'metrics'])->name('metrics');
+
+        // Finance
+        Route::prefix('finance')->name('finance.')->group(function () {
+            Route::get('/', [AdminFinanceController::class, 'dashboard'])->name('dashboard');
+            Route::get('/sales', [AdminFinanceController::class, 'sales'])->name('sales');
+            Route::get('/downloads', [AdminFinanceController::class, 'downloads'])->name('downloads');
+            Route::get('/ai-usage', [AdminFinanceController::class, 'aiUsage'])->name('ai-usage');
+        });
     });

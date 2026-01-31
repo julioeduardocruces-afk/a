@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\AiUsageLog;
 use App\Models\ApiCredential;
 use App\Models\AuditLog;
 use App\Models\Setting;
@@ -106,6 +107,17 @@ PROMPT;
         return Setting::getValue('ai_system_prompt') ?? self::DEFAULT_SYSTEM_PROMPT;
     }
 
+    /**
+     * @var int|null Resume ID for tracking usage — set before calling optimize().
+     */
+    private ?int $currentResumeId = null;
+
+    public function setResumeId(int $resumeId): self
+    {
+        $this->currentResumeId = $resumeId;
+        return $this;
+    }
+
     public function optimize(string $extractedText, array $structuredData, string $targetIndustry, string $targetRole): array
     {
         $provider = config('ats.ai_provider', 'openai');
@@ -115,22 +127,56 @@ PROMPT;
             throw new RuntimeException("No hay credenciales activas para: {$provider}");
         }
 
+        $creds = $credential->getDecryptedCredentials();
+        $model = $creds['model'] ?? ($provider === 'openai' ? 'gpt-4o' : 'gemini-1.5-pro');
         $userPrompt = $this->buildUserPrompt($extractedText, $structuredData, $targetIndustry, $targetRole);
+        $startTime = microtime(true);
 
         try {
-            $response = match ($provider) {
+            $apiResponse = match ($provider) {
                 'openai' => $this->callOpenAi($credential, $userPrompt),
                 'gemini' => $this->callGemini($credential, $userPrompt),
                 default  => throw new RuntimeException("Proveedor IA no soportado: {$provider}"),
             };
 
+            $responseTimeMs = (int) ((microtime(true) - $startTime) * 1000);
             $credential->recordUsage();
 
-            $parsed = $this->parseResponse($response);
+            $content = $apiResponse['content'];
+            $usage = $apiResponse['usage'];
+
+            AiUsageLog::logUsage([
+                'resume_id' => $this->currentResumeId,
+                'credential_id' => $credential->id,
+                'provider' => $provider,
+                'model' => $model,
+                'prompt_tokens' => $usage['prompt_tokens'] ?? 0,
+                'completion_tokens' => $usage['completion_tokens'] ?? 0,
+                'total_tokens' => $usage['total_tokens'] ?? 0,
+                'response_time_ms' => $responseTimeMs,
+                'success' => true,
+            ]);
+
+            $parsed = $this->parseResponse($content);
             $this->validateConsistency($parsed, $structuredData);
 
             return $parsed;
         } catch (\Exception $e) {
+            $responseTimeMs = (int) ((microtime(true) - $startTime) * 1000);
+
+            AiUsageLog::logUsage([
+                'resume_id' => $this->currentResumeId,
+                'credential_id' => $credential->id,
+                'provider' => $provider,
+                'model' => $model,
+                'prompt_tokens' => 0,
+                'completion_tokens' => 0,
+                'total_tokens' => 0,
+                'response_time_ms' => $responseTimeMs,
+                'success' => false,
+                'error_message' => mb_substr($e->getMessage(), 0, 500),
+            ]);
+
             Log::error('AI optimization failed', [
                 'provider' => $provider,
                 'credential' => $credential->name,
@@ -168,7 +214,7 @@ Genera el CV optimizado para ATS siguiendo TODAS las reglas del sistema. Incluye
 PROMPT;
     }
 
-    private function callOpenAi(ApiCredential $credential, string $userPrompt): string
+    private function callOpenAi(ApiCredential $credential, string $userPrompt): array
     {
         $creds = $credential->getDecryptedCredentials();
         $apiKey = $creds['api_key'] ?? '';
@@ -203,10 +249,19 @@ PROMPT;
             );
         }
 
-        return $response->json('choices.0.message.content', '');
+        $usage = $response->json('usage', []);
+
+        return [
+            'content' => $response->json('choices.0.message.content', ''),
+            'usage' => [
+                'prompt_tokens' => $usage['prompt_tokens'] ?? 0,
+                'completion_tokens' => $usage['completion_tokens'] ?? 0,
+                'total_tokens' => $usage['total_tokens'] ?? 0,
+            ],
+        ];
     }
 
-    private function callGemini(ApiCredential $credential, string $userPrompt): string
+    private function callGemini(ApiCredential $credential, string $userPrompt): array
     {
         $creds = $credential->getDecryptedCredentials();
         $apiKey = $creds['api_key'] ?? '';
@@ -250,7 +305,16 @@ PROMPT;
             );
         }
 
-        return $response->json('candidates.0.content.parts.0.text', '');
+        $usageMetadata = $response->json('usageMetadata', []);
+
+        return [
+            'content' => $response->json('candidates.0.content.parts.0.text', ''),
+            'usage' => [
+                'prompt_tokens' => $usageMetadata['promptTokenCount'] ?? 0,
+                'completion_tokens' => $usageMetadata['candidatesTokenCount'] ?? 0,
+                'total_tokens' => $usageMetadata['totalTokenCount'] ?? 0,
+            ],
+        ];
     }
 
     private function parseResponse(string $raw): array

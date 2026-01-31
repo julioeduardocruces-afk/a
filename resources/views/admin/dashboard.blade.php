@@ -37,9 +37,13 @@
     <div class="card">
         <h3 style="margin-bottom:12px;">Accesos Rapidos</h3>
         <ul style="list-style:none;padding:0;">
+            <li style="margin-bottom:8px;"><a href="{{ route('admin.finance.dashboard') }}" style="font-weight:bold;color:#28a745;">Panel Financiero (Ventas, Costos, Rentabilidad)</a></li>
+            <li style="margin-bottom:8px;"><a href="{{ route('admin.finance.sales') }}">Historial de Ventas</a></li>
+            <li style="margin-bottom:8px;"><a href="{{ route('admin.finance.downloads') }}">Historial de Descargas</a></li>
+            <li style="margin-bottom:8px;"><a href="{{ route('admin.finance.ai-usage') }}">Uso de Tokens IA</a></li>
             <li style="margin-bottom:8px;"><a href="{{ route('admin.credentials') }}">Gestionar Credenciales (IA / Flow / SMTP)</a></li>
             <li style="margin-bottom:8px;"><a href="{{ route('admin.resumes') }}">Gestionar CVs</a></li>
-            <li style="margin-bottom:8px;"><a href="{{ route('admin.metrics') }}">Metricas Detalladas</a></li>
+            <li style="margin-bottom:8px;"><a href="{{ route('admin.metrics') }}">Metricas Operativas</a></li>
             <li style="margin-bottom:8px;"><a href="{{ route('admin.audit-logs') }}">Audit Logs</a></li>
         </ul>
     </div>
