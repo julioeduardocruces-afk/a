@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('title', 'Admin Dashboard')
-@section('content')
+@section('admin-content')
 <h1 style="margin-bottom:24px;">Panel de Administracion</h1>
 
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;">

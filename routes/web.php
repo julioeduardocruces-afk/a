@@ -224,5 +224,13 @@ Route::middleware(['auth', EnsureIsAdmin::class, AuditRequest::class])
             Route::get('/sales', [AdminFinanceController::class, 'sales'])->name('sales');
             Route::get('/downloads', [AdminFinanceController::class, 'downloads'])->name('downloads');
             Route::get('/ai-usage', [AdminFinanceController::class, 'aiUsage'])->name('ai-usage');
+            Route::get('/settlement', [AdminFinanceController::class, 'settlement'])->name('settlement');
+            Route::get('/refunds', [AdminFinanceController::class, 'refunds'])->name('refunds');
+            Route::post('/refunds/{payment}/process', [AdminFinanceController::class, 'processRefund'])->name('process-refund');
+
+            // CSV Exports
+            Route::get('/export/sales', [AdminFinanceController::class, 'exportSales'])->name('export-sales');
+            Route::get('/export/downloads', [AdminFinanceController::class, 'exportDownloads'])->name('export-downloads');
+            Route::get('/export/ai-usage', [AdminFinanceController::class, 'exportAiUsage'])->name('export-ai-usage');
         });
     });

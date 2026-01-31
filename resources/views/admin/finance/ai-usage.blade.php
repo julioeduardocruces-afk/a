@@ -1,9 +1,9 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('title', 'Admin - Uso de Tokens IA')
-@section('content')
+@section('admin-content')
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
     <h1>Uso de Tokens IA</h1>
-    <a href="{{ route('admin.finance.dashboard') }}" class="btn btn-secondary btn-sm">&larr; Panel Financiero</a>
+    <a href="{{ route('admin.finance.export-ai-usage', request()->query()) }}" class="btn btn-success btn-sm">Exportar CSV</a>
 </div>
 
 {{-- Global KPIs --}}

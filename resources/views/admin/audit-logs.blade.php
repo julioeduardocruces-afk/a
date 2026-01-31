@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('title', 'Admin - Audit Logs')
-@section('content')
+@section('admin-content')
 <h1 style="margin-bottom:16px;">Audit Logs</h1>
 
 <div class="card" style="overflow-x:auto;">

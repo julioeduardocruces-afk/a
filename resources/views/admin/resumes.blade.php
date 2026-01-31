@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('title', 'Admin - CVs')
-@section('content')
+@section('admin-content')
 <h1 style="margin-bottom:16px;">Gestion de CVs</h1>
 
 <div class="card" style="margin-bottom:16px;">

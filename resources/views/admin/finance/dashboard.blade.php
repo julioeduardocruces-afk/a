@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('title', 'Admin - Panel Financiero')
-@section('content')
+@section('admin-content')
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
     <h1>Panel Financiero</h1>
     <form method="GET" style="display:flex;gap:8px;align-items:center;">
@@ -14,23 +14,63 @@
     </form>
 </div>
 
-{{-- Revenue KPIs --}}
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px;">
+{{-- Revenue KPIs with period comparison --}}
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;">
     <div class="card" style="text-align:center;border-left:4px solid #28a745;">
         <div style="font-size:2rem;font-weight:bold;color:#28a745;">${{ number_format(($revenueStats['total_revenue'] ?? 0) / 100, 0, ',', '.') }}</div>
-        <div style="color:#666;">Ingresos (CLP)</div>
+        <div style="color:#666;">Ingresos Brutos (CLP)</div>
+        @if($revenueGrowth != 0)
+            <div style="font-size:0.8rem;color:{{ $revenueGrowth > 0 ? '#28a745' : '#dc3545' }};margin-top:4px;">
+                {{ $revenueGrowth > 0 ? '+' : '' }}{{ number_format($revenueGrowth, 1) }}% vs periodo anterior
+            </div>
+        @endif
     </div>
     <div class="card" style="text-align:center;border-left:4px solid #0066ff;">
         <div style="font-size:2rem;font-weight:bold;color:#0066ff;">{{ $revenueStats['total_sales'] ?? 0 }}</div>
         <div style="color:#666;">Ventas</div>
+        @if($salesGrowth != 0)
+            <div style="font-size:0.8rem;color:{{ $salesGrowth > 0 ? '#28a745' : '#dc3545' }};margin-top:4px;">
+                {{ $salesGrowth > 0 ? '+' : '' }}{{ number_format($salesGrowth, 1) }}% vs periodo anterior
+            </div>
+        @endif
     </div>
     <div class="card" style="text-align:center;border-left:4px solid #17a2b8;">
         <div style="font-size:2rem;font-weight:bold;color:#17a2b8;">${{ number_format(($revenueStats['avg_ticket'] ?? 0) / 100, 0, ',', '.') }}</div>
         <div style="color:#666;">Ticket Promedio</div>
     </div>
+    <div class="card" style="text-align:center;border-left:4px solid #dc3545;">
+        <div style="font-size:2rem;font-weight:bold;color:#dc3545;">{{ $refundStats['total_refunds'] ?? 0 }}</div>
+        <div style="color:#666;">Reembolsos</div>
+        <div style="font-size:0.8rem;color:#999;">${{ number_format(($refundStats['total_refunded'] ?? 0) / 100, 0, ',', '.') }} CLP</div>
+    </div>
     <div class="card" style="text-align:center;border-left:4px solid #ffc107;">
         <div style="font-size:2rem;font-weight:bold;color:#{{ $margin >= 50 ? '28a745' : ($margin >= 20 ? 'ffc107' : 'dc3545') }};">{{ number_format($margin, 1) }}%</div>
-        <div style="color:#666;">Margen Bruto</div>
+        <div style="color:#666;">Margen Neto</div>
+    </div>
+</div>
+
+{{-- Payment Status Breakdown --}}
+<div class="card" style="margin-bottom:24px;">
+    <h3 style="margin-bottom:16px;">Estado de Pagos ({{ $periodDays }} dias)</h3>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;">
+        @php
+            $statusConfig = [
+                'paid' => ['label' => 'Pagados', 'color' => '#28a745'],
+                'pending' => ['label' => 'Pendientes', 'color' => '#ffc107'],
+                'failed' => ['label' => 'Fallidos', 'color' => '#dc3545'],
+                'refunded' => ['label' => 'Reembolsados', 'color' => '#6c757d'],
+            ];
+        @endphp
+        @foreach($statusConfig as $status => $cfg)
+            @php $item = $paymentBreakdown[$status] ?? null; @endphp
+            <div style="text-align:center;padding:12px 20px;background:{{ $cfg['color'] }}10;border-radius:8px;min-width:120px;">
+                <div style="font-size:1.5rem;font-weight:bold;color:{{ $cfg['color'] }};">{{ $item?->count ?? 0 }}</div>
+                <div style="font-size:0.85rem;color:#666;">{{ $cfg['label'] }}</div>
+                @if($item && $item->total > 0)
+                    <div style="font-size:0.8rem;color:#999;">${{ number_format($item->total / 100, 0, ',', '.') }}</div>
+                @endif
+            </div>
+        @endforeach
     </div>
 </div>
 
@@ -43,14 +83,22 @@
             <div style="font-size:1.4rem;font-weight:bold;color:#28a745;">${{ number_format($totalRevenueCLP / 100, 0, ',', '.') }} CLP</div>
         </div>
         <div>
+            <div style="color:#666;font-size:0.9rem;">Reembolsos</div>
+            <div style="font-size:1.4rem;font-weight:bold;color:#dc3545;">-${{ number_format($totalRefundedCLP / 100, 0, ',', '.') }} CLP</div>
+        </div>
+        <div>
+            <div style="color:#666;font-size:0.9rem;">Ingreso Neto</div>
+            <div style="font-size:1.4rem;font-weight:bold;color:#0066ff;">${{ number_format($netRevenueCLP / 100, 0, ',', '.') }} CLP</div>
+        </div>
+        <div>
             <div style="color:#666;font-size:0.9rem;">Costo IA (estimado)</div>
-            <div style="font-size:1.4rem;font-weight:bold;color:#dc3545;">
+            <div style="font-size:1.4rem;font-weight:bold;color:#ffc107;">
                 USD ${{ number_format($totalAiCostUSD / 100, 2) }}
-                <span style="font-size:0.8rem;color:#999;">(~${{ number_format($aiCostCLP / 100, 0, ',', '.') }} CLP @ ${{ number_format($usdToClp, 0) }})</span>
+                <span style="font-size:0.8rem;color:#999;">(~${{ number_format($aiCostCLP / 100, 0, ',', '.') }} CLP)</span>
             </div>
         </div>
         <div>
-            <div style="color:#666;font-size:0.9rem;">Ganancia Bruta</div>
+            <div style="color:#666;font-size:0.9rem;">Ganancia Neta</div>
             <div style="font-size:1.4rem;font-weight:bold;color:{{ $grossProfit >= 0 ? '#28a745' : '#dc3545' }};">${{ number_format($grossProfit / 100, 0, ',', '.') }} CLP</div>
         </div>
         <div>
@@ -79,13 +127,12 @@
                 ['label' => 'Entregados', 'value' => $funnel['delivered'], 'color' => '#0066ff'],
                 ['label' => 'Descargados', 'value' => $funnel['downloads'], 'color' => '#6f42c1'],
             ];
-            $maxVal = max(1, $funnel['uploads']);
         @endphp
         @foreach($funnelSteps as $i => $step)
-            <div style="flex:1;min-width:120px;text-align:center;">
+            <div style="flex:1;min-width:100px;text-align:center;">
                 <div style="background:{{ $step['color'] }};color:white;padding:12px 8px;border-radius:6px;margin-bottom:4px;">
                     <div style="font-size:1.5rem;font-weight:bold;">{{ $step['value'] }}</div>
-                    <div style="font-size:0.8rem;">{{ $step['label'] }}</div>
+                    <div style="font-size:0.75rem;">{{ $step['label'] }}</div>
                 </div>
                 @if($i > 0 && $funnelSteps[$i-1]['value'] > 0)
                     <div style="font-size:0.75rem;color:#999;">{{ number_format(($step['value'] / $funnelSteps[$i-1]['value']) * 100, 1) }}%</div>
@@ -98,7 +145,7 @@
     </div>
     @if($funnel['uploads'] > 0)
         <div style="margin-top:12px;padding-top:12px;border-top:1px solid #eee;text-align:center;color:#666;">
-            Tasa de conversion global (Upload a Pago): <strong>{{ number_format(($funnel['paid'] / $funnel['uploads']) * 100, 1) }}%</strong>
+            Conversion global (Upload -> Pago): <strong>{{ number_format(($funnel['paid'] / $funnel['uploads']) * 100, 1) }}%</strong>
         </div>
     @endif
 </div>
@@ -134,7 +181,7 @@
     </div>
 </div>
 
-{{-- Daily Revenue Table --}}
+{{-- Daily Tables --}}
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
     <div class="card">
         <h3 style="margin-bottom:12px;">Ingresos Diarios</h3>
@@ -174,18 +221,6 @@
                 </tbody>
             </table>
         </div>
-    </div>
-</div>
-
-{{-- Quick Links --}}
-<div class="card">
-    <h3 style="margin-bottom:12px;">Reportes Detallados</h3>
-    <div style="display:flex;gap:12px;flex-wrap:wrap;">
-        <a href="{{ route('admin.finance.sales') }}" class="btn btn-primary btn-sm">Historial de Ventas</a>
-        <a href="{{ route('admin.finance.downloads') }}" class="btn btn-secondary btn-sm">Historial de Descargas</a>
-        <a href="{{ route('admin.finance.ai-usage') }}" class="btn btn-secondary btn-sm">Uso de Tokens IA</a>
-        <a href="{{ route('admin.metrics') }}" class="btn btn-secondary btn-sm">Metricas Operativas</a>
-        <a href="{{ route('admin.audit-logs') }}" class="btn btn-secondary btn-sm">Audit Logs</a>
     </div>
 </div>
 @endsection

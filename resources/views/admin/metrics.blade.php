@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('title', 'Admin - Metricas')
-@section('content')
+@section('admin-content')
 <h1 style="margin-bottom:24px;">Metricas</h1>
 
 <div class="card">

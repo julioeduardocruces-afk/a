@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('title', 'Admin - Credenciales')
-@section('content')
+@section('admin-content')
 <h1 style="margin-bottom:24px;">Gestion de Credenciales</h1>
 
 @if(session('success'))

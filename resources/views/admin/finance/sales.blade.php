@@ -1,20 +1,37 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('title', 'Admin - Historial de Ventas')
-@section('content')
+@section('admin-content')
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
     <h1>Historial de Ventas</h1>
-    <a href="{{ route('admin.finance.dashboard') }}" class="btn btn-secondary btn-sm">&larr; Panel Financiero</a>
+    <a href="{{ route('admin.finance.export-sales', request()->query()) }}" class="btn btn-success btn-sm">Exportar CSV</a>
 </div>
 
 {{-- Summary --}}
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px;">
     <div class="card" style="text-align:center;border-left:4px solid #28a745;">
-        <div style="font-size:1.8rem;font-weight:bold;color:#28a745;">{{ $summary->count }}</div>
-        <div style="color:#666;">Ventas Pagadas</div>
+        <div style="font-size:1.6rem;font-weight:bold;color:#28a745;">{{ $summary->total_paid }}</div>
+        <div style="color:#666;">Pagados</div>
     </div>
     <div class="card" style="text-align:center;border-left:4px solid #0066ff;">
-        <div style="font-size:1.8rem;font-weight:bold;color:#0066ff;">${{ number_format($summary->total / 100, 0, ',', '.') }}</div>
-        <div style="color:#666;">Total Recaudado (CLP)</div>
+        <div style="font-size:1.6rem;font-weight:bold;color:#0066ff;">${{ number_format($summary->total_revenue / 100, 0, ',', '.') }}</div>
+        <div style="color:#666;">Ingresos Brutos</div>
+    </div>
+    <div class="card" style="text-align:center;border-left:4px solid #dc3545;">
+        <div style="font-size:1.6rem;font-weight:bold;color:#dc3545;">{{ $summary->total_refunded }}</div>
+        <div style="color:#666;">Reembolsados</div>
+        <div style="font-size:0.8rem;color:#999;">${{ number_format($summary->total_refund_amount / 100, 0, ',', '.') }}</div>
+    </div>
+    <div class="card" style="text-align:center;border-left:4px solid #17a2b8;">
+        <div style="font-size:1.6rem;font-weight:bold;color:#17a2b8;">${{ number_format($summary->net_revenue / 100, 0, ',', '.') }}</div>
+        <div style="color:#666;">Ingreso Neto</div>
+    </div>
+    <div class="card" style="text-align:center;border-left:4px solid #ffc107;">
+        <div style="font-size:1.6rem;font-weight:bold;color:#ffc107;">{{ $summary->total_failed }}</div>
+        <div style="color:#666;">Fallidos</div>
+    </div>
+    <div class="card" style="text-align:center;border-left:4px solid #6c757d;">
+        <div style="font-size:1.6rem;font-weight:bold;color:#6c757d;">{{ $summary->total_pending }}</div>
+        <div style="color:#666;">Pendientes</div>
     </div>
 </div>
 
@@ -61,7 +78,7 @@
                     <th>Rubro</th>
                     <th>Monto</th>
                     <th>Estado</th>
-                    <th>Proveedor</th>
+                    <th>Detalle</th>
                     <th>Flow Order</th>
                 </tr>
             </thead>
@@ -81,7 +98,18 @@
                         @endphp
                         <span style="display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.8rem;font-weight:600;background:{{ $statusColors[$statusVal] ?? '#999' }}20;color:{{ $statusColors[$statusVal] ?? '#999' }};">{{ $statusVal }}</span>
                     </td>
-                    <td>{{ $p->provider }}</td>
+                    <td style="font-size:0.8rem;color:#999;">
+                        @if($p->failure_reason)
+                            <span style="color:#dc3545;" title="{{ $p->failure_reason }}">Fallo: {{ Str::limit($p->failure_reason, 30) }}</span>
+                        @elseif($p->refund_reason)
+                            <span style="color:#6c757d;" title="{{ $p->refund_reason }}">Reemb: {{ Str::limit($p->refund_reason, 30) }}</span>
+                            @if($p->refunded_at)
+                                <br>{{ $p->refunded_at->format('d/m H:i') }}
+                            @endif
+                        @else
+                            -
+                        @endif
+                    </td>
                     <td style="font-size:0.85rem;color:#666;">{{ $p->flow_order ?? '-' }}</td>
                 </tr>
                 @empty
