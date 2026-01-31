@@ -157,6 +157,8 @@ Route::middleware(AuditRequest::class)->group(function () {
             ->name('resumes.target-role');
         Route::post('/resumes/{id}/target-role', [ResumeController::class, 'setTargetRole'])
             ->name('resumes.set-target-role');
+        Route::get('/resumes/{id}/payment', [ResumeController::class, 'showPayment'])
+            ->name('resumes.payment');
         Route::post('/resumes/{id}/process', [ResumeController::class, 'process'])
             ->middleware('throttle:5,1')
             ->name('resumes.process');

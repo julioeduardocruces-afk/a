@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\PaymentStatus;
 use App\Enums\ResumeStatus;
-use App\Jobs\GenerateFinalCvJob;
+use App\Jobs\ProcessResumeJob;
 use App\Models\ApiCredential;
 use App\Models\Payment;
 use App\Models\Resume;
@@ -28,7 +28,7 @@ class WebhookIdempotencyTest extends TestCase
             'original_filename' => 'test.pdf',
             'original_mime' => 'application/pdf',
             'original_path' => 'uploads/test.pdf',
-            'status' => ResumeStatus::PreviewReady,
+            'status' => ResumeStatus::Draft,
             'target_role' => 'Developer',
             'target_industry' => 'TI',
         ]);
@@ -61,7 +61,7 @@ class WebhookIdempotencyTest extends TestCase
 
     public function test_webhook_idempotency_paid_stays_paid(): void
     {
-        Bus::fake([GenerateFinalCvJob::class]);
+        Bus::fake([ProcessResumeJob::class]);
 
         $payment = $this->setupPaymentScenario();
 
@@ -84,12 +84,11 @@ class WebhookIdempotencyTest extends TestCase
         $result = $service->handleWebhook(['token' => $payment->flow_token]);
 
         $this->assertEquals(PaymentStatus::Paid, $result->status);
-        // Resume should still be paid (not re-transitioned)
-        $this->assertEquals(ResumeStatus::Paid, $payment->resume->fresh()->status);
+        // Resume should now be in Processing (re-dispatched for stuck Paid resume)
+        $this->assertEquals(ResumeStatus::Processing, $payment->resume->fresh()->status);
 
-        // Duplicate webhook should re-dispatch the job for a stuck Paid resume
-        // (recovery mechanism for crash between payment commit and job dispatch)
-        Bus::assertDispatched(GenerateFinalCvJob::class);
+        // Duplicate webhook should re-dispatch ProcessResumeJob for recovery
+        Bus::assertDispatched(ProcessResumeJob::class);
     }
 
     public function test_webhook_missing_token_throws(): void

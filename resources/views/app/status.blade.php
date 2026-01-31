@@ -13,6 +13,12 @@
     <script>console.error('[ATS Debug] Form errors:', @json($errors->all()));</script>
     @endif
 
+    @if(session('success'))
+    <div class="card" style="border-left:4px solid #28a745;background:#f0fff4;margin-bottom:16px;">
+        <p style="color:#28a745;margin:0;">{{ session('success') }}</p>
+    </div>
+    @endif
+
     <div class="card">
         <table>
             <tr><th style="width:150px;">Archivo</th><td>{{ $resume->original_filename }}</td></tr>
@@ -42,6 +48,15 @@
         </table>
     </div>
 
+    @if($resume->status->value === 'paid')
+        <div class="card" style="text-align:center;background:#d4edda;">
+            <h2>Pago confirmado</h2>
+            <p>Tu CV esta siendo procesado con inteligencia artificial. Esto puede tomar unos minutos.</p>
+            <p style="margin-top:12px;">Esta pagina se actualiza automaticamente.</p>
+        </div>
+        <script>setTimeout(function(){ location.reload(); }, 8000);</script>
+    @endif
+
     @if($resume->status->value === 'processing')
         <div class="card" style="text-align:center;">
             <h2>Procesando tu CV...</h2>
@@ -51,16 +66,16 @@
         <script>setTimeout(function(){ location.reload(); }, 8000);</script>
     @endif
 
-    @if(in_array($resume->status->value, ['preview_ready']))
-        <div style="display:flex;gap:12px;margin-top:16px;">
-            <a href="{{ route('resumes.preview-page', $resume->id) }}" class="btn btn-primary">Ver Preview</a>
+    @if($resume->status->value === 'delivered')
+        <div class="card" style="background:#d4edda;">
+            <h2>CV Optimizado Entregado</h2>
+            <p>Tu CV optimizado ha sido generado y enviado a tu email. Revisa tu bandeja de entrada.</p>
         </div>
     @endif
 
-    @if(in_array($resume->status->value, ['paid', 'delivered']))
-        <div class="card" style="background:#d4edda;">
-            <h2>Pago confirmado</h2>
-            <p>Tu CV optimizado ha sido generado y enviado a tu email. Revisa tu bandeja de entrada.</p>
+    @if($resume->status->value === 'draft')
+        <div style="margin-top:16px;">
+            <a href="{{ route('resumes.payment', $resume->id) }}" class="btn btn-primary">Ir al pago</a>
         </div>
     @endif
 

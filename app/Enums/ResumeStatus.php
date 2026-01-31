@@ -19,12 +19,12 @@ enum ResumeStatus: string
     public function allowedTransitions(): array
     {
         return match ($this) {
-            self::Draft       => [self::Processing, self::Failed],
-            self::Processing  => [self::PreviewReady, self::Failed],
-            self::PreviewReady => [self::Paid, self::Failed],
-            self::Paid        => [self::Delivered, self::Failed],
-            self::Delivered   => [],
-            self::Failed      => [self::Processing, self::Delivered], // retry or admin recovery
+            self::Draft        => [self::Paid, self::Failed],
+            self::Paid         => [self::Processing, self::Delivered, self::Failed],
+            self::Processing   => [self::Delivered, self::Failed],
+            self::PreviewReady => [self::Paid, self::Failed],           // legacy
+            self::Delivered    => [],
+            self::Failed       => [self::Processing, self::Delivered, self::Paid],
         };
     }
 

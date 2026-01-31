@@ -53,7 +53,7 @@
                        placeholder="Ej: Desarrollador Full Stack, Enfermera Jefe, Ejecutivo de Ventas..."
                        required maxlength="255">
             </div>
-            <button type="submit" class="btn btn-primary" style="width:100%;">Continuar y Procesar</button>
+            <button type="submit" class="btn btn-primary" style="width:100%;">Continuar al Pago</button>
         </form>
     </div>
 </div>

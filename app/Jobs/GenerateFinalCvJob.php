@@ -36,7 +36,7 @@ class GenerateFinalCvJob implements ShouldQueue
         $resume = Resume::with('latestVersion')->findOrFail($this->resumeId);
         $initialStatus = $resume->status;
 
-        $allowed = [ResumeStatus::Paid, ResumeStatus::Delivered];
+        $allowed = [ResumeStatus::Processing, ResumeStatus::Paid, ResumeStatus::Delivered];
         $isFailedWithPayment = false;
 
         if ($resume->status === ResumeStatus::Failed) {
@@ -98,7 +98,7 @@ class GenerateFinalCvJob implements ShouldQueue
             $mailer->sendFinalCvEmail($resume);
 
             // Transition to Delivered AFTER email succeeds
-            if (in_array($resume->status, [ResumeStatus::Paid, ResumeStatus::Failed], true)) {
+            if (in_array($resume->status, [ResumeStatus::Processing, ResumeStatus::Paid, ResumeStatus::Failed], true)) {
                 $resume->error_code = null;
                 $resume->error_message = null;
                 $resume->transitionTo(ResumeStatus::Delivered);
@@ -135,7 +135,7 @@ class GenerateFinalCvJob implements ShouldQueue
             return;
         }
 
-        if ($resume->status === ResumeStatus::Paid) {
+        if (in_array($resume->status, [ResumeStatus::Processing, ResumeStatus::Paid], true)) {
             $resume->markFailed('delivery_error', $exception->getMessage());
         } elseif ($resume->status === ResumeStatus::Failed) {
             $resume->update([

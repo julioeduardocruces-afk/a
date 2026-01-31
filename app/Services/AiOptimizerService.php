@@ -248,40 +248,27 @@ PROMPT;
             );
         }
 
-        // Additional heuristic: check experience section keywords match
+        // Additional heuristic: log keyword overlap for monitoring (non-blocking)
         $originalExp = is_string($structured['experience'] ?? null)
             ? $structured['experience']
             : implode(' ', (array)($structured['experience'] ?? []));
 
-        if (empty($originalExp)) {
-            return;
-        }
-
-        // Extract company/role keywords from original (simple heuristic)
-        $words = array_filter(
-            array_unique(preg_split('/\s+/', mb_strtolower($originalExp))),
-            fn(string $w) => mb_strlen($w) > 4
-        );
-
-        $optimizedLower = mb_strtolower($aiResponse['optimized_text_plain']);
-        $missing = [];
-        foreach ($words as $word) {
-            // Check significant words appear
-            if (mb_strlen($word) > 6 && !str_contains($optimizedLower, $word)) {
-                $missing[] = $word;
-            }
-        }
-
-        // BLOCKING: if too many significant keywords are missing, reject
-        if (count($missing) > 5) {
-            Log::error('Heuristic consistency FAILED: many original keywords missing', [
-                'missing_count' => count($missing),
-                'missing_sample' => array_slice($missing, 0, 10),
-            ]);
-            throw new RuntimeException(
-                "El CV optimizado perdió demasiadas palabras clave del original (" . count($missing)
-                . " faltantes). Reintentando."
+        if (!empty($originalExp)) {
+            $words = array_filter(
+                array_unique(preg_split('/\s+/', mb_strtolower($originalExp))),
+                fn(string $w) => mb_strlen($w) > 6
             );
+
+            $optimizedLower = mb_strtolower($aiResponse['optimized_text_plain']);
+            $missing = array_filter($words, fn(string $w) => !str_contains($optimizedLower, $w));
+
+            if (count($missing) > 10) {
+                Log::warning('Heuristic: many original keywords missing from optimized CV', [
+                    'missing_count' => count($missing),
+                    'total_words' => count($words),
+                    'missing_sample' => array_slice(array_values($missing), 0, 10),
+                ]);
+            }
         }
     }
 }

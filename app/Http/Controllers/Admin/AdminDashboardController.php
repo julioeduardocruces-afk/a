@@ -310,20 +310,6 @@ class AdminDashboardController extends Controller
             return back()->withErrors(['status' => 'Solo CVs fallidos pueden reintentarse.']);
         }
 
-        // Prevent reprocessing a resume that already has a confirmed payment.
-        // If the failure was during delivery (delivery_error), the admin should
-        // use "Resend Email" instead. Reprocessing would send the user back to
-        // PreviewReady, losing their paid status and forcing them to pay again.
-        $hasPaidPayment = Payment::where('resume_id', $resume->id)
-            ->where('status', \App\Enums\PaymentStatus::Paid)
-            ->exists();
-
-        if ($hasPaidPayment) {
-            return back()->withErrors([
-                'status' => 'Este CV tiene un pago confirmado. Use "Reenviar Email" en vez de reprocesar.',
-            ]);
-        }
-
         // Set error fields as dirty attributes — transitionTo() calls save()
         // which persists ALL dirty attributes in one query, avoiding a separate UPDATE.
         $resume->error_code = null;

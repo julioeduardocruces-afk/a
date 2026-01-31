@@ -33,8 +33,9 @@ class PaymentController extends Controller
             abort(403);
         }
 
-        if ($resume->status !== ResumeStatus::PreviewReady) {
-            return back()->withErrors(['status' => 'El CV debe estar listo para pago.']);
+        // Payment allowed from Draft (normal flow) or Failed (retry after failure)
+        if (!in_array($resume->status, [ResumeStatus::Draft, ResumeStatus::Failed])) {
+            return back()->withErrors(['status' => 'El CV no esta en un estado valido para pago.']);
         }
 
         // Store customer email for delivery
@@ -94,7 +95,7 @@ class PaymentController extends Controller
                 ->with('success', 'Pago confirmado. Tu CV optimizado sera generado y enviado a tu email.');
         }
 
-        return redirect()->route('resumes.preview-page', $paymentModel->resume_id)
+        return redirect()->route('resumes.payment', $paymentModel->resume_id)
             ->with('info', 'Pago pendiente o no completado. Puedes intentar nuevamente.');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\PaymentStatus;
 use App\Enums\ResumeStatus;
 use App\Jobs\GenerateFinalCvJob;
+use App\Jobs\ProcessResumeJob;
 use App\Models\ApiCredential;
 use App\Models\AuditLog;
 use App\Models\MetricsDaily;
@@ -22,8 +23,8 @@ class PaymentFlowService
      */
     public function createPayment(Resume $resume, int $amount): array
     {
-        if ($resume->status !== ResumeStatus::PreviewReady) {
-            throw new RuntimeException('El CV debe estar en estado preview_ready para pagar.');
+        if (!in_array($resume->status, [ResumeStatus::Draft, ResumeStatus::Failed])) {
+            throw new RuntimeException('El CV no esta en un estado valido para pagar.');
         }
 
         // Prevent double payment with locking to avoid race conditions
@@ -177,36 +178,19 @@ class PaymentFlowService
             throw new RuntimeException("Pago no encontrado para token: {$token}");
         }
 
-        // Idempotency: if already paid, check if the delivery job needs re-dispatch
+        // Idempotency: if already paid, check if processing needs re-dispatch
         if ($payment->status === PaymentStatus::Paid) {
             $resume = $payment->resume;
             $resume?->refresh();
-            if ($resume && $resume->status === ResumeStatus::PreviewReady) {
-                Log::warning('Webhook duplicado: recovering stuck PreviewReady resume with Paid payment', [
+            if ($resume && $resume->status === ResumeStatus::Paid) {
+                Log::info('Webhook duplicado: re-dispatching ProcessResumeJob for stuck Paid resume', [
                     'payment_id' => $payment->id,
                     'resume_id' => $resume->id,
                 ]);
-                try {
-                    $resume->transitionTo(ResumeStatus::Paid);
-                    MetricsDaily::batchIncrementToday([
-                        'paid' => 1,
-                        'revenue' => $payment->amount,
-                    ]);
-                } catch (\InvalidArgumentException $e) {
-                    Log::error('Recovery transition failed for PreviewReady resume', [
-                        'payment_id' => $payment->id,
-                        'resume_id' => $resume->id,
-                        'error' => $e->getMessage(),
-                    ]);
-                    return $payment;
-                }
-                GenerateFinalCvJob::dispatchAfterResponse($resume->id);
-            } elseif ($resume && $resume->status === ResumeStatus::Paid) {
-                Log::info('Webhook duplicado: re-dispatching job for stuck Paid resume', [
-                    'payment_id' => $payment->id,
-                    'resume_id' => $resume->id,
-                ]);
-                GenerateFinalCvJob::dispatchAfterResponse($resume->id);
+                $resume->transitionTo(ResumeStatus::Processing);
+                ProcessResumeJob::dispatchAfterResponse($resume->id);
+            } elseif ($resume && $resume->status === ResumeStatus::Processing) {
+                Log::info('Webhook duplicado: resume already processing', ['payment_id' => $payment->id]);
             } else {
                 Log::info('Webhook duplicado ignorado', ['payment_id' => $payment->id]);
             }
@@ -297,7 +281,9 @@ class PaymentFlowService
                 'flow_order' => $flowOrder,
             ]);
 
-            GenerateFinalCvJob::dispatchAfterResponse($resume->id);
+            // Start AI processing now that payment is confirmed
+            $resume->transitionTo(ResumeStatus::Processing);
+            ProcessResumeJob::dispatchAfterResponse($resume->id);
         }
 
         return $payment;

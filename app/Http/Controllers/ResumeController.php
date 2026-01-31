@@ -181,31 +181,7 @@ class ResumeController extends Controller
             'target_role' => $role,
         ]);
 
-        AuditLog::record('resume.target_set', null, 'anonymous', [
-            'resume_id' => $resume->id,
-            'target_industry' => $industry,
-            'target_role' => $role,
-        ], $request->ip());
-
-        return $this->process($request, $id);
-    }
-
-    /**
-     * POST /resumes/{id}/process - Trigger CV processing.
-     */
-    public function process(Request $request, int $id)
-    {
-        $resume = $request->attributes->get('resume');
-
-        if (!$resume->target_role || !$resume->target_industry) {
-            return back()->withErrors(['target_role' => 'Debes seleccionar rubro y cargo objetivo.']);
-        }
-
-        if (!in_array($resume->status, [ResumeStatus::Draft, ResumeStatus::Failed])) {
-            return back()->withErrors(['status' => 'El CV no puede ser procesado en su estado actual.']);
-        }
-
-        // Extract text first if needed
+        // Extract text now (free operation) so we catch invalid files before payment
         if (empty($resume->extracted_text)) {
             try {
                 $text = $this->extractor->extract($resume->original_path, $resume->original_mime);
@@ -218,24 +194,71 @@ class ResumeController extends Controller
                 \Illuminate\Support\Facades\Log::error('CV text extraction failed', [
                     'resume_id' => $resume->id,
                     'path' => $resume->original_path,
-                    'mime' => $resume->original_mime,
                     'error' => $e->getMessage(),
-                    'file_exists' => file_exists(storage_path('app/' . $resume->original_path)),
                 ]);
-
-                $resume->markFailed('extraction_error', $e->getMessage());
 
                 $userMsg = 'Error al extraer el texto del CV.';
                 if (str_contains($e->getMessage(), 'escaneado') || str_contains($e->getMessage(), 'imagen')) {
                     $userMsg = 'El PDF parece ser una imagen escaneada. Sube un PDF con texto seleccionable.';
                 } elseif (str_contains($e->getMessage(), 'no encontrado')) {
                     $userMsg = 'Archivo no encontrado en el servidor. Intenta subir el CV nuevamente.';
-                } elseif (str_contains($e->getMessage(), 'Path traversal')) {
-                    $userMsg = 'Error de seguridad en la ruta del archivo.';
                 }
 
                 return back()->withErrors(['extraction' => $userMsg]);
             }
+        }
+
+        AuditLog::record('resume.target_set', null, 'anonymous', [
+            'resume_id' => $resume->id,
+            'target_industry' => $industry,
+            'target_role' => $role,
+        ], $request->ip());
+
+        return redirect()->route('resumes.payment', $resume->id);
+    }
+
+    /**
+     * GET /resumes/{id}/payment - Show payment page.
+     */
+    public function showPayment(Request $request, int $id)
+    {
+        $resume = $request->attributes->get('resume');
+
+        if (!$resume->target_role || !$resume->target_industry) {
+            return redirect()->route('resumes.target-role', $resume->id);
+        }
+
+        // If already paid or beyond, redirect to status
+        if (in_array($resume->status, [ResumeStatus::Paid, ResumeStatus::Processing, ResumeStatus::Delivered])) {
+            return redirect()->route('resumes.status', $resume->id);
+        }
+
+        return view('app.payment', compact('resume'));
+    }
+
+    /**
+     * POST /resumes/{id}/process - Trigger CV processing (requires paid payment).
+     */
+    public function process(Request $request, int $id)
+    {
+        $resume = $request->attributes->get('resume');
+
+        if (!$resume->target_role || !$resume->target_industry) {
+            return back()->withErrors(['target_role' => 'Debes seleccionar rubro y cargo objetivo.']);
+        }
+
+        // Only allow processing from Paid or Failed (with paid payment) status
+        $hasPaidPayment = \App\Models\Payment::where('resume_id', $resume->id)
+            ->where('status', \App\Enums\PaymentStatus::Paid)
+            ->exists();
+
+        if (!$hasPaidPayment) {
+            return redirect()->route('resumes.payment', $resume->id)
+                ->withErrors(['payment' => 'Debes pagar antes de procesar el CV.']);
+        }
+
+        if (!in_array($resume->status, [ResumeStatus::Paid, ResumeStatus::Failed])) {
+            return back()->withErrors(['status' => 'El CV no puede ser procesado en su estado actual.']);
         }
 
         $resume->error_code = null;
@@ -245,8 +268,6 @@ class ResumeController extends Controller
         try {
             ProcessResumeJob::dispatch($resume->id);
         } catch (\Exception $e) {
-            // With sync queue driver, job exceptions bubble up here.
-            // Mark resume as failed so user can retry.
             \Illuminate\Support\Facades\Log::error('ProcessResumeJob failed (sync)', [
                 'resume_id' => $resume->id,
                 'error' => $e->getMessage(),

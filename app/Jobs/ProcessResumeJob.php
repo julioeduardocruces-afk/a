@@ -2,7 +2,9 @@
 
 namespace App\Jobs;
 
+use App\Enums\PaymentStatus;
 use App\Enums\ResumeStatus;
+use App\Jobs\GenerateFinalCvJob;
 use App\Models\AuditLog;
 use App\Models\MetricsDaily;
 use App\Models\Resume;
@@ -99,12 +101,6 @@ class ProcessResumeJob implements ShouldQueue
                 return $versionNum + 1;
             });
 
-            // Step 5: Transition to preview_ready
-            $resume->transitionTo(ResumeStatus::PreviewReady);
-
-            // Note: 'previews' metric is incremented in ResumeController::preview()
-            // when the user actually views the preview, not here on processing completion.
-
             $elapsed = (int)((microtime(true) - $startTime) * 1000);
 
             // Track total processing time and count for computing average in dashboard
@@ -118,6 +114,9 @@ class ProcessResumeJob implements ShouldQueue
                 'score' => $score['overall'] ?? 0,
                 'elapsed_ms' => $elapsed,
             ]);
+
+            // Step 5: Dispatch final CV generation (PDF/DOCX + email delivery)
+            GenerateFinalCvJob::dispatch($resume->id);
 
         } catch (\Exception $e) {
             Log::error('Resume processing failed', [
