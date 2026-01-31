@@ -52,7 +52,9 @@
         .admin-sidebar a:hover { background: rgba(255,255,255,0.05); color: white; }
         .admin-sidebar a.active { background: rgba(255,255,255,0.1); color: white; border-left-color: #0066ff; font-weight: 600; }
         .admin-sidebar .sidebar-section { color: #666; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 16px 20px 4px; }
-        .admin-main { flex: 1; min-width: 0; }
+        .admin-main { flex: 1; min-width: 0; overflow-x: hidden; }
+        .admin-main table { font-size: 0.88rem; }
+        .admin-main table th, .admin-main table td { padding: 8px 10px; }
     </style>
 </head>
 <body>

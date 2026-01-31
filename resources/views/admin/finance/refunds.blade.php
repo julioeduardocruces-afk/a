@@ -7,18 +7,18 @@
 </div>
 
 {{-- KPIs --}}
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;">
-    <div class="card" style="text-align:center;border-left:4px solid #dc3545;">
-        <div style="font-size:1.8rem;font-weight:bold;color:#dc3545;">{{ $totalRefunds }}</div>
-        <div style="color:#666;">Total Reembolsos</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px;">
+    <div class="card" style="text-align:center;border-left:4px solid #dc3545;padding:16px;">
+        <div style="font-size:1.6rem;font-weight:bold;color:#dc3545;">{{ $totalRefunds }}</div>
+        <div style="color:#666;font-size:0.85rem;">Total Reembolsos</div>
     </div>
-    <div class="card" style="text-align:center;border-left:4px solid #ffc107;">
-        <div style="font-size:1.8rem;font-weight:bold;color:#ffc107;">${{ number_format($totalRefundAmount, 0, ',', '.') }}</div>
-        <div style="color:#666;">Monto Reembolsado (CLP)</div>
+    <div class="card" style="text-align:center;border-left:4px solid #ffc107;padding:16px;">
+        <div style="font-size:1.6rem;font-weight:bold;color:#ffc107;">${{ number_format($totalRefundAmount, 0, ',', '.') }}</div>
+        <div style="color:#666;font-size:0.85rem;">Monto Reembolsado (CLP)</div>
     </div>
-    <div class="card" style="text-align:center;border-left:4px solid #6c757d;">
-        <div style="font-size:1.8rem;font-weight:bold;color:#6c757d;">{{ number_format($refundRate, 1) }}%</div>
-        <div style="color:#666;">Tasa de Reembolso</div>
+    <div class="card" style="text-align:center;border-left:4px solid #6c757d;padding:16px;">
+        <div style="font-size:1.6rem;font-weight:bold;color:#6c757d;">{{ number_format($refundRate, 1) }}%</div>
+        <div style="color:#666;font-size:0.85rem;">Tasa de Reembolso</div>
     </div>
 </div>
 

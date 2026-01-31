@@ -3,22 +3,22 @@
 @section('admin-content')
 <h1 style="margin-bottom:24px;">Panel de Administracion</h1>
 
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;">
-    <div class="card" style="text-align:center;">
-        <div style="font-size:2rem;font-weight:bold;color:#0066ff;">{{ $totals['uploads'] }}</div>
-        <div>Uploads (30 dias)</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px;">
+    <div class="card" style="text-align:center;padding:16px;">
+        <div style="font-size:1.6rem;font-weight:bold;color:#0066ff;">{{ $totals['uploads'] }}</div>
+        <div style="color:#666;font-size:0.85rem;">Uploads (30 dias)</div>
     </div>
-    <div class="card" style="text-align:center;">
-        <div style="font-size:2rem;font-weight:bold;color:#17a2b8;">{{ $totals['previews'] }}</div>
-        <div>Previews</div>
+    <div class="card" style="text-align:center;padding:16px;">
+        <div style="font-size:1.6rem;font-weight:bold;color:#17a2b8;">{{ $totals['previews'] }}</div>
+        <div style="color:#666;font-size:0.85rem;">Previews</div>
     </div>
-    <div class="card" style="text-align:center;">
-        <div style="font-size:2rem;font-weight:bold;color:#28a745;">{{ $totals['paid'] }}</div>
-        <div>Pagados</div>
+    <div class="card" style="text-align:center;padding:16px;">
+        <div style="font-size:1.6rem;font-weight:bold;color:#28a745;">{{ $totals['paid'] }}</div>
+        <div style="color:#666;font-size:0.85rem;">Pagados</div>
     </div>
-    <div class="card" style="text-align:center;">
-        <div style="font-size:2rem;font-weight:bold;color:#28a745;">${{ number_format($totals['revenue'], 0, ',', '.') }}</div>
-        <div>Revenue (CLP)</div>
+    <div class="card" style="text-align:center;padding:16px;">
+        <div style="font-size:1.6rem;font-weight:bold;color:#28a745;">${{ number_format($totals['revenue'], 0, ',', '.') }}</div>
+        <div style="color:#666;font-size:0.85rem;">Revenue (CLP)</div>
     </div>
 </div>
 

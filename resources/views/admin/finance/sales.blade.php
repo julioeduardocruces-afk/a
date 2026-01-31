@@ -7,31 +7,31 @@
 </div>
 
 {{-- Summary --}}
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px;">
-    <div class="card" style="text-align:center;border-left:4px solid #28a745;">
-        <div style="font-size:1.6rem;font-weight:bold;color:#28a745;">{{ $summary->total_paid }}</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:20px;">
+    <div class="card" style="text-align:center;border-left:4px solid #28a745;padding:16px;">
+        <div style="font-size:1.4rem;font-weight:bold;color:#28a745;">{{ $summary->total_paid }}</div>
         <div style="color:#666;">Pagados</div>
     </div>
-    <div class="card" style="text-align:center;border-left:4px solid #0066ff;">
-        <div style="font-size:1.6rem;font-weight:bold;color:#0066ff;">${{ number_format($summary->total_revenue, 0, ',', '.') }}</div>
-        <div style="color:#666;">Ingresos Brutos</div>
+    <div class="card" style="text-align:center;border-left:4px solid #0066ff;padding:16px;">
+        <div style="font-size:1.4rem;font-weight:bold;color:#0066ff;">${{ number_format($summary->total_revenue, 0, ',', '.') }}</div>
+        <div style="color:#666;font-size:0.85rem;">Ingresos Brutos</div>
     </div>
-    <div class="card" style="text-align:center;border-left:4px solid #dc3545;">
-        <div style="font-size:1.6rem;font-weight:bold;color:#dc3545;">{{ $summary->total_refunded }}</div>
+    <div class="card" style="text-align:center;border-left:4px solid #dc3545;padding:16px;">
+        <div style="font-size:1.4rem;font-weight:bold;color:#dc3545;">{{ $summary->total_refunded }}</div>
         <div style="color:#666;">Reembolsados</div>
-        <div style="font-size:0.8rem;color:#999;">${{ number_format($summary->total_refund_amount, 0, ',', '.') }}</div>
+        <div style="font-size:0.75rem;color:#999;">${{ number_format($summary->total_refund_amount, 0, ',', '.') }}</div>
     </div>
-    <div class="card" style="text-align:center;border-left:4px solid #17a2b8;">
-        <div style="font-size:1.6rem;font-weight:bold;color:#17a2b8;">${{ number_format($summary->net_revenue, 0, ',', '.') }}</div>
-        <div style="color:#666;">Ingreso Neto</div>
+    <div class="card" style="text-align:center;border-left:4px solid #17a2b8;padding:16px;">
+        <div style="font-size:1.4rem;font-weight:bold;color:#17a2b8;">${{ number_format($summary->net_revenue, 0, ',', '.') }}</div>
+        <div style="color:#666;font-size:0.85rem;">Ingreso Neto</div>
     </div>
-    <div class="card" style="text-align:center;border-left:4px solid #ffc107;">
-        <div style="font-size:1.6rem;font-weight:bold;color:#ffc107;">{{ $summary->total_failed }}</div>
-        <div style="color:#666;">Fallidos</div>
+    <div class="card" style="text-align:center;border-left:4px solid #ffc107;padding:16px;">
+        <div style="font-size:1.4rem;font-weight:bold;color:#ffc107;">{{ $summary->total_failed }}</div>
+        <div style="color:#666;font-size:0.85rem;">Fallidos</div>
     </div>
-    <div class="card" style="text-align:center;border-left:4px solid #6c757d;">
-        <div style="font-size:1.6rem;font-weight:bold;color:#6c757d;">{{ $summary->total_pending }}</div>
-        <div style="color:#666;">Pendientes</div>
+    <div class="card" style="text-align:center;border-left:4px solid #6c757d;padding:16px;">
+        <div style="font-size:1.4rem;font-weight:bold;color:#6c757d;">{{ $summary->total_pending }}</div>
+        <div style="color:#666;font-size:0.85rem;">Pendientes</div>
     </div>
 </div>
 

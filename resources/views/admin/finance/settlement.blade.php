@@ -15,26 +15,26 @@
 </div>
 
 {{-- All-time Totals --}}
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px;">
-    <div class="card" style="text-align:center;border-left:4px solid #28a745;">
-        <div style="font-size:1.6rem;font-weight:bold;color:#28a745;">${{ number_format($allTimeRevenue, 0, ',', '.') }}</div>
-        <div style="color:#666;">Ingresos Totales (CLP)</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px;">
+    <div class="card" style="text-align:center;border-left:4px solid #28a745;padding:16px;">
+        <div style="font-size:1.4rem;font-weight:bold;color:#28a745;">${{ number_format($allTimeRevenue, 0, ',', '.') }}</div>
+        <div style="color:#666;font-size:0.85rem;">Ingresos Totales (CLP)</div>
     </div>
-    <div class="card" style="text-align:center;border-left:4px solid #dc3545;">
-        <div style="font-size:1.6rem;font-weight:bold;color:#dc3545;">-${{ number_format($allTimeRefunds, 0, ',', '.') }}</div>
-        <div style="color:#666;">Reembolsos Totales</div>
+    <div class="card" style="text-align:center;border-left:4px solid #dc3545;padding:16px;">
+        <div style="font-size:1.4rem;font-weight:bold;color:#dc3545;">-${{ number_format($allTimeRefunds, 0, ',', '.') }}</div>
+        <div style="color:#666;font-size:0.85rem;">Reembolsos Totales</div>
     </div>
-    <div class="card" style="text-align:center;border-left:4px solid #0066ff;">
-        <div style="font-size:1.6rem;font-weight:bold;color:#0066ff;">${{ number_format($allTimeNet, 0, ',', '.') }}</div>
-        <div style="color:#666;">Ingreso Neto</div>
+    <div class="card" style="text-align:center;border-left:4px solid #0066ff;padding:16px;">
+        <div style="font-size:1.4rem;font-weight:bold;color:#0066ff;">${{ number_format($allTimeNet, 0, ',', '.') }}</div>
+        <div style="color:#666;font-size:0.85rem;">Ingreso Neto</div>
     </div>
-    <div class="card" style="text-align:center;border-left:4px solid #ffc107;">
-        <div style="font-size:1.6rem;font-weight:bold;color:#ffc107;">USD ${{ number_format($allTimeAiCostCents / 100, 2) }}</div>
-        <div style="color:#666;">Costo IA Total</div>
+    <div class="card" style="text-align:center;border-left:4px solid #ffc107;padding:16px;">
+        <div style="font-size:1.4rem;font-weight:bold;color:#ffc107;">USD ${{ number_format($allTimeAiCostCents / 100, 2) }}</div>
+        <div style="color:#666;font-size:0.85rem;">Costo IA Total</div>
     </div>
-    <div class="card" style="text-align:center;border-left:4px solid {{ $allTimeProfit >= 0 ? '#28a745' : '#dc3545' }};">
-        <div style="font-size:1.6rem;font-weight:bold;color:{{ $allTimeProfit >= 0 ? '#28a745' : '#dc3545' }};">${{ number_format($allTimeProfit, 0, ',', '.') }}</div>
-        <div style="color:#666;">Ganancia Neta (CLP)</div>
+    <div class="card" style="text-align:center;border-left:4px solid {{ $allTimeProfit >= 0 ? '#28a745' : '#dc3545' }};padding:16px;">
+        <div style="font-size:1.4rem;font-weight:bold;color:{{ $allTimeProfit >= 0 ? '#28a745' : '#dc3545' }};">${{ number_format($allTimeProfit, 0, ',', '.') }}</div>
+        <div style="color:#666;font-size:0.85rem;">Ganancia Neta (CLP)</div>
     </div>
 </div>
 
@@ -42,7 +42,7 @@
 <div class="card">
     <h3 style="margin-bottom:12px;">Desglose Mensual</h3>
     <div style="overflow-x:auto;">
-        <table>
+        <table style="font-size:0.82rem;white-space:nowrap;">
             <thead>
                 <tr>
                     <th>Mes</th>

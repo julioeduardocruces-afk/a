@@ -7,30 +7,30 @@
 </div>
 
 {{-- Summary KPIs --}}
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px;">
-    <div class="card" style="text-align:center;border-left:4px solid #0066ff;">
-        <div style="font-size:1.8rem;font-weight:bold;color:#0066ff;">{{ $totalDownloads }}</div>
-        <div style="color:#666;">Total Descargas</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:20px;">
+    <div class="card" style="text-align:center;border-left:4px solid #0066ff;padding:16px;">
+        <div style="font-size:1.4rem;font-weight:bold;color:#0066ff;">{{ $totalDownloads }}</div>
+        <div style="color:#666;font-size:0.85rem;">Total Descargas</div>
     </div>
-    <div class="card" style="text-align:center;border-left:4px solid #dc3545;">
-        <div style="font-size:1.8rem;font-weight:bold;color:#dc3545;">{{ $pdfCount }}</div>
-        <div style="color:#666;">PDF</div>
+    <div class="card" style="text-align:center;border-left:4px solid #dc3545;padding:16px;">
+        <div style="font-size:1.4rem;font-weight:bold;color:#dc3545;">{{ $pdfCount }}</div>
+        <div style="color:#666;font-size:0.85rem;">PDF</div>
     </div>
-    <div class="card" style="text-align:center;border-left:4px solid #17a2b8;">
-        <div style="font-size:1.8rem;font-weight:bold;color:#17a2b8;">{{ $docxCount }}</div>
-        <div style="color:#666;">DOCX</div>
+    <div class="card" style="text-align:center;border-left:4px solid #17a2b8;padding:16px;">
+        <div style="font-size:1.4rem;font-weight:bold;color:#17a2b8;">{{ $docxCount }}</div>
+        <div style="color:#666;font-size:0.85rem;">DOCX</div>
     </div>
-    <div class="card" style="text-align:center;border-left:4px solid #28a745;">
-        <div style="font-size:1.8rem;font-weight:bold;color:#28a745;">{{ $tokensGenerated }}</div>
-        <div style="color:#666;">Tokens Generados</div>
+    <div class="card" style="text-align:center;border-left:4px solid #28a745;padding:16px;">
+        <div style="font-size:1.4rem;font-weight:bold;color:#28a745;">{{ $tokensGenerated }}</div>
+        <div style="color:#666;font-size:0.85rem;">Tokens Generados</div>
     </div>
-    <div class="card" style="text-align:center;border-left:4px solid #ffc107;">
-        <div style="font-size:1.8rem;font-weight:bold;color:#ffc107;">{{ $tokensUsed }}</div>
-        <div style="color:#666;">Tokens Usados</div>
+    <div class="card" style="text-align:center;border-left:4px solid #ffc107;padding:16px;">
+        <div style="font-size:1.4rem;font-weight:bold;color:#ffc107;">{{ $tokensUsed }}</div>
+        <div style="color:#666;font-size:0.85rem;">Tokens Usados</div>
     </div>
-    <div class="card" style="text-align:center;border-left:4px solid #6c757d;">
-        <div style="font-size:1.8rem;font-weight:bold;color:#6c757d;">{{ $tokensExpired }}</div>
-        <div style="color:#666;">Tokens Expirados</div>
+    <div class="card" style="text-align:center;border-left:4px solid #6c757d;padding:16px;">
+        <div style="font-size:1.4rem;font-weight:bold;color:#6c757d;">{{ $tokensExpired }}</div>
+        <div style="color:#666;font-size:0.85rem;">Tokens Expirados</div>
     </div>
 </div>
 

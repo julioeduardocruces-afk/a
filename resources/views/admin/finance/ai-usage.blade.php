@@ -7,14 +7,14 @@
 </div>
 
 {{-- Global KPIs --}}
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px;">
-    <div class="card" style="text-align:center;border-left:4px solid #0066ff;">
-        <div style="font-size:1.8rem;font-weight:bold;color:#0066ff;">{{ number_format($totalTokens) }}</div>
-        <div style="color:#666;">Tokens Totales</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px;">
+    <div class="card" style="text-align:center;border-left:4px solid #0066ff;padding:16px;">
+        <div style="font-size:1.6rem;font-weight:bold;color:#0066ff;">{{ number_format($totalTokens) }}</div>
+        <div style="color:#666;font-size:0.85rem;">Tokens Totales</div>
     </div>
-    <div class="card" style="text-align:center;border-left:4px solid #dc3545;">
-        <div style="font-size:1.8rem;font-weight:bold;color:#dc3545;">USD ${{ number_format($totalCostCents / 100, 2) }}</div>
-        <div style="color:#666;">Costo Total Estimado</div>
+    <div class="card" style="text-align:center;border-left:4px solid #dc3545;padding:16px;">
+        <div style="font-size:1.6rem;font-weight:bold;color:#dc3545;">USD ${{ number_format($totalCostCents / 100, 2) }}</div>
+        <div style="color:#666;font-size:0.85rem;">Costo Total Estimado</div>
     </div>
 </div>
 
