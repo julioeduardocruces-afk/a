@@ -41,10 +41,10 @@ class PdfGeneratorService
         $phpWord->setDefaultFontSize(11);
 
         $section = $phpWord->addSection([
-            'marginTop' => 720,    // 0.5 inch
-            'marginBottom' => 720,
-            'marginLeft' => 1080,  // 0.75 inch
-            'marginRight' => 1080,
+            'marginTop' => 1134,   // ~2cm (1 inch = 1440 twips)
+            'marginBottom' => 1000,
+            'marginLeft' => 1418,  // ~2.5cm
+            'marginRight' => 1418,
         ]);
 
         $lines = explode("\n", $plainText);

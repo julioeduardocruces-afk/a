@@ -336,35 +336,38 @@ class ResumeRendererService
         <!DOCTYPE html>
         <html><head><meta charset="utf-8">
         <style>
+            @page {
+                margin: 60px 70px 50px 70px;
+            }
             body {
-                width:100%; padding:30px 40px;
+                width: 100%; margin: 0; padding: 0;
                 font-family: Arial, Helvetica, sans-serif;
-                font-size: 11px; line-height: 1.5; color: #222;
+                font-size: 12px; line-height: 1.55; color: #222;
             }
             h1 {
-                font-size: 20px; font-weight: bold; margin-bottom: 2px;
+                font-size: 22px; font-weight: bold; margin-bottom: 2px;
                 text-transform: uppercase; color: #111; letter-spacing: 0.5px;
             }
             h2 {
-                font-size: 12px; font-weight: bold; margin: 14px 0 5px;
-                border-bottom: 1.5px solid #333; padding-bottom: 2px;
+                font-size: 13px; font-weight: bold; margin: 16px 0 6px;
+                border-bottom: 1.5px solid #333; padding-bottom: 3px;
                 text-transform: uppercase; color: #111; letter-spacing: 0.3px;
             }
             h3 {
-                font-size: 11px; font-weight: bold; margin: 8px 0 1px;
+                font-size: 12px; font-weight: bold; margin: 10px 0 2px;
                 color: #222;
             }
             .contact-line {
-                font-size: 10px; color: #444; line-height: 1.4; margin: 0;
+                font-size: 10.5px; color: #444; line-height: 1.4; margin: 0;
             }
             .contact-line strong { color: #222; }
-            .spacer { height: 5px; }
-            p { margin: 2px 0; }
-            ul { padding-left: 14px; margin: 3px 0; }
-            ul.bullet-list { padding-left: 10px; list-style: none; }
-            ul.bullet-list li { margin-bottom: 2px; }
+            .spacer { height: 6px; }
+            p { margin: 3px 0; }
+            ul { padding-left: 16px; margin: 4px 0; }
+            ul.bullet-list { padding-left: 12px; list-style: none; }
+            ul.bullet-list li { margin-bottom: 3px; }
             ul.bullet-list li::before { content: "• "; font-weight: bold; }
-            li { margin-bottom: 2px; }
+            li { margin-bottom: 3px; }
             strong { font-weight: bold; }
         </style>
         </head><body>{$html}</body></html>
