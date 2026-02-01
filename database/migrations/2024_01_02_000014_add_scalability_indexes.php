@@ -14,8 +14,7 @@ return new class extends Migration
 
         Schema::table('download_tokens', function (Blueprint $table) {
             $table->index('expires_at', 'download_tokens_expires_at_index');
-            $table->index('user_id', 'download_tokens_user_id_index');
-            $table->index('resume_id', 'download_tokens_resume_id_index');
+            // user_id and resume_id already have indexes from foreignId()->constrained()
         });
 
         Schema::table('payments', function (Blueprint $table) {
@@ -23,11 +22,8 @@ return new class extends Migration
             $table->index('created_at', 'payments_created_at_index');
         });
 
-        Schema::table('ai_usage_logs', function (Blueprint $table) {
-            $table->index('created_at', 'ai_usage_logs_created_at_index');
-        });
-
-        // Composite index for audit_logs download counting (action + created_at)
+        // ai_usage_logs.created_at already indexed in migration 000011
+        // audit_logs.action already indexed in 000005, add composite for range queries
         Schema::table('audit_logs', function (Blueprint $table) {
             $table->index(['action', 'created_at'], 'audit_logs_action_created_at_index');
         });
@@ -41,17 +37,11 @@ return new class extends Migration
 
         Schema::table('download_tokens', function (Blueprint $table) {
             $table->dropIndex('download_tokens_expires_at_index');
-            $table->dropIndex('download_tokens_user_id_index');
-            $table->dropIndex('download_tokens_resume_id_index');
         });
 
         Schema::table('payments', function (Blueprint $table) {
             $table->dropIndex('payments_refunded_at_index');
             $table->dropIndex('payments_created_at_index');
-        });
-
-        Schema::table('ai_usage_logs', function (Blueprint $table) {
-            $table->dropIndex('ai_usage_logs_created_at_index');
         });
 
         Schema::table('audit_logs', function (Blueprint $table) {
