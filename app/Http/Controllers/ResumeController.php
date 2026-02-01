@@ -292,20 +292,28 @@ class ResumeController extends Controller
     public function status(Request $request, int $id)
     {
         $resume = $request->attributes->get('resume');
-        $resume->load('latestVersion');
 
         if ($request->wantsJson()) {
-            $errorMsg = $resume->error_message
-                ? 'Ocurrió un error procesando tu CV. Puedes reintentar.'
-                : null;
+            // Cache JSON polling responses for 3 seconds to reduce DB load
+            // during high-traffic status polling (JS clients poll every 2-5s)
+            $cacheKey = "resume_status:{$resume->id}";
+            $data = cache()->remember($cacheKey, 3, function () use ($resume) {
+                $resume->load('latestVersion');
+                $errorMsg = $resume->error_message
+                    ? 'Ocurrió un error procesando tu CV. Puedes reintentar.'
+                    : null;
 
-            return response()->json([
-                'status' => $resume->status->value,
-                'score' => $resume->latestVersion?->score_json['overall'] ?? null,
-                'error' => $errorMsg,
-            ]);
+                return [
+                    'status' => $resume->status->value,
+                    'score' => $resume->latestVersion?->score_json['overall'] ?? null,
+                    'error' => $errorMsg,
+                ];
+            });
+
+            return response()->json($data);
         }
 
+        $resume->load('latestVersion');
         return view('app.status', compact('resume'));
     }
 
