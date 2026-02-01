@@ -53,7 +53,7 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div class="form-group">
                 <label for="ai_max_tokens">Maximo de Tokens</label>
-                <input type="number" name="ai_max_tokens" id="ai_max_tokens" value="{{ old('ai_max_tokens', $currentAi['max_tokens'] ?? 1000) }}" min="100" max="8000">
+                <input type="number" name="ai_max_tokens" id="ai_max_tokens" value="{{ old('ai_max_tokens', $currentAi['max_tokens'] ?? 1000) }}" min="100" max="10000">
             </div>
             <div class="form-group">
                 <label for="ai_temperature">Temperatura</label>

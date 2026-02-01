@@ -63,12 +63,23 @@ class DownloadController extends Controller
         }
         $basePath = "finals/{$resume->id}/cv_optimizado_{$resume->id}";
 
+        // Build user-friendly download filename: "Curriculum Ats - Nombre Completo.pdf"
+        $candidateName = $resume->structured_json['header']['name'] ?? null;
+        if (empty($candidateName)) {
+            $candidateName = $resume->getDisplayName();
+        }
+        $safeName = preg_replace('/[^\p{L}\p{N}\s\-]/u', '', $candidateName);
+        $safeName = trim(preg_replace('/\s+/', ' ', $safeName));
+        if (empty($safeName)) {
+            $safeName = 'CV';
+        }
+
         if ($format === 'docx') {
             $filePath = "{$basePath}.docx";
-            $fileName = "cv_optimizado_{$resume->id}.docx";
+            $fileName = "Curriculum Ats - {$safeName}.docx";
         } else {
             $filePath = "{$basePath}.pdf";
-            $fileName = "cv_optimizado_{$resume->id}.pdf";
+            $fileName = "Curriculum Ats - {$safeName}.pdf";
         }
 
         if (!Storage::exists($filePath)) {

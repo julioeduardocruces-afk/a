@@ -108,7 +108,7 @@ class AdminDashboardController extends Controller
             'ai_provider' => ['required', 'in:openai,gemini'],
             'ai_model' => ['required', 'string', 'max:100'],
             'ai_api_key' => ['nullable', 'string', 'max:500'],
-            'ai_max_tokens' => ['required', 'integer', 'min:100', 'max:8000'],
+            'ai_max_tokens' => ['required', 'integer', 'min:100', 'max:10000'],
             'ai_temperature' => ['required', 'numeric', 'min:0', 'max:2'],
         ]);
 
