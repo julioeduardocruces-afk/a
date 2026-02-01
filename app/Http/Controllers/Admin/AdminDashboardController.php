@@ -10,6 +10,7 @@ use App\Models\Resume;
 use App\Models\Payment;
 use App\Models\Setting;
 use App\Services\AiOptimizerService;
+use App\Services\MailerService;
 use App\Enums\ResumeStatus;
 use App\Jobs\ProcessResumeJob;
 use App\Jobs\GenerateFinalCvJob;
@@ -406,5 +407,75 @@ class AdminDashboardController extends Controller
             ->get();
 
         return view('admin.metrics', compact('daily', 'byIndustry', 'errorsByStage'));
+    }
+
+    // --- Email Template ---
+
+    public function emailTemplate()
+    {
+        $fields = [];
+        foreach (MailerService::DEFAULTS as $key => $default) {
+            $fields[$key] = Setting::getValue($key, $default);
+        }
+
+        return view('admin.email-template', compact('fields'));
+    }
+
+    public function updateEmailTemplate(Request $request)
+    {
+        $action = $request->input('action');
+
+        // Reset to defaults
+        if ($action === 'reset') {
+            foreach (array_keys(MailerService::DEFAULTS) as $key) {
+                Setting::setValue($key, null);
+            }
+
+            AuditLog::record('admin.email_template_reset', $request->user()->id, 'admin', [], $request->ip());
+
+            return back()->with('success', 'Plantilla restaurada a los valores originales.');
+        }
+
+        // Validate all fields
+        $validated = $request->validate([
+            'email_subject' => ['required', 'string', 'max:200'],
+            'email_intro' => ['required', 'string', 'max:2000'],
+            'email_section_ats_title' => ['required', 'string', 'max:200'],
+            'email_section_ats_body' => ['required', 'string', 'max:5000'],
+            'email_section_tips_title' => ['required', 'string', 'max:200'],
+            'email_section_tips_body' => ['required', 'string', 'max:5000'],
+            'email_footer' => ['required', 'string', 'max:1000'],
+        ]);
+
+        // Preview mode — render and return
+        if ($action === 'preview') {
+            $viewData = [
+                'userName' => 'Juan Perez (Vista Previa)',
+                'downloadPdfUrl' => '#',
+                'downloadDocxUrl' => '#',
+                'expiresAt' => now()->addDay()->format('d/m/Y H:i'),
+                'maxDownloads' => (int) config('ats.max_downloads', 3),
+                'emailSubject' => $validated['email_subject'],
+                'emailIntro' => $validated['email_intro'],
+                'sectionAtsTitle' => $validated['email_section_ats_title'],
+                'sectionAtsBody' => $validated['email_section_ats_body'],
+                'sectionTipsTitle' => $validated['email_section_tips_title'],
+                'sectionTipsBody' => $validated['email_section_tips_body'],
+                'emailFooter' => $validated['email_footer'],
+            ];
+
+            return response()->view('emails.cv-ready', $viewData);
+        }
+
+        // Save all fields
+        foreach ($validated as $key => $value) {
+            Setting::setValue($key, trim($value));
+        }
+
+        AuditLog::record('admin.email_template_updated', $request->user()->id, 'admin', [
+            'fields_updated' => array_keys($validated),
+        ], $request->ip());
+
+        return back()->with('success', 'Plantilla de correo actualizada exitosamente.');
     }
 }

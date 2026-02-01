@@ -220,6 +220,10 @@ Route::middleware(['auth', EnsureIsAdmin::class, AuditRequest::class])
         Route::post('/resumes/{id}/resend-email', [AdminDashboardController::class, 'resendEmail'])->name('resumes.resend-email');
         Route::delete('/resumes/{id}', [AdminDashboardController::class, 'destroyResume'])->name('resumes.destroy');
 
+        // Email Template
+        Route::get('/email-template', [AdminDashboardController::class, 'emailTemplate'])->name('email-template');
+        Route::post('/email-template', [AdminDashboardController::class, 'updateEmailTemplate'])->name('email-template.update');
+
         // Audit & Metrics
         Route::get('/audit-logs', [AdminDashboardController::class, 'auditLogs'])->name('audit-logs');
         Route::get('/metrics', [AdminDashboardController::class, 'metrics'])->name('metrics');

@@ -1,30 +1,56 @@
 <!DOCTYPE html>
 <html lang="es">
 <head><meta charset="UTF-8"></head>
-<body style="font-family:Arial,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto;padding:20px;">
-    <h1 style="color:#1a1a2e;">Tu CV Optimizado esta Listo</h1>
+<body style="font-family:Arial,sans-serif;line-height:1.7;color:#333;max-width:600px;margin:0 auto;padding:20px;background:#f9f9f9;">
 
-    <p>Hola {{ $userName }},</p>
+    {{-- Header --}}
+    <div style="background:#1a1a2e;padding:24px 30px;border-radius:10px 10px 0 0;text-align:center;">
+        <h1 style="color:#ffffff;margin:0;font-size:22px;">{{ $emailSubject }}</h1>
+    </div>
 
-    <p>Tu CV optimizado para ATS (ID: #{{ $resumeId }}) ha sido generado exitosamente.</p>
+    <div style="background:#ffffff;padding:30px;border-radius:0 0 10px 10px;border:1px solid #e8e8e8;border-top:none;">
 
-    <p>
-        <a href="{{ $downloadPdfUrl }}"
-           style="display:inline-block;padding:12px 30px;background:#0066ff;color:white;text-decoration:none;border-radius:6px;font-weight:bold;">
-            Descargar CV (PDF)
-        </a>
-        &nbsp;&nbsp;
-        <a href="{{ $downloadDocxUrl }}"
-           style="display:inline-block;padding:12px 30px;background:#28a745;color:white;text-decoration:none;border-radius:6px;font-weight:bold;">
-            Descargar CV (DOCX)
-        </a>
+        <p style="font-size:16px;">Hola <strong>{{ $userName }}</strong>,</p>
+
+        {{-- Intro text (editable from admin) --}}
+        <p style="font-size:15px;">{!! nl2br(e($emailIntro)) !!}</p>
+
+        {{-- Download buttons --}}
+        <div style="text-align:center;margin:28px 0;">
+            <a href="{{ $downloadPdfUrl }}"
+               style="display:inline-block;padding:14px 32px;background:#0066ff;color:white;text-decoration:none;border-radius:8px;font-weight:bold;font-size:15px;margin:6px;">
+                Descargar PDF
+            </a>
+            <a href="{{ $downloadDocxUrl }}"
+               style="display:inline-block;padding:14px 32px;background:#28a745;color:white;text-decoration:none;border-radius:8px;font-weight:bold;font-size:15px;margin:6px;">
+                Descargar Word
+            </a>
+        </div>
+
+        <p style="color:#888;font-size:13px;text-align:center;margin-bottom:24px;">
+            Tienes hasta <strong>{{ $maxDownloads }} descargas</strong> disponibles (PDF o Word). Los enlaces expiran el {{ $expiresAt }}.
+        </p>
+
+        <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
+
+        {{-- ATS explanation (editable from admin) --}}
+        <h2 style="color:#1a1a2e;font-size:17px;margin-bottom:8px;">{{ $sectionAtsTitle }}</h2>
+        <p style="font-size:14px;color:#444;">{!! nl2br(e($sectionAtsBody)) !!}</p>
+
+        <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
+
+        {{-- Recommendations (editable from admin) --}}
+        <h2 style="color:#1a1a2e;font-size:17px;margin-bottom:8px;">{{ $sectionTipsTitle }}</h2>
+        <p style="font-size:14px;color:#444;">{!! nl2br(e($sectionTipsBody)) !!}</p>
+
+        <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
+
+        {{-- Footer text (editable from admin) --}}
+        <p style="font-size:13px;color:#999;text-align:center;">{!! nl2br(e($emailFooter)) !!}</p>
+    </div>
+
+    <p style="font-size:11px;color:#bbb;text-align:center;margin-top:16px;">
+        Este es un correo automatico, no es necesario responder.
     </p>
-
-    <p style="color:#999;font-size:0.9rem;">
-        Puedes descargar tu CV hasta {{ $maxDownloads }} veces (en PDF o DOCX). Los enlaces expiran el {{ $expiresAt }}.
-    </p>
-
-    <hr style="border:none;border-top:1px solid #eee;margin:20px 0;">
-    <p style="color:#999;font-size:0.8rem;">CV Optimizer ATS - No respondas a este email.</p>
 </body>
 </html>
