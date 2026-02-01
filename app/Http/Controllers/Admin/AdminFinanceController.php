@@ -85,20 +85,24 @@ class AdminFinanceController extends Controller
                 ?->toArray() ?? [];
         });
 
-        // Daily revenue trend
-        $dailyRevenue = Payment::where('status', PaymentStatus::Paid)
-            ->where('created_at', '>=', $fromDate)
-            ->selectRaw('DATE(created_at) as date, COUNT(*) as sales, SUM(amount) as revenue')
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
+        // Daily revenue trend (cached)
+        $dailyRevenue = cache()->remember("finance:daily_revenue_{$periodDays}", 120, function () use ($fromDate) {
+            return Payment::where('status', PaymentStatus::Paid)
+                ->where('created_at', '>=', $fromDate)
+                ->selectRaw('DATE(created_at) as date, COUNT(*) as sales, SUM(amount) as revenue')
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
+        });
 
-        // Daily AI cost trend
-        $dailyAiCost = AiUsageLog::where('created_at', '>=', $fromDate)
-            ->selectRaw('DATE(created_at) as date, COUNT(*) as calls, SUM(cost_usd_cents) as cost_cents, SUM(total_tokens) as tokens')
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
+        // Daily AI cost trend (cached)
+        $dailyAiCost = cache()->remember("finance:daily_ai_cost_{$periodDays}", 120, function () use ($fromDate) {
+            return AiUsageLog::where('created_at', '>=', $fromDate)
+                ->selectRaw('DATE(created_at) as date, COUNT(*) as calls, SUM(cost_usd_cents) as cost_cents, SUM(total_tokens) as tokens')
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
+        });
 
         // Profit calculation (now includes refunds)
         // NOTE: amounts in payments table are stored as whole CLP (not cents)
@@ -157,33 +161,42 @@ class AdminFinanceController extends Controller
 
         $payments = $query->orderByDesc('created_at')->paginate(30)->withQueryString();
 
-        // Summary using a separate base query with same filters
-        $baseQuery = Payment::query();
+        // Summary using single grouped query instead of 6 separate queries
+        $summaryQuery = Payment::query();
         if ($request->filled('status') && $request->status !== 'all') {
-            $baseQuery->where('status', $request->status);
+            $summaryQuery->where('status', $request->status);
         }
         if ($request->filled('from')) {
-            $baseQuery->where('created_at', '>=', $request->from);
+            $summaryQuery->where('created_at', '>=', $request->from);
         }
         if ($request->filled('to')) {
-            $baseQuery->where('created_at', '<=', $request->to . ' 23:59:59');
+            $summaryQuery->where('created_at', '<=', $request->to . ' 23:59:59');
         }
         if ($request->filled('email')) {
             $email = $request->email;
-            $baseQuery->where(function ($q) use ($email) {
+            $summaryQuery->where(function ($q) use ($email) {
                 $q->whereHas('resume', fn($r) => $r->where('customer_email', 'like', "%{$email}%"))
                   ->orWhereHas('user', fn($u) => $u->where('email', 'like', "%{$email}%"));
             });
         }
 
+        $summaryRows = $summaryQuery->selectRaw("
+                status,
+                COUNT(*) as cnt,
+                COALESCE(SUM(amount), 0) as total_amount,
+                COALESCE(SUM(COALESCE(refund_amount, amount)), 0) as total_refund_amount
+            ")
+            ->groupBy('status')
+            ->get()
+            ->keyBy(fn($item) => $item->status instanceof \BackedEnum ? $item->status->value : (string) $item->status);
+
         $summary = (object) [
-            'total_paid' => (clone $baseQuery)->where('status', PaymentStatus::Paid)->count(),
-            'total_revenue' => (clone $baseQuery)->where('status', PaymentStatus::Paid)->sum('amount'),
-            'total_refunded' => (clone $baseQuery)->where('status', PaymentStatus::Refunded)->count(),
-            'total_refund_amount' => (clone $baseQuery)->where('status', PaymentStatus::Refunded)
-                ->selectRaw('COALESCE(SUM(COALESCE(refund_amount, amount)), 0) as total')->value('total') ?? 0,
-            'total_failed' => (clone $baseQuery)->where('status', PaymentStatus::Failed)->count(),
-            'total_pending' => (clone $baseQuery)->where('status', PaymentStatus::Pending)->count(),
+            'total_paid' => (int) ($summaryRows->get('paid')->cnt ?? 0),
+            'total_revenue' => (int) ($summaryRows->get('paid')->total_amount ?? 0),
+            'total_refunded' => (int) ($summaryRows->get('refunded')->cnt ?? 0),
+            'total_refund_amount' => (int) ($summaryRows->get('refunded')->total_refund_amount ?? 0),
+            'total_failed' => (int) ($summaryRows->get('failed')->cnt ?? 0),
+            'total_pending' => (int) ($summaryRows->get('pending')->cnt ?? 0),
         ];
         $summary->net_revenue = $summary->total_revenue - $summary->total_refund_amount;
 
@@ -207,11 +220,12 @@ class AdminFinanceController extends Controller
 
         $downloads = $query->paginate(30)->withQueryString();
 
-        // Count by format using PHP (SQLite-compatible, avoids JSON_EXTRACT)
-        $allDownloads = AuditLog::where('action', 'resume.downloaded')->get();
-        $totalDownloads = $allDownloads->count();
-        $pdfCount = $allDownloads->filter(fn($d) => ($d->metadata_json['format'] ?? 'pdf') === 'pdf')->count();
-        $docxCount = $allDownloads->filter(fn($d) => ($d->metadata_json['format'] ?? '') === 'docx')->count();
+        // Count by format using DB-level aggregation (no full table load)
+        $totalDownloads = AuditLog::where('action', 'resume.downloaded')->count();
+        $docxCount = AuditLog::where('action', 'resume.downloaded')
+            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(metadata_json, '$.format')) = 'docx'")
+            ->count();
+        $pdfCount = $totalDownloads - $docxCount;
 
         // Tokens generated vs used
         $tokensGenerated = DownloadToken::count();
@@ -280,33 +294,44 @@ class AdminFinanceController extends Controller
 
         $usdToClp = (float) config('ats.usd_to_clp', 950);
 
-        // Monthly breakdown
+        // Monthly breakdown using grouped queries (3 queries instead of 5 × N months)
+        $startDate = now()->subMonths($months - 1)->startOfMonth()->toDateString();
+
+        // 1. Payments grouped by month and status (revenue + refunds + counts)
+        $paymentsByMonth = Payment::whereIn('status', [PaymentStatus::Paid, PaymentStatus::Refunded])
+            ->where('created_at', '>=', $startDate)
+            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month_label, status,
+                COUNT(*) as cnt,
+                COALESCE(SUM(amount), 0) as total_amount,
+                COALESCE(SUM(COALESCE(refund_amount, amount)), 0) as total_refund_amount")
+            ->groupBy('month_label', 'status')
+            ->get()
+            ->groupBy('month_label');
+
+        // 2. AI costs grouped by month
+        $aiByMonth = AiUsageLog::where('created_at', '>=', $startDate)
+            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month_label, COALESCE(SUM(cost_usd_cents), 0) as cost_cents")
+            ->groupBy('month_label')
+            ->pluck('cost_cents', 'month_label');
+
+        // Build monthly array from grouped results
         $monthly = [];
         for ($i = $months - 1; $i >= 0; $i--) {
-            $monthStart = now()->subMonths($i)->startOfMonth()->toDateString();
-            $monthEnd = now()->subMonths($i)->endOfMonth()->toDateString();
             $label = now()->subMonths($i)->format('Y-m');
+            $monthData = $paymentsByMonth->get($label, collect());
 
-            $revenue = Payment::where('status', PaymentStatus::Paid)
-                ->whereBetween('created_at', [$monthStart, $monthEnd . ' 23:59:59'])
-                ->sum('amount');
+            $paidRow = $monthData->firstWhere('status', PaymentStatus::Paid);
+            $refundedRow = $monthData->firstWhere('status', PaymentStatus::Refunded);
 
-            $refunds = Payment::where('status', PaymentStatus::Refunded)
-                ->whereBetween('created_at', [$monthStart, $monthEnd . ' 23:59:59'])
-                ->selectRaw('COALESCE(SUM(COALESCE(refund_amount, amount)), 0) as total')
-                ->value('total') ?? 0;
+            $revenue = (int) ($paidRow->total_amount ?? 0);
+            $sales = (int) ($paidRow->cnt ?? 0);
+            $refunds = (int) ($refundedRow->total_refund_amount ?? 0);
+            $refundCount = (int) ($refundedRow->cnt ?? 0);
+            $aiCostCents = (int) ($aiByMonth->get($label, 0));
 
-            $aiCostCents = AiUsageLog::whereBetween('created_at', [$monthStart, $monthEnd . ' 23:59:59'])
-                ->sum('cost_usd_cents');
-
-            $aiCostCLP = ($aiCostCents / 100) * $usdToClp; // USD cents -> CLP
+            $aiCostCLP = ($aiCostCents / 100) * $usdToClp;
             $net = $revenue - $refunds;
             $profit = $net - $aiCostCLP;
-
-            $sales = Payment::where('status', PaymentStatus::Paid)
-                ->whereBetween('created_at', [$monthStart, $monthEnd . ' 23:59:59'])->count();
-            $refundCount = Payment::where('status', PaymentStatus::Refunded)
-                ->whereBetween('created_at', [$monthStart, $monthEnd . ' 23:59:59'])->count();
 
             $monthly[] = (object) compact(
                 'label', 'revenue', 'refunds', 'net', 'aiCostCents', 'aiCostCLP', 'profit',

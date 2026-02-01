@@ -471,6 +471,16 @@ function runMigrations(PDO $pdo): array
         // ── performance indexes ──
         "CREATE INDEX `payments_resume_id_status_index` ON `payments` (`resume_id`, `status`)",
 
+        // ── scalability indexes ──
+        "CREATE INDEX `resumes_customer_email_index` ON `resumes` (`customer_email`)",
+        "CREATE INDEX `download_tokens_expires_at_index` ON `download_tokens` (`expires_at`)",
+        "CREATE INDEX `download_tokens_user_id_index` ON `download_tokens` (`user_id`)",
+        "CREATE INDEX `download_tokens_resume_id_index` ON `download_tokens` (`resume_id`)",
+        "CREATE INDEX `payments_refunded_at_index` ON `payments` (`refunded_at`)",
+        "CREATE INDEX `payments_created_at_index` ON `payments` (`created_at`)",
+        "CREATE INDEX `ai_usage_logs_created_at_index` ON `ai_usage_logs` (`created_at`)",
+        "CREATE INDEX `audit_logs_action_created_at_index` ON `audit_logs` (`action`, `created_at`)",
+
         // ── migrations table (so Artisan knows migrations ran) ──
         "CREATE TABLE IF NOT EXISTS `migrations` (
             `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -495,6 +505,7 @@ function runMigrations(PDO $pdo): array
         '2024_01_02_000009_add_anonymous_flow_fields',
         '2024_01_02_000010_create_settings_table',
         '2024_01_02_000013_add_download_count_to_download_tokens',
+        '2024_01_02_000014_add_scalability_indexes',
     ];
 
     foreach ($sqls as $i => $sql) {
