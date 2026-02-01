@@ -98,7 +98,8 @@
         </button>
         <button type="submit" name="action" value="reset" class="btn"
                 style="padding:12px 24px;background:#dc3545;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;"
-                onclick="return confirm('Esto restaurara todos los campos a los valores originales. Continuar?');">
+                onclick="return confirm('Esto restaurara todos los campos a los valores originales. Continuar?');"
+                formnovalidate>
             Restaurar Valores Originales
         </button>
         <button type="submit" name="action" value="preview" class="btn"

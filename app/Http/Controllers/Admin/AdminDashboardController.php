@@ -425,10 +425,12 @@ class AdminDashboardController extends Controller
     {
         $action = $request->input('action');
 
-        // Reset to defaults
+        // Reset to defaults — delete rows so getValue falls back to DEFAULTS
         if ($action === 'reset') {
-            foreach (array_keys(MailerService::DEFAULTS) as $key) {
-                Setting::setValue($key, null);
+            $keys = array_keys(MailerService::DEFAULTS);
+            Setting::whereIn('key', $keys)->delete();
+            foreach ($keys as $key) {
+                cache()->forget("setting:{$key}");
             }
 
             AuditLog::record('admin.email_template_reset', $request->user()->id, 'admin', [], $request->ip());
