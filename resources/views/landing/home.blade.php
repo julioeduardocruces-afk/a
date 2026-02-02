@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Optimiza tu CV para ATS - Consigue mas Entrevistas')
-@section('meta_description', 'Servicio especializado en optimizacion de CV para sistemas ATS. Compatible con Laborum, ChileTrabajos, Trabajando.com, LinkedIn, Indeed y Computrabajo. Mejora tu puntaje ATS y consigue mas entrevistas.')
+@section('meta_description', 'Servicio especializado en optimizacion de CV para sistemas ATS. Compatible con Laborum, ChileTrabajos, Trabajando.com, LinkedIn, Indeed y Computrabajo.')
 
 @section('meta_extra')
 <script type="application/ld+json">
@@ -15,175 +15,319 @@
     'operatingSystem' => 'Web',
 ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
 </script>
+<style>
+    .landing-hero {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        color: white; text-align: center; padding: 70px 20px 60px;
+        margin: -30px -20px 0; position: relative; overflow: hidden;
+    }
+    .landing-hero::before {
+        content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+        background: radial-gradient(circle at 30% 50%, rgba(0,102,255,0.15) 0%, transparent 50%),
+                    radial-gradient(circle at 70% 80%, rgba(40,167,69,0.1) 0%, transparent 50%);
+        pointer-events: none;
+    }
+    .landing-hero h1 { font-size: 2.6rem; margin-bottom: 16px; position: relative; font-weight: 800; }
+    .landing-hero h1 span { color: #4da3ff; }
+    .landing-hero p { position: relative; }
+    .hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; position: relative; }
+    .hero-buttons .btn { padding: 16px 40px; font-size: 1.1rem; border-radius: 50px; transition: transform 0.2s, box-shadow 0.2s; }
+    .hero-buttons .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+    .hero-buttons .btn-primary { background: linear-gradient(135deg, #0066ff, #0052cc); }
+    .hero-buttons .btn-success { background: linear-gradient(135deg, #28a745, #1e7e34); }
+
+    .section-alt { background: #f0f4f8; padding: 50px 20px; margin: 0 -20px; }
+    .section-white { background: white; padding: 50px 20px; margin: 0 -20px; }
+    .section-dark { background: #1a1a2e; color: white; padding: 50px 20px; margin: 0 -20px; }
+    .section-title { text-align: center; font-size: 1.8rem; color: #1a1a2e; margin-bottom: 12px; font-weight: 700; }
+    .section-dark .section-title { color: white; }
+    .section-subtitle { text-align: center; color: #666; font-size: 1.05rem; max-width: 650px; margin: 0 auto 36px; }
+    .section-dark .section-subtitle { color: #aab; }
+
+    .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 950px; margin: 0 auto; }
+    .step-card {
+        background: white; border-radius: 12px; padding: 32px 24px; text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08); transition: transform 0.2s; position: relative; border-top: 4px solid #0066ff;
+    }
+    .step-card:hover { transform: translateY(-4px); }
+    .step-card:nth-child(2) { border-top-color: #28a745; }
+    .step-card:nth-child(3) { border-top-color: #f59e0b; }
+    .step-number {
+        width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #0066ff, #0052cc);
+        color: white; font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 16px;
+    }
+    .step-card:nth-child(2) .step-number { background: linear-gradient(135deg, #28a745, #1e7e34); }
+    .step-card:nth-child(3) .step-number { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .step-card h3 { font-size: 1.1rem; color: #1a1a2e; margin-bottom: 8px; }
+    .step-card p { color: #555; font-size: 0.95rem; line-height: 1.6; }
+
+    .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; max-width: 900px; margin: 0 auto; }
+    .feature-card {
+        background: white; border-radius: 12px; padding: 28px; box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        display: flex; gap: 16px; align-items: flex-start; transition: transform 0.2s;
+    }
+    .feature-card:hover { transform: translateY(-3px); }
+    .feature-icon {
+        width: 50px; height: 50px; min-width: 50px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 800;
+    }
+    .feature-icon.blue { background: #e8f0fe; color: #0066ff; }
+    .feature-icon.green { background: #e6f7ed; color: #28a745; }
+    .feature-icon.orange { background: #fef3e2; color: #f59e0b; }
+    .feature-icon.purple { background: #f0e6ff; color: #7c3aed; }
+    .feature-card h4 { font-size: 1rem; color: #1a1a2e; margin-bottom: 6px; }
+    .feature-card p { color: #555; font-size: 0.9rem; line-height: 1.6; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; max-width: 850px; margin: 0 auto; }
+    .stat-card {
+        background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 12px; padding: 28px 16px; text-align: center;
+    }
+    .stat-number { font-size: 2.2rem; font-weight: 800; color: #4da3ff; margin-bottom: 4px; }
+    .stat-label { font-size: 0.85rem; color: #aab; line-height: 1.4; }
+
+    .logos-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; align-items: center; max-width: 800px; margin: 0 auto; }
+    .logo-item {
+        height: 50px; display: flex; align-items: center; justify-content: center;
+        background: white; border-radius: 8px; padding: 8px 12px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .logo-item img { max-width: 100%; max-height: 100%; object-fit: contain; filter: grayscale(30%); transition: filter 0.2s; }
+    .logo-item:hover img { filter: grayscale(0%); }
+
+    .info-block { max-width: 750px; margin: 0 auto; }
+    .info-block p { color: #444; font-size: 1rem; line-height: 1.8; margin-bottom: 14px; }
+
+    .rubros-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; max-width: 850px; margin: 0 auto; }
+    .rubro-item { background: white; padding: 10px 16px; border-radius: 8px; font-size: 0.95rem; color: #333; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+
+    .faq-container { max-width: 700px; margin: 0 auto; }
+    .faq-item { background: white; border-radius: 10px; padding: 20px 24px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .faq-item h3 { font-size: 1rem; color: #1a1a2e; margin-bottom: 8px; }
+    .faq-item p { color: #555; font-size: 0.93rem; line-height: 1.6; }
+
+    .cta-section {
+        background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+        color: white; text-align: center; padding: 50px 20px; margin: 0 -20px; border-radius: 0;
+    }
+    .cta-section h2 { font-size: 1.8rem; margin-bottom: 12px; font-weight: 700; }
+    .cta-section p { max-width: 550px; margin: 0 auto 28px; font-size: 1.05rem; opacity: 0.9; }
+    .cta-section .btn { background: white; color: #0066ff; font-weight: 700; border-radius: 50px; padding: 16px 36px; }
+    .cta-section .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+    .cta-section .btn-outline { background: transparent; color: white; border: 2px solid rgba(255,255,255,0.7); }
+    .cta-section .btn-outline:hover { background: rgba(255,255,255,0.1); border-color: white; }
+
+    @media (max-width: 768px) {
+        .landing-hero h1 { font-size: 1.8rem; }
+        .steps-grid { grid-template-columns: 1fr; max-width: 400px; }
+        .features-grid { grid-template-columns: 1fr; }
+        .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        .logos-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+</style>
 @endsection
 
 @section('content')
 {{-- Hero --}}
-<div style="text-align:center;padding:60px 0 40px;">
-    <h1 style="font-size:2.5rem;color:#1a1a2e;margin-bottom:16px;">Optimiza tu CV para Sistemas ATS</h1>
-    <p style="font-size:1.2rem;color:#555;max-width:720px;margin:0 auto 12px;">
-        Mas del 75% de los CVs son descartados automaticamente por los filtros ATS antes de que un reclutador los vea.
+<div class="landing-hero">
+    <h1>Optimiza tu CV para <span>Sistemas ATS</span></h1>
+    <p style="font-size:1.15rem;max-width:680px;margin:0 auto 10px;opacity:0.85;">
+        Mas del 75% de los CVs son descartados automaticamente antes de que un reclutador los vea.
     </p>
-    <p style="font-size:1.1rem;color:#333;max-width:720px;margin:0 auto 30px;font-weight:500;">
-        Nuestro sistema especializado analiza, reestructura y optimiza tu CV para superar estos filtros y llegar directamente a manos del reclutador.
+    <p style="font-size:1.1rem;max-width:680px;margin:0 auto 32px;font-weight:500;">
+        Nuestro sistema especializado reestructura y optimiza tu CV para superar estos filtros y llegar a manos del reclutador.
     </p>
-    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
-        <a href="{{ route('upload.form') }}" class="btn btn-primary" style="font-size:1.1rem;padding:14px 36px;">Subir mi CV</a>
-        <a href="{{ route('cv-builder.form') }}" class="btn btn-success" style="font-size:1.1rem;padding:14px 36px;">Crear CV desde Cero</a>
+    <div class="hero-buttons">
+        <a href="{{ route('upload.form') }}" class="btn btn-primary">Subir mi CV</a>
+        <a href="{{ route('cv-builder.form') }}" class="btn btn-success">Crear CV desde Cero</a>
     </div>
-    <p style="margin-top:12px;color:#888;font-size:0.9rem;">Sin registro. Sube tu CV o crealo con nuestro formulario. Resultado en minutos.</p>
+    <p style="margin-top:16px;opacity:0.5;font-size:0.9rem;">Sin registro. Resultado en minutos.</p>
 </div>
 
 {{-- Como funciona --}}
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin:40px 0;">
-    <div class="card" style="text-align:center;">
-        <h3 style="margin-bottom:8px;">1. Sube o Crea tu CV</h3>
-        <p>Sube tu CV en PDF o DOCX, o crealo desde cero con nuestro formulario guiado. Sin necesidad de crear cuenta.</p>
-    </div>
-    <div class="card" style="text-align:center;">
-        <h3 style="margin-bottom:8px;">2. Elige tu Objetivo</h3>
-        <p>Selecciona el rubro y cargo al que postulas. Nuestro sistema adapta tu CV a los requisitos especificos de tu industria.</p>
-    </div>
-    <div class="card" style="text-align:center;">
-        <h3 style="margin-bottom:8px;">3. Recibe tu CV Optimizado</h3>
-        <p>El sistema optimiza palabras clave, estructura y formato ATS. Recibe tu CV en PDF y Word listo para postular.</p>
+<div class="section-alt">
+    <div class="section-title">Como Funciona</div>
+    <div class="section-subtitle">Tres pasos simples para transformar tu CV</div>
+    <div class="steps-grid">
+        <div class="step-card">
+            <div class="step-number">1</div>
+            <h3>Sube o Crea tu CV</h3>
+            <p>Sube tu CV en PDF o DOCX, o crealo desde cero con nuestro formulario guiado. Sin necesidad de crear cuenta.</p>
+        </div>
+        <div class="step-card">
+            <div class="step-number">2</div>
+            <h3>Elige tu Objetivo</h3>
+            <p>Selecciona el rubro y cargo al que postulas. El sistema adapta tu CV a los requisitos de tu industria.</p>
+        </div>
+        <div class="step-card">
+            <div class="step-number">3</div>
+            <h3>Recibe tu CV Optimizado</h3>
+            <p>Recibe tu CV optimizado en PDF y Word listo para postular en cualquier plataforma de empleo.</p>
+        </div>
     </div>
 </div>
 
 {{-- Que incluye --}}
-<div class="card" style="margin:40px 0;">
-    <h2 style="margin-bottom:16px;text-align:center;">Que incluye la optimizacion?</h2>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;max-width:800px;margin:0 auto;">
-        <div>
-            <h4 style="color:#1a1a2e;margin-bottom:4px;">Palabras clave estrategicas</h4>
-            <p style="color:#555;font-size:0.95rem;">Incorporamos los terminos que los sistemas ATS buscan para tu rubro y cargo, aumentando tu puntaje de compatibilidad.</p>
+<div class="section-white">
+    <div class="section-title">Que incluye la optimizacion?</div>
+    <div class="section-subtitle">Tu CV sera transformado para maximizar su compatibilidad con filtros ATS</div>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon blue">K</div>
+            <div>
+                <h4>Palabras clave estrategicas</h4>
+                <p>Incorporamos los terminos que los sistemas ATS buscan para tu rubro y cargo, aumentando tu puntaje de compatibilidad.</p>
+            </div>
         </div>
-        <div>
-            <h4 style="color:#1a1a2e;margin-bottom:4px;">Estructura compatible ATS</h4>
-            <p style="color:#555;font-size:0.95rem;">Reorganizamos secciones, encabezados y formato para que los lectores automaticos procesen tu CV sin errores.</p>
+        <div class="feature-card">
+            <div class="feature-icon green">E</div>
+            <div>
+                <h4>Estructura compatible ATS</h4>
+                <p>Reorganizamos secciones, encabezados y formato para que los lectores automaticos procesen tu CV sin errores.</p>
+            </div>
         </div>
-        <div>
-            <h4 style="color:#1a1a2e;margin-bottom:4px;">Redaccion orientada a resultados</h4>
-            <p style="color:#555;font-size:0.95rem;">Transformamos descripciones genericas en logros concretos y medibles que destacan ante reclutadores.</p>
+        <div class="feature-card">
+            <div class="feature-icon orange">R</div>
+            <div>
+                <h4>Redaccion orientada a resultados</h4>
+                <p>Transformamos descripciones genericas en logros concretos y medibles que destacan ante reclutadores.</p>
+            </div>
         </div>
-        <div>
-            <h4 style="color:#1a1a2e;margin-bottom:4px;">Formato profesional limpio</h4>
-            <p style="color:#555;font-size:0.95rem;">Entregamos tu CV en PDF y Word con diseno profesional, margenes correctos y tipografia optimizada para lectura digital.</p>
+        <div class="feature-card">
+            <div class="feature-icon purple">F</div>
+            <div>
+                <h4>Formato profesional limpio</h4>
+                <p>Entregamos tu CV en PDF y Word con diseno profesional, margenes correctos y tipografia optimizada.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Estadisticas --}}
+<div class="section-dark">
+    <div class="section-title">Numeros que Importan</div>
+    <div class="section-subtitle">Los datos detras de por que necesitas optimizar tu CV</div>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">75%</div>
+            <div class="stat-label">De los CVs son filtrados automaticamente por sistemas ATS</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">90%</div>
+            <div class="stat-label">De las grandes empresas usan software ATS para reclutar</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">7seg</div>
+            <div class="stat-label">Tiempo promedio que un reclutador mira un CV</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">3x</div>
+            <div class="stat-label">Mas probabilidades de entrevista con un CV optimizado</div>
         </div>
     </div>
 </div>
 
 {{-- Por que necesitas esto --}}
-<div class="card" style="margin:40px 0;background:#f8f9fa;">
-    <h2 style="margin-bottom:16px;text-align:center;">Por que necesitas un CV optimizado para ATS?</h2>
-    <div style="max-width:750px;margin:0 auto;">
-        <p style="color:#444;font-size:1rem;line-height:1.7;margin-bottom:12px;">
-            Las empresas en Chile y el mundo utilizan sistemas ATS (Applicant Tracking System) para filtrar automaticamente los cientos de CVs que reciben por cada oferta laboral.
-            Estos sistemas analizan tu CV buscando palabras clave, formato compatible y estructura especifica. <strong>Si tu CV no cumple con estos criterios, es descartado automaticamente sin que ningun reclutador lo lea.</strong>
+<div class="section-white">
+    <div class="section-title">Por que necesitas un CV optimizado para ATS?</div>
+    <div class="section-subtitle"></div>
+    <div class="info-block">
+        <p>
+            Las empresas en Chile y el mundo utilizan sistemas ATS (Applicant Tracking System) para filtrar automaticamente los cientos de CVs que reciben por cada oferta.
+            Estos sistemas analizan tu CV buscando palabras clave, formato compatible y estructura especifica. <strong>Si tu CV no cumple con estos criterios, es descartado sin que ningun reclutador lo lea.</strong>
         </p>
-        <p style="color:#444;font-size:1rem;line-height:1.7;margin-bottom:12px;">
-            El problema es que la mayoria de las personas redactan su CV pensando en que lo leera una persona, no una maquina. Usan formatos creativos, tablas, columnas, imagenes o encabezados que los sistemas ATS no pueden interpretar. El resultado: tu CV queda fuera del proceso aunque estes perfectamente calificado para el cargo.
+        <p>
+            La mayoria de las personas redactan su CV pensando en que lo leera una persona, no una maquina. Usan formatos creativos, tablas, columnas o imagenes que los sistemas ATS no pueden interpretar. El resultado: tu CV queda fuera del proceso aunque estes perfectamente calificado.
         </p>
-        <p style="color:#444;font-size:1rem;line-height:1.7;">
-            Nuestro servicio resuelve este problema. Analizamos tu CV y lo reestructuramos para que cumpla con los estandares que exigen los sistemas ATS de las principales plataformas de empleo en Chile y Latinoamerica.
+        <p>
+            Nuestro servicio resuelve este problema. Analizamos tu CV y lo reestructuramos para que cumpla con los estandares que exigen los filtros ATS de las principales plataformas de empleo.
         </p>
     </div>
 </div>
 
 {{-- Logos plataformas --}}
-<div class="card" style="margin:40px 0;">
-    <h2 style="margin-bottom:24px;text-align:center;">Compatible con las Principales Plataformas de Empleo</h2>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px 32px;align-items:center;justify-items:center;max-width:650px;margin:0 auto;">
-        <div style="width:140px;height:60px;display:flex;align-items:center;justify-content:center;">
-            <img src="{{ asset('img/logos/LinkedIn.webp') }}" alt="LinkedIn" style="max-width:100%;max-height:100%;object-fit:contain;">
-        </div>
-        <div style="width:140px;height:60px;display:flex;align-items:center;justify-content:center;">
-            <img src="{{ asset('img/logos/indeed.png') }}" alt="Indeed" style="max-width:100%;max-height:100%;object-fit:contain;">
-        </div>
-        <div style="width:140px;height:60px;display:flex;align-items:center;justify-content:center;">
-            <img src="{{ asset('img/logos/Computrabajo.png') }}" alt="Computrabajo" style="max-width:100%;max-height:100%;object-fit:contain;">
-        </div>
-        <div style="width:140px;height:60px;display:flex;align-items:center;justify-content:center;">
-            <img src="{{ asset('img/logos/Laaborum.png') }}" alt="Laborum" style="max-width:100%;max-height:100%;object-fit:contain;">
-        </div>
-        <div style="width:140px;height:60px;display:flex;align-items:center;justify-content:center;">
-            <img src="{{ asset('img/logos/Chiletrabajos.png') }}" alt="ChileTrabajos" style="max-width:100%;max-height:100%;object-fit:contain;">
-        </div>
-        <div style="width:140px;height:60px;display:flex;align-items:center;justify-content:center;">
-            <img src="{{ asset('img/logos/trabajando.webp') }}" alt="Trabajando.com" style="max-width:100%;max-height:100%;object-fit:contain;">
-        </div>
+<div class="section-alt">
+    <div class="section-title">Compatible con las Principales Plataformas</div>
+    <div class="section-subtitle">Optimizamos tu CV para que pase los filtros de estas y otras plataformas</div>
+    <div class="logos-grid">
+        <div class="logo-item"><img src="{{ asset('img/logos/LinkedIn.webp') }}" alt="LinkedIn"></div>
+        <div class="logo-item"><img src="{{ asset('img/logos/indeed.png') }}" alt="Indeed"></div>
+        <div class="logo-item"><img src="{{ asset('img/logos/Computrabajo.png') }}" alt="Computrabajo"></div>
+        <div class="logo-item"><img src="{{ asset('img/logos/Laaborum.png') }}" alt="Laborum"></div>
+        <div class="logo-item"><img src="{{ asset('img/logos/Chiletrabajos.png') }}" alt="ChileTrabajos"></div>
+        <div class="logo-item"><img src="{{ asset('img/logos/trabajando.webp') }}" alt="Trabajando.com"></div>
     </div>
-    <p style="text-align:center;color:#888;font-size:0.85rem;margin-top:16px;">
-        Optimizamos tu CV para que sea 100% compatible con los filtros ATS de estas y otras plataformas.
-    </p>
 </div>
 
 {{-- Rubros --}}
-<div class="card" style="margin:40px 0;">
-    <h2 style="margin-bottom:16px;">Rubros Disponibles</h2>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;">
-        <span>Tecnologias de la Informacion (TI)</span>
-        <span>Salud / Hemodialisis</span>
-        <span>Ventas y Comercial</span>
-        <span>Finanzas / Factoring</span>
-        <span>Ingenieria</span>
-        <span>Educacion</span>
-        <span>Logistica y Transporte</span>
-        <span>Marketing Digital</span>
-        <span>Recursos Humanos</span>
-        <span>Administracion</span>
-        <span>Construccion</span>
-        <span>Y muchos mas...</span>
+<div class="section-white">
+    <div class="section-title">Rubros Disponibles</div>
+    <div class="section-subtitle">Optimizacion especializada para cada industria</div>
+    <div class="rubros-grid">
+        <div class="rubro-item">Tecnologias de la Informacion (TI)</div>
+        <div class="rubro-item">Salud / Hemodialisis</div>
+        <div class="rubro-item">Ventas y Comercial</div>
+        <div class="rubro-item">Finanzas / Factoring</div>
+        <div class="rubro-item">Ingenieria</div>
+        <div class="rubro-item">Educacion</div>
+        <div class="rubro-item">Logistica y Transporte</div>
+        <div class="rubro-item">Marketing Digital</div>
+        <div class="rubro-item">Recursos Humanos</div>
+        <div class="rubro-item">Administracion</div>
+        <div class="rubro-item">Construccion</div>
+        <div class="rubro-item">Y muchos mas...</div>
     </div>
 </div>
 
 {{-- FAQ --}}
-<div style="text-align:center;padding:40px 0;">
-    <h2>Preguntas Frecuentes</h2>
-    <div style="max-width:700px;margin:20px auto;text-align:left;" itemscope itemtype="https://schema.org/FAQPage">
-        <div class="card" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+<div class="section-alt">
+    <div class="section-title">Preguntas Frecuentes</div>
+    <div class="section-subtitle"></div>
+    <div class="faq-container" itemscope itemtype="https://schema.org/FAQPage">
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
             <h3 itemprop="name">Que es un sistema ATS?</h3>
             <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-                <p itemprop="text">ATS (Applicant Tracking System) es el software que usan las empresas para filtrar CVs automaticamente. Si tu CV no esta optimizado para estos sistemas, puede ser rechazado antes de que un reclutador lo lea, incluso si cumples con todos los requisitos del cargo.</p>
+                <p itemprop="text">ATS (Applicant Tracking System) es el software que usan las empresas para filtrar CVs automaticamente. Si tu CV no esta optimizado, puede ser rechazado antes de que un reclutador lo lea, incluso si cumples con todos los requisitos.</p>
             </div>
         </div>
-        <div class="card" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
             <h3 itemprop="name">Que hace diferente a este servicio?</h3>
             <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-                <p itemprop="text">Nuestro sistema esta especializado exclusivamente en optimizacion para ATS. No es un simple cambio de formato: analizamos tu contenido, incorporamos las palabras clave que buscan los reclutadores en tu industria, reestructuramos las secciones y optimizamos la redaccion para maximizar tu puntaje de compatibilidad.</p>
+                <p itemprop="text">Nuestro sistema esta especializado exclusivamente en optimizacion para ATS. No es un simple cambio de formato: analizamos tu contenido, incorporamos palabras clave de tu industria, reestructuramos las secciones y optimizamos la redaccion para maximizar tu puntaje.</p>
             </div>
         </div>
-        <div class="card" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
             <h3 itemprop="name">Necesito crear una cuenta?</h3>
             <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-                <p itemprop="text">No. Nuestro servicio funciona sin registro. Solo sube tu CV o crealo con nuestro formulario, elige el rubro, y recibe el resultado optimizado en tu email despues del pago.</p>
+                <p itemprop="text">No. Funciona sin registro. Solo sube tu CV o crealo con nuestro formulario, elige el rubro, y recibe el resultado en tu email despues del pago.</p>
             </div>
         </div>
-        <div class="card" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
             <h3 itemprop="name">Que formatos acepta y entrega?</h3>
             <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-                <p itemprop="text">Aceptamos PDF y DOCX (max 10 MB). Si no tienes tu CV en archivo, puedes crearlo con nuestro formulario. Entregamos tu CV optimizado en ambos formatos: PDF y Word, listos para adjuntar en cualquier portal de empleo.</p>
+                <p itemprop="text">Aceptamos PDF y DOCX (max 10 MB). Tambien puedes crear tu CV desde nuestro formulario. Entregamos el CV optimizado en PDF y Word.</p>
             </div>
         </div>
-        <div class="card" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
             <h3 itemprop="name">Solo sirve para Chile?</h3>
             <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-                <p itemprop="text">Estamos enfocados en el mercado chileno y latinoamericano, pero la optimizacion ATS funciona para cualquier plataforma global como LinkedIn e Indeed. Los sistemas ATS funcionan de la misma manera en todo el mundo.</p>
+                <p itemprop="text">Estamos enfocados en Chile y Latinoamerica, pero la optimizacion funciona para cualquier plataforma global como LinkedIn e Indeed.</p>
             </div>
         </div>
     </div>
-    <a href="{{ route('faq') }}">Ver todas las preguntas frecuentes</a>
+    <div style="text-align:center;margin-top:20px;">
+        <a href="{{ route('faq') }}" style="color:#0066ff;font-weight:600;">Ver todas las preguntas frecuentes</a>
+    </div>
 </div>
 
 {{-- CTA final --}}
-<div style="text-align:center;padding:30px 0 60px;">
-    <h2 style="color:#1a1a2e;margin-bottom:12px;">Deja de ser filtrado. Empieza a ser contactado.</h2>
-    <p style="color:#555;max-width:600px;margin:0 auto 24px;font-size:1.05rem;">
-        Tu experiencia merece ser vista. Optimiza tu CV hoy y aumenta tus posibilidades de conseguir entrevistas.
-    </p>
-    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
-        <a href="{{ route('upload.form') }}" class="btn btn-primary" style="font-size:1.1rem;padding:14px 36px;">Subir mi CV</a>
-        <a href="{{ route('cv-builder.form') }}" class="btn btn-success" style="font-size:1.1rem;padding:14px 36px;">Crear CV desde Cero</a>
+<div class="cta-section">
+    <h2>Deja de ser filtrado. Empieza a ser contactado.</h2>
+    <p>Tu experiencia merece ser vista. Optimiza tu CV hoy y aumenta tus posibilidades de conseguir entrevistas.</p>
+    <div class="hero-buttons">
+        <a href="{{ route('upload.form') }}" class="btn">Subir mi CV</a>
+        <a href="{{ route('cv-builder.form') }}" class="btn btn-outline">Crear CV desde Cero</a>
     </div>
 </div>
 @endsection
