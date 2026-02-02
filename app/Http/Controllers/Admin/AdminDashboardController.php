@@ -79,10 +79,11 @@ class AdminDashboardController extends Controller
 
         $metaPixelId = Setting::getValue('meta_pixel_id', '');
         $metaPixelEnabled = Setting::getValue('meta_pixel_enabled', '0') === '1';
+        $metaCapiToken = Setting::getValue('meta_capi_token', '');
 
         return view('admin.credentials', compact(
             'credentials', 'currentAi', 'currentAiProvider', 'currentFlow', 'flowEnabled',
-            'systemPrompt', 'defaultPrompt', 'metaPixelId', 'metaPixelEnabled'
+            'systemPrompt', 'defaultPrompt', 'metaPixelId', 'metaPixelEnabled', 'metaCapiToken'
         ));
     }
 
@@ -251,10 +252,12 @@ class AdminDashboardController extends Controller
         $validated = $request->validate([
             'meta_pixel_id' => ['nullable', 'string', 'max:20', 'regex:/^[0-9]*$/'],
             'meta_pixel_enabled' => ['nullable'],
+            'meta_capi_token' => ['nullable', 'string', 'max:500'],
         ]);
 
         $pixelId = trim($validated['meta_pixel_id'] ?? '');
         $enabled = (bool) $request->input('meta_pixel_enabled', false);
+        $capiToken = trim($validated['meta_capi_token'] ?? '');
 
         // Don't allow enabling without a pixel ID
         if ($enabled && $pixelId === '') {
@@ -264,9 +267,15 @@ class AdminDashboardController extends Controller
         Setting::setValue('meta_pixel_id', $pixelId);
         Setting::setValue('meta_pixel_enabled', $enabled ? '1' : '0');
 
+        // Only update CAPI token if provided (allows saving other fields without clearing it)
+        if ($capiToken !== '') {
+            Setting::setValue('meta_capi_token', Crypt::encryptString($capiToken));
+        }
+
         AuditLog::record('admin.meta_pixel_updated', $request->user()->id, 'admin', [
             'pixel_id' => $pixelId ? substr($pixelId, 0, 6) . '...' : '(vacio)',
             'enabled' => $enabled,
+            'capi_configured' => $capiToken !== '' || !empty(Setting::getValue('meta_capi_token', '')),
         ], $request->ip());
 
         return back()->with('success', 'Configuracion de Facebook Pixel guardada exitosamente.');

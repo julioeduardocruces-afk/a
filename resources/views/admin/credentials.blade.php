@@ -158,10 +158,19 @@
                 <small style="color:#666;">Desactiva para pausar el tracking sin perder el ID</small>
             </div>
         </div>
+        <div class="form-group">
+            <label for="meta_capi_token">Conversions API Token (CAPI)</label>
+            <input type="password" name="meta_capi_token" id="meta_capi_token"
+                   placeholder="{{ !empty($metaCapiToken) ? '••••••••••• (token guardado)' : 'Tu Access Token de Conversions API' }}" maxlength="500">
+            <small style="color:#666;">Dejar vacio para mantener el valor actual. Se genera en Meta Events Manager > Configuracion > Conversions API > Generar token de acceso.</small>
+        </div>
         <div style="display:flex;gap:12px;align-items:center;">
             <button type="submit" class="btn btn-primary btn-sm">Guardar Pixel</button>
             @if(!empty($metaPixelId))
                 <span style="color:#28a745;font-size:0.85rem;">Pixel configurado: {{ $metaPixelId }}</span>
+            @endif
+            @if(!empty($metaCapiToken))
+                <span style="color:#28a745;font-size:0.85rem;">CAPI activo</span>
             @endif
         </div>
     </form>

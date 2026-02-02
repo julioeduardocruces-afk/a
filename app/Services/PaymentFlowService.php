@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
+use App\Services\MetaConversionsService;
 
 class PaymentFlowService
 {
@@ -280,6 +281,21 @@ class PaymentFlowService
                 'resume_id' => $resume->id,
                 'flow_order' => $flowOrder,
             ]);
+
+            // Meta CAPI: Purchase event (matches client-side eventID 'purchase_{id}')
+            MetaConversionsService::sendEvent(
+                'Purchase',
+                'purchase_' . $resume->id,
+                MetaConversionsService::buildUserData(null, $resume->customer_email),
+                [
+                    'value' => $payment->amount,
+                    'currency' => 'CLP',
+                    'content_name' => 'CV ATS Optimization',
+                    'content_type' => 'product',
+                    'content_ids' => [(string) $resume->id],
+                    'num_items' => 1,
+                ],
+            );
 
             // Start AI processing now that payment is confirmed
             $resume->transitionTo(ResumeStatus::Processing);

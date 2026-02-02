@@ -7,6 +7,7 @@ use App\Jobs\ProcessResumeJob;
 use App\Models\AuditLog;
 use App\Models\MetricsDaily;
 use App\Models\Resume;
+use App\Services\MetaConversionsService;
 use App\Services\ResumeRendererService;
 use App\Services\TextExtractorService;
 use Illuminate\Http\Request;
@@ -99,6 +100,15 @@ class ResumeController extends Controller
             'mime' => $file->getMimeType(),
             'size' => $file->getSize(),
         ], $request->ip());
+
+        // Meta CAPI: Lead event (matches client-side fbq('track','Lead') on upload form)
+        MetaConversionsService::sendEvent(
+            'Lead',
+            'lead_upload_' . $resume->id,
+            MetaConversionsService::buildUserData($request),
+            ['content_name' => 'CV Upload', 'content_category' => 'ATS Optimization'],
+            route('upload.form'),
+        );
 
         return redirect()->route('resumes.target-role', $resume->id);
     }
@@ -232,6 +242,22 @@ class ResumeController extends Controller
         if (in_array($resume->status, [ResumeStatus::Paid, ResumeStatus::Processing, ResumeStatus::Delivered])) {
             return redirect()->route('resumes.status', $resume->id);
         }
+
+        // Meta CAPI: InitiateCheckout (matches client-side eventID 'checkout_{id}')
+        MetaConversionsService::sendEvent(
+            'InitiateCheckout',
+            'checkout_' . $resume->id,
+            MetaConversionsService::buildUserData($request, $resume->customer_email),
+            [
+                'value' => (int) config('ats.price_clp', 4990),
+                'currency' => 'CLP',
+                'content_name' => 'CV ATS Optimization',
+                'content_type' => 'product',
+                'content_ids' => [(string) $resume->id],
+                'num_items' => 1,
+            ],
+            route('resumes.payment', $resume->id),
+        );
 
         return view('app.payment', compact('resume'));
     }
@@ -542,6 +568,15 @@ class ResumeController extends Controller
             'resume_id' => $resume->id,
             'name' => $name,
         ], $request->ip());
+
+        // Meta CAPI: Lead event (matches client-side fbq('track','Lead') on CV builder form)
+        MetaConversionsService::sendEvent(
+            'Lead',
+            'lead_builder_' . $resume->id,
+            MetaConversionsService::buildUserData($request, $email),
+            ['content_name' => 'CV Builder', 'content_category' => 'ATS Optimization'],
+            route('cv-builder.form'),
+        );
 
         return redirect()->route('resumes.target-role', $resume->id);
     }
