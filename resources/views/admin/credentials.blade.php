@@ -164,6 +164,13 @@
                    placeholder="{{ !empty($metaCapiToken) ? '••••••••••• (token guardado)' : 'Tu Access Token de Conversions API' }}" maxlength="500">
             <small style="color:#666;">Dejar vacio para mantener el valor actual. Se genera en Meta Events Manager > Configuracion > Conversions API > Generar token de acceso.</small>
         </div>
+        <div class="form-group">
+            <label for="meta_capi_test_code">Test Event Code (opcional)</label>
+            <input type="text" name="meta_capi_test_code" id="meta_capi_test_code"
+                   value="{{ old('meta_capi_test_code', $metaCapiTestCode ?? '') }}"
+                   placeholder="Ej: TEST12345" maxlength="50">
+            <small style="color:#666;">Codigo de prueba para verificar eventos en Meta Events Manager > Test Events. Dejar vacio en produccion.</small>
+        </div>
         <div style="display:flex;gap:12px;align-items:center;">
             <button type="submit" class="btn btn-primary btn-sm">Guardar Pixel</button>
             @if(!empty($metaPixelId))

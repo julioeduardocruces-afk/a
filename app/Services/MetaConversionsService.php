@@ -68,15 +68,23 @@ class MetaConversionsService
 
         $url = 'https://graph.facebook.com/' . self::GRAPH_API_VERSION . '/' . $pixelId . '/events';
 
+        $payload = [
+            'data' => [$eventData],
+            'access_token' => $accessToken,
+        ];
+
+        // Include test_event_code when configured (for debugging in Meta Events Manager)
+        $testCode = Setting::getValue('meta_capi_test_code', '');
+        if ($testCode !== '') {
+            $payload['test_event_code'] = $testCode;
+        }
+
         // Synchronous HTTP with short timeout — consider queuing for high-traffic sites
         try {
             $response = Http::timeout(5)
                 ->connectTimeout(3)
                 ->asJson()
-                ->post($url, [
-                    'data' => [$eventData],
-                    'access_token' => $accessToken,
-                ]);
+                ->post($url, $payload);
 
             if (!$response->successful()) {
                 Log::warning('Meta CAPI: API error', [

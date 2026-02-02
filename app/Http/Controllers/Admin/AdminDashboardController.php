@@ -80,10 +80,12 @@ class AdminDashboardController extends Controller
         $metaPixelId = Setting::getValue('meta_pixel_id', '');
         $metaPixelEnabled = Setting::getValue('meta_pixel_enabled', '0') === '1';
         $metaCapiToken = Setting::getValue('meta_capi_token', '');
+        $metaCapiTestCode = Setting::getValue('meta_capi_test_code', '');
 
         return view('admin.credentials', compact(
             'credentials', 'currentAi', 'currentAiProvider', 'currentFlow', 'flowEnabled',
-            'systemPrompt', 'defaultPrompt', 'metaPixelId', 'metaPixelEnabled', 'metaCapiToken'
+            'systemPrompt', 'defaultPrompt', 'metaPixelId', 'metaPixelEnabled', 'metaCapiToken',
+            'metaCapiTestCode'
         ));
     }
 
@@ -253,11 +255,13 @@ class AdminDashboardController extends Controller
             'meta_pixel_id' => ['nullable', 'string', 'max:20', 'regex:/^[0-9]*$/'],
             'meta_pixel_enabled' => ['nullable'],
             'meta_capi_token' => ['nullable', 'string', 'max:500'],
+            'meta_capi_test_code' => ['nullable', 'string', 'max:50', 'regex:/^[A-Za-z0-9]*$/'],
         ]);
 
         $pixelId = trim($validated['meta_pixel_id'] ?? '');
         $enabled = (bool) $request->input('meta_pixel_enabled', false);
         $capiToken = trim($validated['meta_capi_token'] ?? '');
+        $testCode = trim($validated['meta_capi_test_code'] ?? '');
 
         // Don't allow enabling without a pixel ID
         if ($enabled && $pixelId === '') {
@@ -271,6 +275,9 @@ class AdminDashboardController extends Controller
         if ($capiToken !== '') {
             Setting::setValue('meta_capi_token', Crypt::encryptString($capiToken));
         }
+
+        // Test event code: save as-is (empty string clears it for production)
+        Setting::setValue('meta_capi_test_code', $testCode);
 
         AuditLog::record('admin.meta_pixel_updated', $request->user()->id, 'admin', [
             'pixel_id' => $pixelId ? substr($pixelId, 0, 6) . '...' : '(vacio)',
