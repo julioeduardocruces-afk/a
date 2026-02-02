@@ -1,5 +1,8 @@
 @extends('layouts.app')
 @section('title', 'Pagar - CV Optimizado ATS')
+@push('fb_events')
+<script>if(typeof fbq==='function')fbq('track','InitiateCheckout',{value:{{ config('ats.price_clp', 4990) }},currency:'CLP',content_name:'CV ATS Optimization',content_category:'{{ $resume->target_industry ?? "General" }}'});</script>
+@endpush
 @section('content')
 <div style="max-width:700px;margin:30px auto;">
     <h1 style="margin-bottom:8px;">Paso 3: Pagar y Optimizar</h1>

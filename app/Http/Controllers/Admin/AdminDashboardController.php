@@ -77,9 +77,12 @@ class AdminDashboardController extends Controller
         $defaultPrompt = AiOptimizerService::DEFAULT_SYSTEM_PROMPT;
         $systemPrompt = Setting::getValue('ai_system_prompt', $defaultPrompt);
 
+        $metaPixelId = Setting::getValue('meta_pixel_id', '');
+        $metaPixelEnabled = Setting::getValue('meta_pixel_enabled', '0') === '1';
+
         return view('admin.credentials', compact(
             'credentials', 'currentAi', 'currentAiProvider', 'currentFlow', 'flowEnabled',
-            'systemPrompt', 'defaultPrompt'
+            'systemPrompt', 'defaultPrompt', 'metaPixelId', 'metaPixelEnabled'
         ));
     }
 
@@ -97,6 +100,10 @@ class AdminDashboardController extends Controller
 
         if ($formType === 'prompt') {
             return $this->storeSystemPrompt($request);
+        }
+
+        if ($formType === 'meta_pixel') {
+            return $this->storeMetaPixel($request);
         }
 
         return back()->withErrors(['form_type' => 'Tipo de formulario no reconocido.']);
@@ -237,6 +244,31 @@ class AdminDashboardController extends Controller
         ], $request->ip());
 
         return back()->with('success', 'Credencial de Flow guardada exitosamente.');
+    }
+
+    private function storeMetaPixel(Request $request)
+    {
+        $validated = $request->validate([
+            'meta_pixel_id' => ['nullable', 'string', 'max:20', 'regex:/^[0-9]*$/'],
+            'meta_pixel_enabled' => ['nullable'],
+        ]);
+
+        $pixelId = trim($validated['meta_pixel_id'] ?? '');
+        $enabled = (bool) $request->input('meta_pixel_enabled', false);
+
+        if ($pixelId !== '') {
+            Setting::setValue('meta_pixel_id', $pixelId);
+        } else {
+            Setting::setValue('meta_pixel_id', '');
+        }
+        Setting::setValue('meta_pixel_enabled', $enabled ? '1' : '0');
+
+        AuditLog::record('admin.meta_pixel_updated', $request->user()->id, 'admin', [
+            'pixel_id' => $pixelId ? substr($pixelId, 0, 6) . '...' : '(vacio)',
+            'enabled' => $enabled,
+        ], $request->ip());
+
+        return back()->with('success', 'Configuracion de Facebook Pixel guardada exitosamente.');
     }
 
     private function storeSystemPrompt(Request $request)

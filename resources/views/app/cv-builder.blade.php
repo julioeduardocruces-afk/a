@@ -1,5 +1,8 @@
 @extends('layouts.app')
 @section('title', 'Crear CV - Formulario')
+@push('fb_events')
+<script>if(typeof fbq==='function')fbq('track','Lead',{content_name:'CV Builder',content_category:'ATS Optimization'});</script>
+@endpush
 @section('content')
 <div style="max-width:700px;margin:30px auto;">
     <h1 style="margin-bottom:8px;">Paso 1: Crea tu CV</h1>

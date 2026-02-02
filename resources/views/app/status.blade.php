@@ -71,6 +71,17 @@
             <h2>CV Optimizado Entregado</h2>
             <p>Tu CV optimizado ha sido generado y enviado a tu email. Revisa tu bandeja de entrada.</p>
         </div>
+        @push('fb_events')
+        <script>
+        (function(){
+            var key='fbq_purchase_{{$resume->id}}';
+            if(typeof fbq==='function'&&!localStorage.getItem(key)){
+                fbq('track','Purchase',{value:{{ config('ats.price_clp', 4990) }},currency:'CLP',content_name:'CV ATS Optimization',content_category:'{{ $resume->target_industry ?? "General" }}',content_ids:['{{ $resume->id }}']});
+                localStorage.setItem(key,'1');
+            }
+        })();
+        </script>
+        @endpush
     @endif
 
     @if($resume->status->value === 'draft')

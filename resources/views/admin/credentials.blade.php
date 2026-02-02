@@ -131,6 +131,43 @@
 </div>
 
 {{-- ════════════════════════════════════════ --}}
+{{-- FACEBOOK PIXEL / META                   --}}
+{{-- ════════════════════════════════════════ --}}
+<div class="card">
+    <h3 style="margin-bottom:16px;">Facebook Pixel (Meta)</h3>
+    <p style="color:#666;margin-bottom:12px;">Configura tu Pixel de Facebook para medir conversiones de campanas de Meta Ads. Solo necesitas el ID numerico del Pixel.</p>
+    <form method="POST" action="{{ route('admin.credentials.store') }}">
+        @csrf
+        <input type="hidden" name="form_type" value="meta_pixel">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group">
+                <label for="meta_pixel_id">Pixel ID</label>
+                <input type="text" name="meta_pixel_id" id="meta_pixel_id"
+                       value="{{ old('meta_pixel_id', $metaPixelId ?? '') }}"
+                       placeholder="Ej: 123456789012345" maxlength="20"
+                       pattern="[0-9]*" inputmode="numeric">
+                <small style="color:#666;">Solo numeros. Se encuentra en Meta Business Suite > Eventos > Pixel</small>
+            </div>
+            <div class="form-group">
+                <label for="meta_pixel_enabled" style="margin-bottom:8px;">Estado</label>
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                    <input type="checkbox" name="meta_pixel_enabled" id="meta_pixel_enabled" value="1"
+                           {{ old('meta_pixel_enabled', ($metaPixelEnabled ?? false)) ? 'checked' : '' }}>
+                    Pixel Activo
+                </label>
+                <small style="color:#666;">Desactiva para pausar el tracking sin perder el ID</small>
+            </div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;">
+            <button type="submit" class="btn btn-primary btn-sm">Guardar Pixel</button>
+            @if(!empty($metaPixelId))
+                <span style="color:#28a745;font-size:0.85rem;">Pixel configurado: {{ $metaPixelId }}</span>
+            @endif
+        </div>
+    </form>
+</div>
+
+{{-- ════════════════════════════════════════ --}}
 {{-- CONFIGURACION SMTP                       --}}
 {{-- ════════════════════════════════════════ --}}
 <div class="card">

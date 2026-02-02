@@ -1,5 +1,8 @@
 @extends('layouts.app')
 @section('title', 'Subir CV')
+@push('fb_events')
+<script>if(typeof fbq==='function')fbq('track','Lead',{content_name:'CV Upload',content_category:'ATS Optimization'});</script>
+@endpush
 @section('content')
 <div style="max-width:600px;margin:30px auto;">
     <h1 style="margin-bottom:8px;">Paso 1: Sube tu CV</h1>
