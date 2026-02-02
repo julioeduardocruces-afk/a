@@ -74,9 +74,9 @@
         @push('fb_events')
         <script>
         (function(){
-            var key='fbq_purchase_{{$resume->id}}';
+            var key='fbq_purchase_{{ $resume->id }}';
             if(typeof fbq==='function'&&!localStorage.getItem(key)){
-                fbq('track','Purchase',{value:{{ config('ats.price_clp', 4990) }},currency:'CLP',content_name:'CV ATS Optimization',content_category:'{{ $resume->target_industry ?? "General" }}',content_ids:['{{ $resume->id }}']});
+                fbq('track','Purchase',{value:{{ (int) config('ats.price_clp', 4990) }},currency:'CLP',content_name:'CV ATS Optimization',content_category:{!! json_encode($resume->target_industry ?? 'General') !!},content_ids:[{!! json_encode((string)$resume->id) !!}]},{eventID:'purchase_{{ $resume->id }}'});
                 localStorage.setItem(key,'1');
             }
         })();

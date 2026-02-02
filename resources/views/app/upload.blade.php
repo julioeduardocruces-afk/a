@@ -1,14 +1,14 @@
 @extends('layouts.app')
 @section('title', 'Subir CV')
 @push('fb_events')
-<script>if(typeof fbq==='function')fbq('track','Lead',{content_name:'CV Upload',content_category:'ATS Optimization'});</script>
+<script>if(typeof fbq==='function')fbq('track','ViewContent',{content_name:'CV Upload Page',content_category:'ATS Optimization'});</script>
 @endpush
 @section('content')
 <div style="max-width:600px;margin:30px auto;">
     <h1 style="margin-bottom:8px;">Paso 1: Sube tu CV</h1>
     <p style="color:#666;margin-bottom:20px;">Sube tu CV y nosotros lo optimizamos para sistemas ATS. Sin registro necesario.</p>
     <div class="card">
-        <form method="POST" action="{{ route('upload.store') }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('upload.store') }}" enctype="multipart/form-data" onsubmit="if(typeof fbq==='function')fbq('track','Lead',{content_name:'CV Upload',content_category:'ATS Optimization'});">
             @csrf
             <div class="form-group">
                 <label for="cv_file">Archivo CV (PDF o DOCX, max 10 MB)</label>

@@ -59,8 +59,9 @@
     @php
         $__fbPixelId = \App\Models\Setting::getValue('meta_pixel_id', '');
         $__fbPixelOn = \App\Models\Setting::getValue('meta_pixel_enabled', '0') === '1';
+        $__isAdmin = request()->is('admin', 'admin/*');
     @endphp
-    @if($__fbPixelOn && $__fbPixelId)
+    @if($__fbPixelOn && $__fbPixelId && !$__isAdmin)
     <!-- Meta Pixel Code -->
     <script>
     !function(f,b,e,v,n,t,s)
@@ -71,11 +72,11 @@
     t.src=v;s=b.getElementsByTagName(e)[0];
     s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', '{{ $__fbPixelId }}');
+    fbq('init', {!! json_encode($__fbPixelId) !!});
     fbq('track', 'PageView');
     </script>
     <noscript><img height="1" width="1" style="display:none"
-    src="https://www.facebook.com/tr?id={{ $__fbPixelId }}&ev=PageView&noscript=1"
+    src="https://www.facebook.com/tr?id={{ urlencode($__fbPixelId) }}&ev=PageView&noscript=1"
     /></noscript>
     <!-- End Meta Pixel Code -->
     @endif

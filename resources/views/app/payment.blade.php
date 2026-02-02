@@ -1,7 +1,15 @@
 @extends('layouts.app')
 @section('title', 'Pagar - CV Optimizado ATS')
 @push('fb_events')
-<script>if(typeof fbq==='function')fbq('track','InitiateCheckout',{value:{{ config('ats.price_clp', 4990) }},currency:'CLP',content_name:'CV ATS Optimization',content_category:'{{ $resume->target_industry ?? "General" }}'});</script>
+<script>
+(function(){
+    var key='fbq_checkout_{{ $resume->id }}';
+    if(typeof fbq==='function'&&!sessionStorage.getItem(key)){
+        fbq('track','InitiateCheckout',{value:{{ (int) config('ats.price_clp', 4990) }},currency:'CLP',content_name:'CV ATS Optimization',content_category:{!! json_encode($resume->target_industry ?? 'General') !!},content_ids:[{!! json_encode((string)$resume->id) !!}]},{eventID:'checkout_{{ $resume->id }}'});
+        sessionStorage.setItem(key,'1');
+    }
+})();
+</script>
 @endpush
 @section('content')
 <div style="max-width:700px;margin:30px auto;">
