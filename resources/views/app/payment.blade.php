@@ -5,7 +5,7 @@
 (function(){
     var key='fbq_checkout_{{ $resume->id }}';
     if(typeof fbq==='function'&&!sessionStorage.getItem(key)){
-        fbq('track','InitiateCheckout',{value:{{ (int) config('ats.price_clp', 4990) }},currency:'CLP',content_name:'CV ATS Optimization',content_category:{!! json_encode($resume->target_industry ?? 'General') !!},content_ids:[{!! json_encode((string)$resume->id) !!}]},{eventID:'checkout_{{ $resume->id }}'});
+        fbq('track','InitiateCheckout',{value:{{ (int) config('ats.price_clp', 4990) }},currency:'CLP',content_name:'CV ATS Optimization',content_category:{!! json_encode($resume->target_industry ?? 'General') !!},content_type:'product',content_ids:[{!! json_encode((string)$resume->id) !!}],num_items:1},{eventID:'checkout_{{ $resume->id }}'});
         sessionStorage.setItem(key,'1');
     }
 })();

@@ -256,11 +256,12 @@ class AdminDashboardController extends Controller
         $pixelId = trim($validated['meta_pixel_id'] ?? '');
         $enabled = (bool) $request->input('meta_pixel_enabled', false);
 
-        if ($pixelId !== '') {
-            Setting::setValue('meta_pixel_id', $pixelId);
-        } else {
-            Setting::setValue('meta_pixel_id', '');
+        // Don't allow enabling without a pixel ID
+        if ($enabled && $pixelId === '') {
+            return back()->withErrors(['meta_pixel_id' => 'Debes ingresar un Pixel ID para activar el tracking.'])->withInput();
         }
+
+        Setting::setValue('meta_pixel_id', $pixelId);
         Setting::setValue('meta_pixel_enabled', $enabled ? '1' : '0');
 
         AuditLog::record('admin.meta_pixel_updated', $request->user()->id, 'admin', [
