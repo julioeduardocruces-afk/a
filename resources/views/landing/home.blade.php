@@ -47,14 +47,26 @@
 </div>
 
 <div class="card" style="margin:40px 0;">
-    <h2 style="margin-bottom:16px;">Compatible con las Principales Plataformas ATS</h2>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
-        <div><strong>Laborum</strong> - Chile</div>
-        <div><strong>ChileTrabajos</strong> - Chile</div>
-        <div><strong>Trabajando.com</strong> - Chile</div>
-        <div><strong>LinkedIn</strong> - Global</div>
-        <div><strong>Indeed</strong> - Global</div>
-        <div><strong>Computrabajo</strong> - LATAM</div>
+    <h2 style="margin-bottom:24px;text-align:center;">Compatible con las Principales Plataformas de Empleo</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px 32px;align-items:center;justify-items:center;max-width:650px;margin:0 auto;">
+        <div style="width:140px;height:60px;display:flex;align-items:center;justify-content:center;">
+            <img src="{{ asset('img/logos/LinkedIn.webp') }}" alt="LinkedIn" style="max-width:100%;max-height:100%;object-fit:contain;">
+        </div>
+        <div style="width:140px;height:60px;display:flex;align-items:center;justify-content:center;">
+            <img src="{{ asset('img/logos/indeed.png') }}" alt="Indeed" style="max-width:100%;max-height:100%;object-fit:contain;">
+        </div>
+        <div style="width:140px;height:60px;display:flex;align-items:center;justify-content:center;">
+            <img src="{{ asset('img/logos/Computrabajo.png') }}" alt="Computrabajo" style="max-width:100%;max-height:100%;object-fit:contain;">
+        </div>
+        <div style="width:140px;height:60px;display:flex;align-items:center;justify-content:center;">
+            <img src="{{ asset('img/logos/Laaborum.png') }}" alt="Laborum" style="max-width:100%;max-height:100%;object-fit:contain;">
+        </div>
+        <div style="width:140px;height:60px;display:flex;align-items:center;justify-content:center;">
+            <img src="{{ asset('img/logos/Chiletrabajos.png') }}" alt="ChileTrabajos" style="max-width:100%;max-height:100%;object-fit:contain;">
+        </div>
+        <div style="width:140px;height:60px;display:flex;align-items:center;justify-content:center;">
+            <img src="{{ asset('img/logos/trabajando.webp') }}" alt="Trabajando.com" style="max-width:100%;max-height:100%;object-fit:contain;">
+        </div>
     </div>
 </div>
 
