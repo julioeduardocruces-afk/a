@@ -51,7 +51,7 @@
     @if($resume->status->value === 'paid')
         <div class="card" style="text-align:center;background:#d4edda;">
             <h2>Pago confirmado</h2>
-            <p>Tu CV esta siendo procesado con inteligencia artificial. Esto puede tomar unos minutos.</p>
+            <p>Tu CV esta siendo procesado por nuestro sistema especializado. Esto puede tomar unos minutos.</p>
             <p style="margin-top:12px;">Esta pagina se actualiza automaticamente.</p>
         </div>
         <script>setTimeout(function(){ location.reload(); }, 8000);</script>
@@ -60,7 +60,7 @@
     @if($resume->status->value === 'processing')
         <div class="card" style="text-align:center;">
             <h2>Procesando tu CV...</h2>
-            <p>Estamos optimizando tu CV con inteligencia artificial. Esto puede tomar unos minutos.</p>
+            <p>Estamos optimizando tu CV con nuestro sistema especializado en ATS. Esto puede tomar unos minutos.</p>
             <p style="margin-top:12px;">Esta pagina se actualiza automaticamente.</p>
         </div>
         <script>setTimeout(function(){ location.reload(); }, 8000);</script>

@@ -3,7 +3,7 @@
 @section('content')
 <div style="max-width:700px;margin:30px auto;">
     <h1 style="margin-bottom:8px;">Paso 3: Pagar y Optimizar</h1>
-    <p style="color:#666;margin-bottom:20px;">Tu CV sera optimizado con inteligencia artificial para sistemas ATS.</p>
+    <p style="color:#666;margin-bottom:20px;">Tu CV sera optimizado por nuestro sistema especializado para superar los filtros ATS.</p>
 
     @if($errors->any())
     <div class="card" style="border-left:4px solid #dc3545;background:#fff5f5;margin-bottom:16px;">
