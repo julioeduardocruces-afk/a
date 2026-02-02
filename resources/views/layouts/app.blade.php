@@ -61,7 +61,7 @@
     <nav>
         <div class="container">
             <a href="{{ route('home') }}" class="nav-brand">CV Optimizer ATS</a>
-            <div>
+            <div class="nav-links">
                 <a href="{{ route('upload.form') }}">Optimizar CV</a>
                 <a href="{{ route('how-it-works') }}">Como Funciona</a>
                 <a href="{{ route('faq') }}">FAQ</a>

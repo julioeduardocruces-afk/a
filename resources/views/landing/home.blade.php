@@ -101,8 +101,15 @@
     .info-block { max-width: 750px; margin: 0 auto; }
     .info-block p { color: #444; font-size: 1rem; line-height: 1.8; margin-bottom: 14px; }
 
-    .rubros-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; max-width: 850px; margin: 0 auto; }
-    .rubro-item { background: white; padding: 10px 16px; border-radius: 8px; font-size: 0.95rem; color: #333; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .rubros-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; max-width: 950px; margin: 0 auto; }
+    .rubro-item {
+        background: white; padding: 20px 18px; border-radius: 12px; font-size: 0.95rem; color: #333;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.07); text-align: center; transition: transform 0.2s, box-shadow 0.2s;
+        border-bottom: 3px solid transparent;
+    }
+    .rubro-item:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); border-bottom-color: #0066ff; }
+    .rubro-icon { font-size: 1.8rem; margin-bottom: 8px; display: block; }
+    .rubro-item span { font-weight: 600; color: #1a1a2e; }
 
     .faq-container { max-width: 700px; margin: 0 auto; }
     .faq-item { background: white; border-radius: 10px; padding: 20px 24px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
@@ -126,6 +133,11 @@
         .features-grid { grid-template-columns: 1fr; }
         .stats-grid { grid-template-columns: repeat(2, 1fr); }
         .logos-grid { grid-template-columns: repeat(3, 1fr); }
+        .rubros-grid { grid-template-columns: repeat(2, 1fr); }
+        nav .container { flex-wrap: wrap; }
+        nav .nav-brand { font-size: 1.1rem; }
+        .nav-links { width: 100%; display: flex; justify-content: center; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+        .nav-links a { margin-left: 0 !important; font-size: 0.85rem; padding: 4px 10px; background: rgba(255,255,255,0.1); border-radius: 20px; }
     }
 </style>
 @endsection
@@ -267,18 +279,18 @@
     <div class="section-title">Rubros Disponibles</div>
     <div class="section-subtitle">Optimizacion especializada para cada industria</div>
     <div class="rubros-grid">
-        <div class="rubro-item">Tecnologias de la Informacion (TI)</div>
-        <div class="rubro-item">Salud / Hemodialisis</div>
-        <div class="rubro-item">Ventas y Comercial</div>
-        <div class="rubro-item">Finanzas / Factoring</div>
-        <div class="rubro-item">Ingenieria</div>
-        <div class="rubro-item">Educacion</div>
-        <div class="rubro-item">Logistica y Transporte</div>
-        <div class="rubro-item">Marketing Digital</div>
-        <div class="rubro-item">Recursos Humanos</div>
-        <div class="rubro-item">Administracion</div>
-        <div class="rubro-item">Construccion</div>
-        <div class="rubro-item">Y muchos mas...</div>
+        <div class="rubro-item"><div class="rubro-icon">&#128187;</div><span>Tecnologias de la Informacion</span></div>
+        <div class="rubro-item"><div class="rubro-icon">&#9764;&#65039;</div><span>Salud / Hemodialisis</span></div>
+        <div class="rubro-item"><div class="rubro-icon">&#128200;</div><span>Ventas y Comercial</span></div>
+        <div class="rubro-item"><div class="rubro-icon">&#128176;</div><span>Finanzas / Factoring</span></div>
+        <div class="rubro-item"><div class="rubro-icon">&#9881;&#65039;</div><span>Ingenieria</span></div>
+        <div class="rubro-item"><div class="rubro-icon">&#127891;</div><span>Educacion</span></div>
+        <div class="rubro-item"><div class="rubro-icon">&#128666;</div><span>Logistica y Transporte</span></div>
+        <div class="rubro-item"><div class="rubro-icon">&#128241;</div><span>Marketing Digital</span></div>
+        <div class="rubro-item"><div class="rubro-icon">&#128101;</div><span>Recursos Humanos</span></div>
+        <div class="rubro-item"><div class="rubro-icon">&#128203;</div><span>Administracion</span></div>
+        <div class="rubro-item"><div class="rubro-icon">&#127959;&#65039;</div><span>Construccion</span></div>
+        <div class="rubro-item"><div class="rubro-icon">&#10024;</div><span>Y muchos mas...</span></div>
     </div>
 </div>
 
