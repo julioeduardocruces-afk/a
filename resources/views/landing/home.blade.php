@@ -16,10 +16,12 @@
 ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
 </script>
 <style>
+    .main-content { padding: 0; }
+    footer { margin-top: 0; }
     .landing-hero {
         background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
         color: white; text-align: center; padding: 70px 20px 60px;
-        margin: -30px -20px 0; position: relative; overflow: hidden;
+        position: relative; overflow: hidden;
     }
     .landing-hero::before {
         content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
@@ -36,9 +38,9 @@
     .hero-buttons .btn-primary { background: linear-gradient(135deg, #0066ff, #0052cc); }
     .hero-buttons .btn-success { background: linear-gradient(135deg, #28a745, #1e7e34); }
 
-    .section-alt { background: #f0f4f8; padding: 50px 20px; margin: 0 -20px; }
-    .section-white { background: white; padding: 50px 20px; margin: 0 -20px; }
-    .section-dark { background: #1a1a2e; color: white; padding: 50px 20px; margin: 0 -20px; }
+    .section-alt { background: #f0f4f8; padding: 50px 20px; }
+    .section-white { background: white; padding: 50px 20px; }
+    .section-dark { background: #1a1a2e; color: white; padding: 50px 20px; }
     .section-title { text-align: center; font-size: 1.8rem; color: #1a1a2e; margin-bottom: 12px; font-weight: 700; }
     .section-dark .section-title { color: white; }
     .section-subtitle { text-align: center; color: #666; font-size: 1.05rem; max-width: 650px; margin: 0 auto 36px; }
@@ -109,7 +111,7 @@
 
     .cta-section {
         background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
-        color: white; text-align: center; padding: 50px 20px; margin: 0 -20px; border-radius: 0;
+        color: white; text-align: center; padding: 50px 20px;
     }
     .cta-section h2 { font-size: 1.8rem; margin-bottom: 12px; font-weight: 700; }
     .cta-section p { max-width: 550px; margin: 0 auto 28px; font-size: 1.05rem; opacity: 0.9; }
@@ -128,7 +130,7 @@
 </style>
 @endsection
 
-@section('content')
+@section('full_width')
 {{-- Hero --}}
 <div class="landing-hero">
     <h1>Optimiza tu CV para <span>Sistemas ATS</span></h1>

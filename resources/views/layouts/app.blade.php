@@ -79,25 +79,29 @@
     </nav>
 
     <div class="main-content">
-        <div class="container">
-            @if(session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
-            @if(session('info'))
-                <div class="alert alert-info">{{ session('info') }}</div>
-            @endif
-            @if($errors->any())
-                <div class="alert alert-error">
-                    <ul style="margin:0;padding-left:20px;">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+        @hasSection('full_width')
+            @yield('full_width')
+        @else
+            <div class="container">
+                @if(session('success'))
+                    <div class="alert alert-success">{{ session('success') }}</div>
+                @endif
+                @if(session('info'))
+                    <div class="alert alert-info">{{ session('info') }}</div>
+                @endif
+                @if($errors->any())
+                    <div class="alert alert-error">
+                        <ul style="margin:0;padding-left:20px;">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
 
-            @yield('content')
-        </div>
+                @yield('content')
+            </div>
+        @endif
     </div>
 
     <footer>
