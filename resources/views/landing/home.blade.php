@@ -16,7 +16,7 @@
 ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
 </script>
 <style>
-    .main-content { padding: 0; }
+    .main-content { padding: 0; min-height: 0; }
     footer { margin-top: 0; }
     .landing-hero {
         background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);

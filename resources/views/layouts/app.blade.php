@@ -6,7 +6,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'CV Optimizer ATS') - Optimiza tu CV</title>
     <meta name="description" content="@yield('meta_description', 'Optimiza tu CV para sistemas ATS. Mejora tus posibilidades en Laborum, ChileTrabajos y mas.')">
-    @yield('meta_extra')
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; background: #f8f9fa; }
@@ -56,6 +55,7 @@
         .admin-main table { font-size: 0.88rem; }
         .admin-main table th, .admin-main table td { padding: 8px 10px; }
     </style>
+    @yield('meta_extra')
 </head>
 <body>
     <nav>
