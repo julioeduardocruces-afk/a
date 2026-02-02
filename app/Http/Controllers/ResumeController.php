@@ -101,14 +101,21 @@ class ResumeController extends Controller
             'size' => $file->getSize(),
         ], $request->ip());
 
-        // Meta CAPI: Lead event (matches client-side fbq('track','Lead') on upload form)
+        // Meta CAPI: Lead event (client-side fires on redirect with matching eventID)
+        $leadEventId = 'lead_upload_' . $resume->id;
         MetaConversionsService::sendEvent(
             'Lead',
-            'lead_upload_' . $resume->id,
+            $leadEventId,
             MetaConversionsService::buildUserData($request),
             ['content_name' => 'CV Upload', 'content_category' => 'ATS Optimization'],
             route('upload.form'),
         );
+
+        // Flash lead event data so the client-side pixel fires with matching eventID
+        $request->session()->flash('fb_lead_event', [
+            'event_id' => $leadEventId,
+            'content_name' => 'CV Upload',
+        ]);
 
         return redirect()->route('resumes.target-role', $resume->id);
     }
@@ -569,14 +576,21 @@ class ResumeController extends Controller
             'name' => $name,
         ], $request->ip());
 
-        // Meta CAPI: Lead event (matches client-side fbq('track','Lead') on CV builder form)
+        // Meta CAPI: Lead event (client-side fires on redirect with matching eventID)
+        $leadEventId = 'lead_builder_' . $resume->id;
         MetaConversionsService::sendEvent(
             'Lead',
-            'lead_builder_' . $resume->id,
+            $leadEventId,
             MetaConversionsService::buildUserData($request, $email),
             ['content_name' => 'CV Builder', 'content_category' => 'ATS Optimization'],
             route('cv-builder.form'),
         );
+
+        // Flash lead event data so the client-side pixel fires with matching eventID
+        $request->session()->flash('fb_lead_event', [
+            'event_id' => $leadEventId,
+            'content_name' => 'CV Builder',
+        ]);
 
         return redirect()->route('resumes.target-role', $resume->id);
     }

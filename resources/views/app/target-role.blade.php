@@ -1,5 +1,16 @@
 @extends('layouts.app')
 @section('title', 'Seleccionar Rubro y Cargo')
+@if(session('fb_lead_event'))
+@push('fb_events')
+<script>
+(function(){
+    if(typeof fbq==='function'){
+        fbq('track','Lead',{content_name:{!! json_encode(session('fb_lead_event.content_name')) !!},content_category:'ATS Optimization'},{eventID:{!! json_encode(session('fb_lead_event.event_id')) !!}});
+    }
+})();
+</script>
+@endpush
+@endif
 @section('content')
 <div style="max-width:600px;margin:30px auto;">
     <h1 style="margin-bottom:8px;">Paso 2: Rubro y Cargo Objetivo</h1>

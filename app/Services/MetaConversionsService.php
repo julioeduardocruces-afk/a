@@ -68,7 +68,7 @@ class MetaConversionsService
 
         $url = 'https://graph.facebook.com/' . self::GRAPH_API_VERSION . '/' . $pixelId . '/events';
 
-        // Fire-and-forget: use async HTTP so it doesn't block the response
+        // Synchronous HTTP with short timeout — consider queuing for high-traffic sites
         try {
             $response = Http::timeout(5)
                 ->connectTimeout(3)
@@ -105,7 +105,10 @@ class MetaConversionsService
         $hashed = [];
 
         if (!empty($raw['email'])) {
-            $hashed['em'] = [hash('sha256', strtolower(trim($raw['email'])))];
+            $emailHash = hash('sha256', strtolower(trim($raw['email'])));
+            $hashed['em'] = [$emailHash];
+            // Use hashed email as external_id for improved match quality
+            $hashed['external_id'] = [$emailHash];
         }
 
         if (!empty($raw['ip'])) {

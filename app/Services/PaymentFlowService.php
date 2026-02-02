@@ -283,6 +283,9 @@ class PaymentFlowService
             ]);
 
             // Meta CAPI: Purchase event (matches client-side eventID 'purchase_{id}')
+            // Note: In webhook context, request() comes from Flow's server, not the user.
+            // We pass email for hashing; IP/UA won't match the real user here but
+            // the matching eventID + email hash enables Meta deduplication.
             MetaConversionsService::sendEvent(
                 'Purchase',
                 'purchase_' . $resume->id,
@@ -295,6 +298,7 @@ class PaymentFlowService
                     'content_ids' => [(string) $resume->id],
                     'num_items' => 1,
                 ],
+                route('resumes.status', $resume->id),
             );
 
             // Start AI processing now that payment is confirmed

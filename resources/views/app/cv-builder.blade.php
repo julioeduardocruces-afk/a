@@ -8,7 +8,7 @@
     <h1 style="margin-bottom:8px;">Paso 1: Crea tu CV</h1>
     <p style="color:#666;margin-bottom:20px;">Completa tus datos y nosotros generamos y optimizamos tu CV para sistemas ATS.</p>
 
-    <form method="POST" action="{{ route('cv-builder.store') }}" id="cv-builder-form" onsubmit="if(typeof fbq==='function')fbq('track','Lead',{content_name:'CV Builder',content_category:'ATS Optimization'});">
+    <form method="POST" action="{{ route('cv-builder.store') }}" id="cv-builder-form">
         @csrf
 
         {{-- DATOS PERSONALES --}}
