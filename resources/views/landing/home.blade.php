@@ -89,11 +89,11 @@
     .stat-number { font-size: 2.2rem; font-weight: 800; color: #4da3ff; margin-bottom: 4px; }
     .stat-label { font-size: 0.85rem; color: #aab; line-height: 1.4; }
 
-    .logos-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; align-items: center; max-width: 800px; margin: 0 auto; }
+    .logos-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 28px; align-items: center; max-width: 950px; margin: 0 auto; }
     .logo-item {
-        height: 50px; display: flex; align-items: center; justify-content: center;
-        background: white; border-radius: 8px; padding: 8px 12px;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        height: 80px; display: flex; align-items: center; justify-content: center;
+        background: white; border-radius: 10px; padding: 14px 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
     .logo-item img { max-width: 100%; max-height: 100%; object-fit: contain; filter: grayscale(30%); transition: filter 0.2s; }
     .logo-item:hover img { filter: grayscale(0%); }
