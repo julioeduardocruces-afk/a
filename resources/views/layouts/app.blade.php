@@ -61,6 +61,7 @@
     <nav>
         <div class="container">
             <a href="{{ route('home') }}" class="nav-brand">CV Optimizer ATS</a>
+            <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu">&#9776;</button>
             <div class="nav-links">
                 <a href="{{ route('upload.form') }}">Optimizar CV</a>
                 <a href="{{ route('how-it-works') }}">Como Funciona</a>
