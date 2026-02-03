@@ -27,9 +27,14 @@
             </a>
         </div>
 
-        <p style="color:#888;font-size:13px;text-align:center;margin-bottom:24px;">
-            Tienes hasta <strong>{{ $maxDownloads }} descargas</strong> disponibles (PDF o Word). Los enlaces expiran el {{ $expiresAt }}.
-        </p>
+        {{-- Expiration warning box --}}
+        <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:16px;margin-bottom:24px;">
+            <p style="color:#856404;font-size:14px;margin:0;text-align:center;">
+                <strong>IMPORTANTE:</strong> Tienes <strong>{{ $maxDownloads }} descargas</strong> disponibles (PDF o Word).<br>
+                Los enlaces expiran el <strong>{{ $expiresAt }}</strong> (7 dias desde hoy).<br>
+                <span style="font-size:13px;">Te recomendamos descargar tu CV ahora y guardarlo en tu computador.</span>
+            </p>
+        </div>
 
         <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
 
