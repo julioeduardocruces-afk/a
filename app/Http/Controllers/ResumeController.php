@@ -108,7 +108,7 @@ class ResumeController extends Controller
             $leadEventId,
             MetaConversionsService::buildUserData($request),
             ['content_name' => 'CV Upload', 'content_category' => 'ATS Optimization'],
-            route('upload.form'),
+            route('resumes.target-role', $resume->id),
         );
 
         // Flash lead event data so the client-side pixel fires with matching eventID
@@ -250,21 +250,32 @@ class ResumeController extends Controller
             return redirect()->route('resumes.status', $resume->id);
         }
 
-        // Meta CAPI: InitiateCheckout (matches client-side eventID 'checkout_{id}')
-        MetaConversionsService::sendEvent(
-            'InitiateCheckout',
-            'checkout_' . $resume->id,
-            MetaConversionsService::buildUserData($request, $resume->customer_email),
-            [
-                'value' => (int) config('ats.price_clp', 4990),
-                'currency' => 'CLP',
-                'content_name' => 'CV ATS Optimization',
-                'content_type' => 'product',
-                'content_ids' => [(string) $resume->id],
-                'num_items' => 1,
-            ],
-            route('resumes.payment', $resume->id),
-        );
+        // Store user browsing context for later use in Purchase CAPI (webhook context)
+        if (empty($resume->meta_user_context)) {
+            $resume->update([
+                'meta_user_context' => MetaConversionsService::buildUserData($request, $resume->customer_email),
+            ]);
+        }
+
+        // Meta CAPI: InitiateCheckout — only fire once per session to avoid duplicate server events
+        $capiKey = 'meta_capi_checkout_' . $resume->id;
+        if (!$request->session()->has($capiKey)) {
+            MetaConversionsService::sendEvent(
+                'InitiateCheckout',
+                'checkout_' . $resume->id,
+                MetaConversionsService::buildUserData($request, $resume->customer_email),
+                [
+                    'value' => (int) config('ats.price_clp', 4990),
+                    'currency' => 'CLP',
+                    'content_name' => 'CV ATS Optimization',
+                    'content_type' => 'product',
+                    'content_ids' => [(string) $resume->id],
+                    'num_items' => 1,
+                ],
+                route('resumes.payment', $resume->id),
+            );
+            $request->session()->put($capiKey, true);
+        }
 
         return view('app.payment', compact('resume'));
     }
@@ -583,7 +594,7 @@ class ResumeController extends Controller
             $leadEventId,
             MetaConversionsService::buildUserData($request, $email),
             ['content_name' => 'CV Builder', 'content_category' => 'ATS Optimization'],
-            route('cv-builder.form'),
+            route('resumes.target-role', $resume->id),
         );
 
         // Flash lead event data so the client-side pixel fires with matching eventID

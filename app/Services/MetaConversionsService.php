@@ -56,6 +56,9 @@ class MetaConversionsService
             'event_id' => $eventId,
             'action_source' => 'website',
             'user_data' => $hashedUserData,
+            // CCPA/LGPD: empty array = no restrictions. To enable LDU, use ['LDU'].
+            // @see https://developers.facebook.com/docs/marketing-apis/data-processing-options
+            'data_processing_options' => [],
         ];
 
         if ($sourceUrl) {
@@ -114,9 +117,9 @@ class MetaConversionsService
 
         if (!empty($raw['email'])) {
             $emailHash = hash('sha256', strtolower(trim($raw['email'])));
-            $hashed['em'] = [$emailHash];
+            $hashed['em'] = $emailHash;
             // Use hashed email as external_id for improved match quality
-            $hashed['external_id'] = [$emailHash];
+            $hashed['external_id'] = $emailHash;
         }
 
         if (!empty($raw['ip'])) {

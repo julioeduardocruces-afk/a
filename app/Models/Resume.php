@@ -22,6 +22,7 @@ class Resume extends Model
         'target_industry',
         'target_role',
         'customer_email',
+        'meta_user_context',
         'status',
         'error_code',
         'error_message',
@@ -31,6 +32,7 @@ class Resume extends Model
     {
         return [
             'structured_json' => 'array',
+            'meta_user_context' => 'array',
             'status' => ResumeStatus::class,
         ];
     }

@@ -1,7 +1,15 @@
 @extends('layouts.app')
 @section('title', 'Subir CV')
 @push('fb_events')
-<script>if(typeof fbq==='function')fbq('track','ViewContent',{content_name:'CV Upload Page',content_category:'ATS Optimization'});</script>
+<script>
+(function(){
+    var key='fbq_vc_upload';
+    if(typeof fbq==='function'&&!sessionStorage.getItem(key)){
+        fbq('track','ViewContent',{content_name:'CV Upload Page',content_category:'ATS Optimization'});
+        sessionStorage.setItem(key,'1');
+    }
+})();
+</script>
 @endpush
 @section('content')
 <div style="max-width:600px;margin:30px auto;">

@@ -283,13 +283,20 @@ class PaymentFlowService
             ]);
 
             // Meta CAPI: Purchase event (matches client-side eventID 'purchase_{id}')
-            // Note: In webhook context, request() comes from Flow's server, not the user.
-            // We pass email for hashing; IP/UA won't match the real user here but
-            // the matching eventID + email hash enables Meta deduplication.
+            // Use stored user context (captured at payment page) instead of webhook
+            // request data, which comes from Flow's server and would degrade match quality.
+            $userData = $resume->meta_user_context ?? [];
+            if (empty($userData)) {
+                // Fallback: at least send hashed email for matching
+                $userData = ['email' => $resume->customer_email];
+            } elseif ($resume->customer_email && empty($userData['email'])) {
+                $userData['email'] = $resume->customer_email;
+            }
+
             MetaConversionsService::sendEvent(
                 'Purchase',
                 'purchase_' . $resume->id,
-                MetaConversionsService::buildUserData(null, $resume->customer_email),
+                $userData,
                 [
                     'value' => $payment->amount,
                     'currency' => 'CLP',

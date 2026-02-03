@@ -1,7 +1,15 @@
 @extends('layouts.app')
 @section('title', 'Crear CV - Formulario')
 @push('fb_events')
-<script>if(typeof fbq==='function')fbq('track','ViewContent',{content_name:'CV Builder Page',content_category:'ATS Optimization'});</script>
+<script>
+(function(){
+    var key='fbq_vc_builder';
+    if(typeof fbq==='function'&&!sessionStorage.getItem(key)){
+        fbq('track','ViewContent',{content_name:'CV Builder Page',content_category:'ATS Optimization'});
+        sessionStorage.setItem(key,'1');
+    }
+})();
+</script>
 @endpush
 @section('content')
 <div style="max-width:700px;margin:30px auto;">
