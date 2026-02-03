@@ -561,6 +561,9 @@ class ResumeController extends Controller
 
         $extractedText = implode("\n", $textParts);
 
+        // Split name for Meta CAPI Match Quality (fn/ln)
+        $nameParts = preg_split('/\s+/', $name, 2);
+
         // Create Resume (no file upload, mark as form-built)
         $resume = Resume::create([
             'original_filename' => 'formulario_cv_' . Str::slug($name) . '.txt',
@@ -569,6 +572,13 @@ class ResumeController extends Controller
             'extracted_text' => $extractedText,
             'structured_json' => $structuredJson,
             'customer_email' => $email,
+            'meta_user_context' => MetaConversionsService::buildUserData($request, $email, array_filter([
+                'first_name' => $nameParts[0] ?? '',
+                'last_name' => $nameParts[1] ?? '',
+                'phone' => $phone,
+                'city' => $location,
+                'country' => 'cl',
+            ])),
             'status' => ResumeStatus::Draft,
         ]);
 
@@ -588,11 +598,18 @@ class ResumeController extends Controller
         ], $request->ip());
 
         // Meta CAPI: Lead event (client-side fires on redirect with matching eventID)
+        // Pass additional PII from the CV Builder form for improved Match Quality
         $leadEventId = 'lead_builder_' . $resume->id;
         MetaConversionsService::sendEvent(
             'Lead',
             $leadEventId,
-            MetaConversionsService::buildUserData($request, $email),
+            MetaConversionsService::buildUserData($request, $email, array_filter([
+                'first_name' => $nameParts[0] ?? '',
+                'last_name' => $nameParts[1] ?? '',
+                'phone' => $phone,
+                'city' => $location,
+                'country' => 'cl',
+            ])),
             ['content_name' => 'CV Builder', 'content_category' => 'ATS Optimization'],
             route('resumes.target-role', $resume->id),
         );

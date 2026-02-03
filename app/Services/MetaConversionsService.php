@@ -122,6 +122,32 @@ class MetaConversionsService
             $hashed['external_id'] = $emailHash;
         }
 
+        // PII fields that must be lowercase + SHA-256 hashed
+        if (!empty($raw['first_name'])) {
+            $hashed['fn'] = hash('sha256', strtolower(trim($raw['first_name'])));
+        }
+
+        if (!empty($raw['last_name'])) {
+            $hashed['ln'] = hash('sha256', strtolower(trim($raw['last_name'])));
+        }
+
+        if (!empty($raw['phone'])) {
+            // Strip non-digits, keep leading + for country code, then hash
+            $phone = preg_replace('/[^\d]/', '', $raw['phone']);
+            if ($phone !== '') {
+                $hashed['ph'] = hash('sha256', $phone);
+            }
+        }
+
+        if (!empty($raw['city'])) {
+            $hashed['ct'] = hash('sha256', strtolower(trim($raw['city'])));
+        }
+
+        if (!empty($raw['country'])) {
+            $hashed['country'] = hash('sha256', strtolower(trim($raw['country'])));
+        }
+
+        // Non-hashed fields
         if (!empty($raw['ip'])) {
             $hashed['client_ip_address'] = $raw['ip'];
         }
@@ -154,9 +180,12 @@ class MetaConversionsService
     }
 
     /**
-     * Build user data array from a request + optional email.
+     * Build user data array from a request + optional PII fields.
+     *
+     * Accepted $extra keys: first_name, last_name, phone, city, country.
+     * These are hashed by hashUserData() before being sent to Meta.
      */
-    public static function buildUserData(?\Illuminate\Http\Request $request = null, ?string $email = null): array
+    public static function buildUserData(?\Illuminate\Http\Request $request = null, ?string $email = null, array $extra = []): array
     {
         $request = $request ?? request();
 
@@ -164,6 +193,6 @@ class MetaConversionsService
             'email' => $email,
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),
-        ], self::extractMetaCookies($request)));
+        ], self::extractMetaCookies($request), $extra));
     }
 }
