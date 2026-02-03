@@ -482,7 +482,7 @@ class ResumeController extends Controller
             'education.*.institution' => ['required', 'string', 'max:255'],
             'education.*.degree' => ['required', 'string', 'max:255'],
             'education.*.period' => ['nullable', 'string', 'max:100'],
-            'skills' => ['required', 'string', 'max:2000'],
+            'skills' => ['nullable', 'string', 'max:2000'],
             'certifications' => ['nullable', 'string', 'max:2000'],
             'languages' => ['nullable', 'string', 'max:500'],
         ]);
@@ -496,7 +496,7 @@ class ResumeController extends Controller
         $location = $this->sanitizeUserText($validated['location'] ?? '');
         $linkedin = $this->sanitizeUserText($validated['linkedin'] ?? '');
         $summary = $this->sanitizeUserText($validated['summary'] ?? '');
-        $skillsRaw = $this->sanitizeUserText($validated['skills']);
+        $skillsRaw = $this->sanitizeUserText($validated['skills'] ?? '');
         $certsRaw = $this->sanitizeUserText($validated['certifications'] ?? '', true);
         $langsRaw = $this->sanitizeUserText($validated['languages'] ?? '');
 
@@ -590,8 +590,8 @@ class ResumeController extends Controller
         $textParts[] = 'EDUCACION';
         $textParts[] = implode("\n\n", $educationText);
         $textParts[] = '';
-        $textParts[] = 'HABILIDADES';
-        $textParts[] = implode(', ', $skills);
+        $textParts[] = 'COMPETENCIAS CLAVE';
+        $textParts[] = !empty($skills) ? implode(', ', $skills) : '[GENERAR AUTOMATICAMENTE BASADO EN EXPERIENCIA LABORAL]';
         if (!empty($certs)) {
             $textParts[] = '';
             $textParts[] = 'CERTIFICACIONES';

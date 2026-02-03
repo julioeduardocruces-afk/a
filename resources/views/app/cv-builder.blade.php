@@ -135,12 +135,13 @@
             <button type="button" onclick="addEducation()" class="btn btn-secondary btn-sm" style="margin-top:4px;">+ Agregar Educacion</button>
         </div>
 
-        {{-- HABILIDADES --}}
+        {{-- COMPETENCIAS CLAVE --}}
         <div class="card">
-            <h3 style="margin-bottom:12px;color:#1a1a2e;">Habilidades</h3>
+            <h3 style="margin-bottom:12px;color:#1a1a2e;">Competencias Clave (opcional)</h3>
+            <p style="font-size:0.85rem;color:#666;margin-bottom:12px;">Si dejas este campo vacio, generaremos automaticamente las competencias clave y herramientas basadas en tu experiencia laboral.</p>
             <div class="form-group" style="margin-bottom:0;">
-                <label for="skills">Lista tus habilidades separadas por coma *</label>
-                <textarea id="skills" name="skills" rows="3" required maxlength="2000" placeholder="Ej: PHP, Laravel, JavaScript, React, MySQL, Git, Docker, Trabajo en equipo, Liderazgo">{{ old('skills') }}</textarea>
+                <label for="skills">Lista tus competencias separadas por coma</label>
+                <textarea id="skills" name="skills" rows="3" maxlength="2000" placeholder="Ej: Gestion de proyectos, Liderazgo de equipos, Analisis de datos, Excel avanzado, SAP, Trabajo bajo presion">{{ old('skills') }}</textarea>
             </div>
         </div>
 

@@ -26,6 +26,7 @@ REGLAS ABSOLUTAS - NO PUEDES VIOLARLAS:
 8. SOLO incluye secciones que existan en el CV original. Si el CV NO tiene certificaciones, NO incluyas la sección CERTIFICACIONES. Si NO tiene idiomas, NO incluyas IDIOMAS. No inventes secciones vacías.
 9. OBLIGATORIO incluir RUT y Dirección del candidato si están presentes en los datos originales. El RUT es crítico para postulaciones en Chile y SIEMPRE debe aparecer en el encabezado del CV optimizado. La dirección completa también debe incluirse.
 10. Si el PERFIL PROFESIONAL está vacío o contiene el texto "[GENERAR AUTOMATICAMENTE BASADO EN EXPERIENCIA LABORAL]", DEBES crear un perfil profesional completo y atractivo basándote en la experiencia laboral, educación y habilidades del candidato. Incluye años de experiencia, áreas de especialización, logros destacados y competencias clave. El perfil debe ser de 3-5 líneas.
+11. Si las COMPETENCIAS CLAVE están vacías o contienen el texto "[GENERAR AUTOMATICAMENTE BASADO EN EXPERIENCIA LABORAL]", DEBES generar las secciones COMPETENCIAS CLAVE y HERRAMIENTAS Y SISTEMAS basándote en la experiencia laboral del candidato. Extrae competencias profesionales relevantes (ej: gestión documental, análisis de créditos, trabajo bajo presión) y herramientas/sistemas mencionados o inferidos de su experiencia (ej: Microsoft Office, sistemas bancarios, plataformas de facturación).
 
 FORMATO MARKDOWN OBLIGATORIO (optimized_text_md):
 
