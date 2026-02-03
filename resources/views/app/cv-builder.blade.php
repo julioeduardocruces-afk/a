@@ -30,14 +30,24 @@
                     <input type="text" id="full_name" name="full_name" value="{{ old('full_name') }}" required maxlength="255" placeholder="Ej: Juan Perez Lopez">
                 </div>
                 <div class="form-group">
-                    <label for="email">Email *</label>
-                    <input type="email" id="email" name="email" value="{{ old('email') }}" required maxlength="255" placeholder="Ej: juan@email.com">
+                    <label for="rut">RUT *</label>
+                    <input type="text" id="rut" name="rut" value="{{ old('rut') }}" required maxlength="12" placeholder="Ej: 12.345.678-9">
                 </div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                 <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" name="email" value="{{ old('email') }}" required maxlength="255" placeholder="Ej: juan@email.com">
+                </div>
+                <div class="form-group">
                     <label for="phone">Telefono</label>
                     <input type="text" id="phone" name="phone" value="{{ old('phone') }}" maxlength="30" placeholder="Ej: +56 9 1234 5678">
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group">
+                    <label for="address">Direccion *</label>
+                    <input type="text" id="address" name="address" value="{{ old('address') }}" required maxlength="500" placeholder="Ej: Av. Libertador Bernardo O'Higgins 1234, Depto 56">
                 </div>
                 <div class="form-group">
                     <label for="location">Ciudad / Region</label>

@@ -466,8 +466,10 @@ class ResumeController extends Controller
     {
         $validated = $request->validate([
             'full_name' => ['required', 'string', 'max:255'],
+            'rut' => ['required', 'string', 'max:12'],
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
+            'address' => ['required', 'string', 'max:500'],
             'location' => ['nullable', 'string', 'max:255'],
             'linkedin' => ['nullable', 'string', 'max:255'],
             'summary' => ['required', 'string', 'max:2000'],
@@ -487,8 +489,10 @@ class ResumeController extends Controller
 
         // Sanitize all text fields
         $name = $this->sanitizeUserText($validated['full_name']);
+        $rut = $this->sanitizeUserText($validated['rut']);
         $email = $validated['email'];
         $phone = $this->sanitizeUserText($validated['phone'] ?? '');
+        $address = $this->sanitizeUserText($validated['address']);
         $location = $this->sanitizeUserText($validated['location'] ?? '');
         $linkedin = $this->sanitizeUserText($validated['linkedin'] ?? '');
         $summary = $this->sanitizeUserText($validated['summary']);
@@ -546,13 +550,17 @@ class ResumeController extends Controller
 
         // Header text
         $headerParts = [$name];
+        if ($rut) $headerParts[] = 'RUT: ' . $rut;
         if ($email) $headerParts[] = $email;
         if ($phone) $headerParts[] = $phone;
+        if ($address) $headerParts[] = $address;
         if ($location) $headerParts[] = $location;
         if ($linkedin) $headerParts[] = $linkedin;
 
         $structuredJson = [
             'header' => implode("\n", $headerParts),
+            'rut' => $rut,
+            'address' => $address,
             'summary' => $summary,
             'experience' => $experienceEntries,
             'education' => $educationEntries,
@@ -564,7 +572,14 @@ class ResumeController extends Controller
 
         // Build extracted_text (plain text CV, same as PDF extraction would produce)
         $textParts = [];
-        $textParts[] = implode(' | ', $headerParts);
+        $contactLine = $name;
+        if ($rut) $contactLine .= ' | RUT: ' . $rut;
+        if ($email) $contactLine .= ' | ' . $email;
+        if ($phone) $contactLine .= ' | ' . $phone;
+        $textParts[] = $contactLine;
+        if ($address) $textParts[] = 'Direccion: ' . $address;
+        if ($location) $textParts[] = $location;
+        if ($linkedin) $textParts[] = $linkedin;
         $textParts[] = '';
         $textParts[] = 'PERFIL PROFESIONAL';
         $textParts[] = $summary;

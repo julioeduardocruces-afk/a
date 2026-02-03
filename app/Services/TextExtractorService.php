@@ -214,6 +214,8 @@ class TextExtractorService
     {
         $sections = [
             'header' => '',
+            'rut' => '',
+            'address' => '',
             'summary' => '',
             'experience' => [],
             'education' => [],
@@ -222,6 +224,18 @@ class TextExtractorService
             'languages' => [],
             'other' => '',
         ];
+
+        // Extract RUT from text (Chilean ID format: XX.XXX.XXX-X or XXXXXXXX-X)
+        if (preg_match('/\b(?:RUT[:\s]*)?(\d{1,2}\.?\d{3}\.?\d{3}-[\dkK])\b/i', $text, $rutMatch)) {
+            $sections['rut'] = $rutMatch[1];
+        }
+
+        // Extract address (look for common Chilean address patterns)
+        if (preg_match('/(?:direcci[oó]n|domicilio)[:\s]*([^\n]+)/iu', $text, $addressMatch)) {
+            $sections['address'] = trim($addressMatch[1]);
+        } elseif (preg_match('/\b((?:Av(?:enida)?|Calle|Pasaje|Pje)\s*\.?\s*[^\n,]+(?:,\s*(?:Depto|Dpto|Apt|Casa|Of)\.?\s*\d+[A-Za-z]?)?)/iu', $text, $addressMatch)) {
+            $sections['address'] = trim($addressMatch[1]);
+        }
 
         $lines = explode("\n", $text);
         $currentSection = 'header';
