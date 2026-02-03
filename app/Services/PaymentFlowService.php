@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
+use App\Jobs\SendMetaCapiEvent;
 use App\Services\MetaConversionsService;
 
 class PaymentFlowService
@@ -293,7 +294,7 @@ class PaymentFlowService
                 $userData['email'] = $resume->customer_email;
             }
 
-            MetaConversionsService::sendEvent(
+            SendMetaCapiEvent::dispatch(
                 'Purchase',
                 'purchase_' . $resume->id,
                 $userData,

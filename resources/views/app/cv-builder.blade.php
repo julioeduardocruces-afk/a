@@ -5,7 +5,9 @@
 (function(){
     var key='fbq_vc_builder';
     if(typeof fbq==='function'&&!sessionStorage.getItem(key)){
-        fbq('track','ViewContent',{content_name:'CV Builder Page',content_category:'ATS Optimization'});
+        var eid={!! json_encode(session('meta_capi_vc_builder', '')) !!};
+        var opts=eid?{eventID:eid}:{};
+        fbq('track','ViewContent',{content_name:'CV Builder Page',content_category:'ATS Optimization'},opts);
         sessionStorage.setItem(key,'1');
     }
 })();

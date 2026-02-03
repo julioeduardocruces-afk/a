@@ -132,8 +132,13 @@ class MetaConversionsService
         }
 
         if (!empty($raw['phone'])) {
-            // Strip non-digits, keep leading + for country code, then hash
+            // Strip non-digits then normalize to E.164 (digits-only with country code)
             $phone = preg_replace('/[^\d]/', '', $raw['phone']);
+            // Chilean numbers: 9 digits (mobile starts with 9, landline with 2)
+            // Prepend country code 56 if missing
+            if (strlen($phone) === 9 && preg_match('/^[29]/', $phone)) {
+                $phone = '56' . $phone;
+            }
             if ($phone !== '') {
                 $hashed['ph'] = hash('sha256', $phone);
             }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\ResumeStatus;
 use App\Jobs\ProcessResumeJob;
+use App\Jobs\SendMetaCapiEvent;
 use App\Models\AuditLog;
 use App\Models\MetricsDaily;
 use App\Models\Resume;
@@ -24,8 +25,22 @@ class ResumeController extends Controller
     /**
      * Show upload form (public, no login required).
      */
-    public function showUpload()
+    public function showUpload(Request $request)
     {
+        // Meta CAPI: ViewContent (async) — once per session
+        $capiKey = 'meta_capi_vc_upload';
+        if (!$request->session()->has($capiKey)) {
+            $eventId = 'vc_upload_' . substr($request->session()->getId(), 0, 16);
+            SendMetaCapiEvent::dispatch(
+                'ViewContent',
+                $eventId,
+                MetaConversionsService::buildUserData($request),
+                ['content_name' => 'CV Upload Page', 'content_category' => 'ATS Optimization'],
+                route('upload.form'),
+            );
+            $request->session()->put($capiKey, $eventId);
+        }
+
         return view('app.upload');
     }
 
@@ -101,9 +116,9 @@ class ResumeController extends Controller
             'size' => $file->getSize(),
         ], $request->ip());
 
-        // Meta CAPI: Lead event (client-side fires on redirect with matching eventID)
+        // Meta CAPI: Lead event (async — client-side fires on redirect with matching eventID)
         $leadEventId = 'lead_upload_' . $resume->id;
-        MetaConversionsService::sendEvent(
+        SendMetaCapiEvent::dispatch(
             'Lead',
             $leadEventId,
             MetaConversionsService::buildUserData($request),
@@ -257,10 +272,10 @@ class ResumeController extends Controller
             ]);
         }
 
-        // Meta CAPI: InitiateCheckout — only fire once per session to avoid duplicate server events
+        // Meta CAPI: InitiateCheckout (async) — only fire once per session
         $capiKey = 'meta_capi_checkout_' . $resume->id;
         if (!$request->session()->has($capiKey)) {
-            MetaConversionsService::sendEvent(
+            SendMetaCapiEvent::dispatch(
                 'InitiateCheckout',
                 'checkout_' . $resume->id,
                 MetaConversionsService::buildUserData($request, $resume->customer_email),
@@ -425,8 +440,22 @@ class ResumeController extends Controller
     /**
      * Show CV builder form (alternative to file upload).
      */
-    public function showCvBuilder()
+    public function showCvBuilder(Request $request)
     {
+        // Meta CAPI: ViewContent (async) — once per session
+        $capiKey = 'meta_capi_vc_builder';
+        if (!$request->session()->has($capiKey)) {
+            $eventId = 'vc_builder_' . substr($request->session()->getId(), 0, 16);
+            SendMetaCapiEvent::dispatch(
+                'ViewContent',
+                $eventId,
+                MetaConversionsService::buildUserData($request),
+                ['content_name' => 'CV Builder Page', 'content_category' => 'ATS Optimization'],
+                route('cv-builder.form'),
+            );
+            $request->session()->put($capiKey, $eventId);
+        }
+
         return view('app.cv-builder');
     }
 
@@ -597,10 +626,10 @@ class ResumeController extends Controller
             'name' => $name,
         ], $request->ip());
 
-        // Meta CAPI: Lead event (client-side fires on redirect with matching eventID)
+        // Meta CAPI: Lead event (async — client-side fires on redirect with matching eventID)
         // Pass additional PII from the CV Builder form for improved Match Quality
         $leadEventId = 'lead_builder_' . $resume->id;
-        MetaConversionsService::sendEvent(
+        SendMetaCapiEvent::dispatch(
             'Lead',
             $leadEventId,
             MetaConversionsService::buildUserData($request, $email, array_filter([
