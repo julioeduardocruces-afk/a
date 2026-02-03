@@ -62,10 +62,11 @@
 
         {{-- PERFIL / RESUMEN --}}
         <div class="card">
-            <h3 style="margin-bottom:12px;color:#1a1a2e;">Perfil Profesional</h3>
+            <h3 style="margin-bottom:12px;color:#1a1a2e;">Perfil Profesional (opcional)</h3>
+            <p style="font-size:0.85rem;color:#666;margin-bottom:12px;">Si dejas este campo vacio, la IA generara automaticamente un perfil profesional basado en tu experiencia laboral.</p>
             <div class="form-group">
-                <label for="summary">Resumen breve de tu perfil (2-4 lineas) *</label>
-                <textarea id="summary" name="summary" rows="4" required maxlength="2000" placeholder="Ej: Profesional con 5 anos de experiencia en desarrollo de software, especializado en aplicaciones web con PHP y JavaScript. Orientado a resultados con enfoque en soluciones escalables.">{{ old('summary') }}</textarea>
+                <label for="summary">Resumen breve de tu perfil (2-4 lineas)</label>
+                <textarea id="summary" name="summary" rows="4" maxlength="2000" placeholder="Ej: Profesional con 5 anos de experiencia en desarrollo de software, especializado en aplicaciones web con PHP y JavaScript. Orientado a resultados con enfoque en soluciones escalables.">{{ old('summary') }}</textarea>
             </div>
         </div>
 

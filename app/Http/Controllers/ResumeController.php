@@ -472,7 +472,7 @@ class ResumeController extends Controller
             'address' => ['required', 'string', 'max:500'],
             'location' => ['nullable', 'string', 'max:255'],
             'linkedin' => ['nullable', 'string', 'max:255'],
-            'summary' => ['required', 'string', 'max:2000'],
+            'summary' => ['nullable', 'string', 'max:2000'],
             'experiences' => ['required', 'array', 'min:1'],
             'experiences.*.company' => ['required', 'string', 'max:255'],
             'experiences.*.position' => ['required', 'string', 'max:255'],
@@ -495,7 +495,7 @@ class ResumeController extends Controller
         $address = $this->sanitizeUserText($validated['address']);
         $location = $this->sanitizeUserText($validated['location'] ?? '');
         $linkedin = $this->sanitizeUserText($validated['linkedin'] ?? '');
-        $summary = $this->sanitizeUserText($validated['summary']);
+        $summary = $this->sanitizeUserText($validated['summary'] ?? '');
         $skillsRaw = $this->sanitizeUserText($validated['skills']);
         $certsRaw = $this->sanitizeUserText($validated['certifications'] ?? '', true);
         $langsRaw = $this->sanitizeUserText($validated['languages'] ?? '');
@@ -582,7 +582,7 @@ class ResumeController extends Controller
         if ($linkedin) $textParts[] = $linkedin;
         $textParts[] = '';
         $textParts[] = 'PERFIL PROFESIONAL';
-        $textParts[] = $summary;
+        $textParts[] = $summary ?: '[GENERAR AUTOMATICAMENTE BASADO EN EXPERIENCIA LABORAL]';
         $textParts[] = '';
         $textParts[] = 'EXPERIENCIA LABORAL';
         $textParts[] = implode("\n\n", $experienceText);
