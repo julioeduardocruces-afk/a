@@ -535,8 +535,10 @@ class ResumeController extends Controller
             $educationText[] = $block;
         }
 
-        $skills = array_map('trim', explode(',', $skillsRaw));
-        $skills = array_filter($skills);
+        $skills = [];
+        if ($skillsRaw) {
+            $skills = array_filter(array_map('trim', explode(',', $skillsRaw)));
+        }
 
         $certs = [];
         if ($certsRaw) {
