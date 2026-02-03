@@ -5,6 +5,7 @@
         <div class="sidebar-section">General</div>
         <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
         <a href="{{ route('admin.resumes') }}" class="{{ request()->routeIs('admin.resumes') ? 'active' : '' }}">Gestionar CVs</a>
+        <a href="{{ route('admin.free-process') }}" class="{{ request()->routeIs('admin.free-process') ? 'active' : '' }}">Procesar CV Gratis</a>
         <a href="{{ route('admin.credentials') }}" class="{{ request()->routeIs('admin.credentials') ? 'active' : '' }}">Credenciales</a>
         <a href="{{ route('admin.email-template') }}" class="{{ request()->routeIs('admin.email-template') ? 'active' : '' }}">Plantilla Email</a>
 

@@ -14,8 +14,11 @@ use App\Services\MailerService;
 use App\Enums\ResumeStatus;
 use App\Jobs\ProcessResumeJob;
 use App\Jobs\GenerateFinalCvJob;
+use App\Services\TextExtractorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AdminDashboardController extends Controller
 {
@@ -528,5 +531,333 @@ class AdminDashboardController extends Controller
         ], $request->ip());
 
         return back()->with('success', 'Plantilla de correo actualizada exitosamente.');
+    }
+
+    // --- Free CV Processing (Admin Only) ---
+
+    /**
+     * Show the free CV processing page for admins.
+     */
+    public function freeProcess()
+    {
+        // Get draft resumes that haven't been processed yet (for quick selection)
+        $draftResumes = Resume::where('status', ResumeStatus::Draft)
+            ->orderByDesc('created_at')
+            ->limit(50)
+            ->get();
+
+        return view('admin.free-process', compact('draftResumes'));
+    }
+
+    /**
+     * Process an existing resume without payment (admin only).
+     */
+    public function processResumeFree(Request $request, int $id)
+    {
+        $resume = Resume::findOrFail($id);
+
+        // Validate target role
+        $validated = $request->validate([
+            'target_industry' => ['required', 'string', 'max:100'],
+            'target_role' => ['required', 'string', 'max:200'],
+            'recipient_email' => ['nullable', 'email', 'max:255'],
+        ]);
+
+        // Update target industry/role
+        $resume->target_industry = $this->sanitizeInput($validated['target_industry']);
+        $resume->target_role = $this->sanitizeInput($validated['target_role']);
+
+        // Override email if provided
+        if (!empty($validated['recipient_email'])) {
+            $resume->customer_email = $validated['recipient_email'];
+        }
+
+        // Clear any previous errors
+        $resume->error_code = null;
+        $resume->error_message = null;
+
+        // Transition directly to Processing (skip payment)
+        $resume->transitionTo(ResumeStatus::Processing);
+
+        // Dispatch the processing job
+        ProcessResumeJob::dispatch($resume->id);
+
+        AuditLog::record('admin.free_process_resume', $request->user()->id, 'admin', [
+            'resume_id' => $id,
+            'target_industry' => $resume->target_industry,
+            'target_role' => $resume->target_role,
+            'recipient_email' => $resume->customer_email,
+        ], $request->ip());
+
+        return back()->with('success', "CV #{$id} enviado a procesamiento. El resultado se enviara a: {$resume->customer_email}");
+    }
+
+    /**
+     * Upload and process a CV file without payment (admin only).
+     */
+    public function freeProcessUpload(Request $request)
+    {
+        $validated = $request->validate([
+            'cv_file' => ['required', 'file', 'max:10240', 'mimes:pdf,docx'],
+            'target_industry' => ['required', 'string', 'max:100'],
+            'target_role' => ['required', 'string', 'max:200'],
+            'recipient_email' => ['required', 'email', 'max:255'],
+        ]);
+
+        $file = $request->file('cv_file');
+        $textExtractor = new TextExtractorService();
+
+        // Validate file security
+        try {
+            $textExtractor->validateFile($file);
+        } catch (\Exception $e) {
+            return back()->withErrors(['cv_file' => $e->getMessage()])->withInput();
+        }
+
+        // Generate secure filename and store
+        $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+        $storagePath = 'uploads/admin/' . $filename;
+        Storage::disk('local')->putFileAs('uploads/admin', $file, $filename);
+
+        // Extract and structure text
+        $mime = $file->getMimeType();
+        try {
+            $extractedText = $textExtractor->extract($storagePath, $mime);
+            $structuredJson = $textExtractor->structureText($extractedText);
+        } catch (\Exception $e) {
+            Storage::disk('local')->delete($storagePath);
+            return back()->withErrors(['cv_file' => 'Error extrayendo texto: ' . $e->getMessage()])->withInput();
+        }
+
+        // Create resume record
+        $resume = Resume::create([
+            'user_id' => $request->user()->id,
+            'original_filename' => $file->getClientOriginalName(),
+            'original_mime' => $mime,
+            'original_path' => $storagePath,
+            'extracted_text' => $extractedText,
+            'structured_json' => $structuredJson,
+            'target_industry' => $this->sanitizeInput($validated['target_industry']),
+            'target_role' => $this->sanitizeInput($validated['target_role']),
+            'customer_email' => $validated['recipient_email'],
+            'status' => ResumeStatus::Processing,
+            'access_token' => Str::random(64),
+        ]);
+
+        // Dispatch processing job
+        ProcessResumeJob::dispatch($resume->id);
+
+        AuditLog::record('admin.free_process_upload', $request->user()->id, 'admin', [
+            'resume_id' => $resume->id,
+            'original_filename' => $file->getClientOriginalName(),
+            'target_industry' => $resume->target_industry,
+            'target_role' => $resume->target_role,
+            'recipient_email' => $resume->customer_email,
+        ], $request->ip());
+
+        return back()->with('success', "CV subido y enviado a procesamiento. El resultado se enviara a: {$resume->customer_email}");
+    }
+
+    /**
+     * Build and process a CV from form data without payment (admin only).
+     */
+    public function freeProcessBuilder(Request $request)
+    {
+        $validated = $request->validate([
+            'full_name' => ['required', 'string', 'max:255'],
+            'rut' => ['required', 'string', 'max:12'],
+            'email' => ['required', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'address' => ['required', 'string', 'max:500'],
+            'location' => ['nullable', 'string', 'max:255'],
+            'linkedin' => ['nullable', 'string', 'max:255'],
+            'summary' => ['nullable', 'string', 'max:2000'],
+            'experiences' => ['required', 'array', 'min:1'],
+            'experiences.*.company' => ['required', 'string', 'max:255'],
+            'experiences.*.position' => ['required', 'string', 'max:255'],
+            'experiences.*.period' => ['nullable', 'string', 'max:100'],
+            'experiences.*.description' => ['nullable', 'string', 'max:3000'],
+            'education' => ['required', 'array', 'min:1'],
+            'education.*.institution' => ['required', 'string', 'max:255'],
+            'education.*.degree' => ['required', 'string', 'max:255'],
+            'education.*.period' => ['nullable', 'string', 'max:100'],
+            'skills' => ['nullable', 'string', 'max:2000'],
+            'certifications' => ['nullable', 'string', 'max:2000'],
+            'languages' => ['nullable', 'string', 'max:500'],
+            'target_industry' => ['required', 'string', 'max:100'],
+            'target_role' => ['required', 'string', 'max:200'],
+            'recipient_email' => ['required', 'email', 'max:255'],
+        ]);
+
+        // Sanitize all text fields
+        $name = $this->sanitizeInput($validated['full_name']);
+        $rut = $this->sanitizeInput($validated['rut']);
+        $email = $validated['email'];
+        $phone = $this->sanitizeInput($validated['phone'] ?? '');
+        $address = $this->sanitizeInput($validated['address']);
+        $location = $this->sanitizeInput($validated['location'] ?? '');
+        $linkedin = $this->sanitizeInput($validated['linkedin'] ?? '');
+        $summary = $this->sanitizeInput($validated['summary'] ?? '');
+        $skillsRaw = $this->sanitizeInput($validated['skills'] ?? '');
+        $certsRaw = $this->sanitizeInput($validated['certifications'] ?? '', true);
+        $langsRaw = $this->sanitizeInput($validated['languages'] ?? '');
+
+        // Build experience entries
+        $experienceEntries = [];
+        $experienceText = [];
+        foreach ($validated['experiences'] as $exp) {
+            $company = $this->sanitizeInput($exp['company']);
+            $position = $this->sanitizeInput($exp['position']);
+            $period = $this->sanitizeInput($exp['period'] ?? '');
+            $desc = $this->sanitizeInput($exp['description'] ?? '', true);
+
+            $entry = $position . ' - ' . $company;
+            if ($period) $entry .= ' (' . $period . ')';
+            $experienceEntries[] = $entry;
+
+            $block = $company . ' - ' . $position;
+            if ($period) $block .= "\n" . $period;
+            if ($desc) $block .= "\n" . $desc;
+            $experienceText[] = $block;
+        }
+
+        // Build education entries
+        $educationEntries = [];
+        $educationText = [];
+        foreach ($validated['education'] as $edu) {
+            $institution = $this->sanitizeInput($edu['institution']);
+            $degree = $this->sanitizeInput($edu['degree']);
+            $period = $this->sanitizeInput($edu['period'] ?? '');
+
+            $entry = $degree . ' - ' . $institution;
+            if ($period) $entry .= ' (' . $period . ')';
+            $educationEntries[] = $entry;
+
+            $block = $institution . ' - ' . $degree;
+            if ($period) $block .= "\n" . $period;
+            $educationText[] = $block;
+        }
+
+        // Parse skills, certifications, languages
+        $skills = [];
+        if ($skillsRaw) {
+            $skills = array_filter(array_map('trim', explode(',', $skillsRaw)));
+        }
+
+        $certs = [];
+        if ($certsRaw) {
+            $certs = array_filter(array_map('trim', preg_split('/[\n,]+/', $certsRaw)));
+        }
+
+        $langs = [];
+        if ($langsRaw) {
+            $langs = array_filter(array_map('trim', preg_split('/[\n,]+/', $langsRaw)));
+        }
+
+        // Build header
+        $headerParts = [$name];
+        if ($rut) $headerParts[] = 'RUT: ' . $rut;
+        if ($email) $headerParts[] = $email;
+        if ($phone) $headerParts[] = $phone;
+        if ($address) $headerParts[] = $address;
+        if ($location) $headerParts[] = $location;
+        if ($linkedin) $headerParts[] = $linkedin;
+
+        $structuredJson = [
+            'header' => implode("\n", $headerParts),
+            'rut' => $rut,
+            'address' => $address,
+            'summary' => $summary,
+            'experience' => $experienceEntries,
+            'education' => $educationEntries,
+            'skills' => array_values($skills),
+            'certifications' => array_values($certs),
+            'languages' => array_values($langs),
+            'other' => '',
+        ];
+
+        // Build extracted text
+        $textParts = [];
+        $contactLine = $name;
+        if ($rut) $contactLine .= ' | RUT: ' . $rut;
+        if ($email) $contactLine .= ' | ' . $email;
+        if ($phone) $contactLine .= ' | ' . $phone;
+        $textParts[] = $contactLine;
+        if ($address) $textParts[] = 'Direccion: ' . $address;
+        if ($location) $textParts[] = $location;
+        if ($linkedin) $textParts[] = $linkedin;
+        $textParts[] = '';
+        $textParts[] = 'PERFIL PROFESIONAL';
+        $textParts[] = $summary ?: '[GENERAR AUTOMATICAMENTE BASADO EN EXPERIENCIA LABORAL]';
+        $textParts[] = '';
+        $textParts[] = 'EXPERIENCIA LABORAL';
+        $textParts[] = implode("\n\n", $experienceText);
+        $textParts[] = '';
+        $textParts[] = 'EDUCACION';
+        $textParts[] = implode("\n\n", $educationText);
+        $textParts[] = '';
+        $textParts[] = 'COMPETENCIAS CLAVE';
+        $textParts[] = !empty($skills) ? implode(', ', $skills) : '[GENERAR AUTOMATICAMENTE BASADO EN EXPERIENCIA LABORAL]';
+        if (!empty($certs)) {
+            $textParts[] = '';
+            $textParts[] = 'CERTIFICACIONES';
+            $textParts[] = implode("\n", $certs);
+        }
+        if (!empty($langs)) {
+            $textParts[] = '';
+            $textParts[] = 'IDIOMAS';
+            $textParts[] = implode(', ', $langs);
+        }
+
+        $extractedText = implode("\n", $textParts);
+
+        // Create resume record
+        $resume = Resume::create([
+            'user_id' => $request->user()->id,
+            'original_filename' => 'admin_cv_builder_' . Str::slug($name) . '.txt',
+            'original_mime' => 'text/plain',
+            'original_path' => '',
+            'extracted_text' => $extractedText,
+            'structured_json' => $structuredJson,
+            'target_industry' => $this->sanitizeInput($validated['target_industry']),
+            'target_role' => $this->sanitizeInput($validated['target_role']),
+            'customer_email' => $validated['recipient_email'],
+            'status' => ResumeStatus::Processing,
+            'access_token' => Str::random(64),
+        ]);
+
+        // Dispatch processing job
+        ProcessResumeJob::dispatch($resume->id);
+
+        AuditLog::record('admin.free_process_builder', $request->user()->id, 'admin', [
+            'resume_id' => $resume->id,
+            'candidate_name' => $name,
+            'target_industry' => $resume->target_industry,
+            'target_role' => $resume->target_role,
+            'recipient_email' => $resume->customer_email,
+        ], $request->ip());
+
+        return back()->with('success', "CV creado y enviado a procesamiento. El resultado se enviara a: {$resume->customer_email}");
+    }
+
+    /**
+     * Sanitize user input to prevent XSS and injection attacks.
+     */
+    private function sanitizeInput(string $text, bool $allowNewlines = false): string
+    {
+        // Strip HTML/PHP tags
+        $text = strip_tags($text);
+
+        // Remove control characters except newlines if allowed
+        if ($allowNewlines) {
+            $text = preg_replace('/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F]/', '', $text);
+        } else {
+            $text = preg_replace('/[\x00-\x1F\x7F]/', ' ', $text);
+        }
+
+        // Collapse multiple spaces
+        $text = preg_replace('/[ \t]+/', ' ', $text);
+
+        return trim($text);
     }
 }

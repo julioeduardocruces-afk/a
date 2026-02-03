@@ -243,4 +243,10 @@ Route::middleware(['auth', EnsureIsAdmin::class, AuditRequest::class])
             Route::get('/export/downloads', [AdminFinanceController::class, 'exportDownloads'])->name('export-downloads');
             Route::get('/export/ai-usage', [AdminFinanceController::class, 'exportAiUsage'])->name('export-ai-usage');
         });
+
+        // Free CV Processing (no payment required)
+        Route::get('/free-process', [AdminDashboardController::class, 'freeProcess'])->name('free-process');
+        Route::post('/free-process/upload', [AdminDashboardController::class, 'freeProcessUpload'])->name('free-process.upload');
+        Route::post('/free-process/builder', [AdminDashboardController::class, 'freeProcessBuilder'])->name('free-process.builder');
+        Route::post('/resumes/{id}/process-free', [AdminDashboardController::class, 'processResumeFree'])->name('resumes.process-free');
     });
