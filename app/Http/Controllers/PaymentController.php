@@ -39,7 +39,17 @@ class PaymentController extends Controller
         }
 
         // Store customer email for delivery
-        $resume->update(['customer_email' => $validated['customer_email']]);
+        $email = $validated['customer_email'];
+        $resume->update(['customer_email' => $email]);
+
+        // Enrich stored Meta user context with email for Purchase CAPI (webhook context).
+        // For the upload flow, meta_user_context was captured at showPayment() without email
+        // because customer_email hadn't been submitted yet at that point.
+        $context = $resume->meta_user_context ?? [];
+        if (empty($context['email']) && $email) {
+            $context['email'] = $email;
+            $resume->update(['meta_user_context' => $context]);
+        }
 
         $amount = (int)config('ats.price_clp', 4990);
 
