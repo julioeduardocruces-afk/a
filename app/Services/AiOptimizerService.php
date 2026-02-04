@@ -35,7 +35,6 @@ REGLA CRÍTICA - NO CREAR SECCIONES VACÍAS NI CON PLACEHOLDER:
   - "A solicitud"
   - "Disponibles a solicitud"
 - Si no hay CERTIFICACIONES en el original, OMITIR sección CERTIFICACIONES
-- Si no hay HERRAMIENTAS en el original, OMITIR sección HERRAMIENTAS Y TECNOLOGÍAS
 - Si no hay IDIOMAS en el original, OMITIR sección IDIOMAS
 - Si no hay DISPONIBILIDAD en el original, OMITIR sección DISPONIBILIDAD
 - Si no hay REFERENCIAS en el original, OMITIR sección REFERENCIAS
@@ -59,6 +58,12 @@ REGLA CRÍTICA DE EXPERIENCIA LABORAL - NO RESUMIR:
 11. COMPETENCIAS CLAVE - SIEMPRE GENERAR (importante para ATS):
     - SIEMPRE crear sección COMPETENCIAS CLAVE basándote en la experiencia real del candidato
     - Extraer competencias técnicas y blandas de la experiencia laboral
+    - Esta sección es OBLIGATORIA para optimización ATS
+12. HERRAMIENTAS Y TECNOLOGÍAS - SIEMPRE GENERAR:
+    - SIEMPRE crear esta sección basándote en:
+      a) Herramientas/software mencionados explícitamente en el CV
+      b) Herramientas inferidas de la experiencia laboral del candidato
+    - Incluir: software, sistemas, herramientas técnicas, plataformas
     - Esta sección es OBLIGATORIA para optimización ATS
 
 REGLAS DE CONTENIDO COMPLETO - NO OMITIR NADA:
@@ -151,9 +156,10 @@ Institución que lo otorga (si existe en el original)
 - Competencia blanda 1
 
 ## HERRAMIENTAS Y TECNOLOGÍAS
-(Solo si el CV menciona herramientas/software específicos)
-- Herramienta 1
-- Herramienta 2
+(SIEMPRE incluir - generar basado en CV y experiencia del candidato)
+- Software/Sistema 1
+- Herramienta técnica 2
+- Plataforma 3
 
 ## IDIOMAS
 (Solo si existen en el CV original - si no hay, OMITIR)
