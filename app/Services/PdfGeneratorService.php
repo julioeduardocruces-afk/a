@@ -48,6 +48,9 @@ class PdfGeneratorService
         ]);
 
         $lines = explode("\n", $plainText);
+        $isFirstLine = true;
+        $foundName = false;
+
         foreach ($lines as $line) {
             $trimmed = trim($line);
 
@@ -56,22 +59,37 @@ class PdfGeneratorService
                 continue;
             }
 
+            // First non-empty line is the name - make it large, bold, centered
+            if ($isFirstLine && !$foundName) {
+                $isFirstLine = false;
+                // Check if this looks like a name (not a section header)
+                if (!$this->isSectionHeader($trimmed) && !str_starts_with($trimmed, '-') && !str_starts_with($trimmed, '•')) {
+                    $section->addText(
+                        htmlspecialchars($trimmed, ENT_QUOTES, 'UTF-8'),
+                        ['bold' => true, 'size' => 18, 'color' => '1a1a2e'],
+                        ['alignment' => Jc::CENTER, 'spaceAfter' => 120]
+                    );
+                    $foundName = true;
+                    continue;
+                }
+            }
+
             // Detect headers (ALL CAPS lines or lines starting with known section titles)
             if ($this->isSectionHeader($trimmed)) {
                 $section->addText(
                     htmlspecialchars($trimmed, ENT_QUOTES, 'UTF-8'),
-                    ['bold' => true, 'size' => 13, 'allCaps' => true],
-                    ['spaceAfter' => 60]
+                    ['bold' => true, 'size' => 14, 'color' => '1a1a2e'],
+                    ['spaceAfter' => 80, 'spaceBefore' => 200]
                 );
                 continue;
             }
 
-            // Detect sub-headers (bold-like lines)
+            // Detect sub-headers (job titles, education entries)
             if ($this->isSubHeader($trimmed)) {
                 $section->addText(
                     htmlspecialchars($trimmed, ENT_QUOTES, 'UTF-8'),
-                    ['bold' => true, 'size' => 11],
-                    ['spaceAfter' => 40]
+                    ['bold' => true, 'size' => 12, 'color' => '333333'],
+                    ['spaceAfter' => 60, 'spaceBefore' => 120]
                 );
                 continue;
             }
@@ -140,7 +158,34 @@ class PdfGeneratorService
 
     private function isSubHeader(string $line): bool
     {
-        // Lines that look like "Company Name - Role (Date - Date)"
-        return (bool)preg_match('/^[A-ZÁÉÍÓÚÑ].+\s[-–|]\s.+\d{4}/', $line);
+        // Lines that look like "Company Name - Role (Date - Date)" or similar patterns
+        // Pattern 1: Contains dash/hyphen with year (e.g., "Empresa - Cargo | 2020 - 2023")
+        if (preg_match('/^[A-ZÁÉÍÓÚÑ].+\s[-–|]\s.+\d{4}/', $line)) {
+            return true;
+        }
+
+        // Pattern 2: Starts with capital letter, contains year range (e.g., "Analista Senior (2019 - 2022)")
+        if (preg_match('/^[A-ZÁÉÍÓÚÑ][^#\n]{10,}.*\(\d{4}\s*[-–]\s*(\d{4}|Presente|Actual)\)/ui', $line)) {
+            return true;
+        }
+
+        // Pattern 3: Job title pattern with separator (e.g., "Gerente de Finanzas – Banco XYZ")
+        if (preg_match('/^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(\s+[A-Za-záéíóúñÁÉÍÓÚÑ]+){1,5}\s*[–\-|]\s*[A-ZÁÉÍÓÚÑ]/u', $line)) {
+            return true;
+        }
+
+        // Pattern 4: Education entry (e.g., "Ingeniero Comercial - Universidad de Chile")
+        if (preg_match('/^(Ingenier[oa]|Licenciad[oa]|Técnico|Magíster|Master|MBA|Diplomado|Contador|Abogad[oa]|Doctor|PhD|Bachiller)/ui', $line) &&
+            mb_strlen($line) > 15 && mb_strlen($line) < 120) {
+            return true;
+        }
+
+        // Pattern 5: Institution pattern (e.g., "Universidad de Santiago | 2015 - 2019")
+        if (preg_match('/^(Universidad|Instituto|Centro|Escuela|Colegio|Liceo|Academia)/ui', $line) &&
+            mb_strlen($line) > 10 && mb_strlen($line) < 120) {
+            return true;
+        }
+
+        return false;
     }
 }

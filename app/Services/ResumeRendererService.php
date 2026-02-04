@@ -44,18 +44,28 @@ class ResumeRendererService
         $htmlLines = [];
         $afterH1 = false; // Track lines right after name for subtitle/contact styling
         $inEntry = false; // Track if we're inside an h3 entry block
+        $isFirstLine = true; // First non-empty line is likely the name
+
+        // Known section headers (for fallback detection)
+        $sectionHeaders = [
+            'PERFIL PROFESIONAL', 'EXPERIENCIA LABORAL', 'FORMACIÓN ACADÉMICA',
+            'FORMACION ACADEMICA', 'EDUCACIÓN', 'EDUCACION', 'COMPETENCIAS CLAVE',
+            'HERRAMIENTAS Y TECNOLOGÍAS', 'HERRAMIENTAS Y TECNOLOGIAS',
+            'CERTIFICACIONES', 'IDIOMAS', 'DISPONIBILIDAD', 'EDUCACIÓN BÁSICA Y MEDIA',
+            'EDUCACION BASICA Y MEDIA', 'RESUMEN', 'HABILIDADES', 'CURSOS',
+        ];
 
         foreach ($lines as $line) {
+            $originalLine = $line;
             $safe = htmlspecialchars($line, ENT_QUOTES, 'UTF-8');
+            $trimmedUpper = mb_strtoupper(trim($line));
 
-            // Headers
+            // Headers with Markdown syntax
             if (preg_match('/^### (.+)$/', $safe, $m)) {
                 $afterH1 = false;
-                // Close previous entry if open
                 if ($inEntry) {
                     $htmlLines[] = '</div>';
                 }
-                // Start new entry block
                 $htmlLines[] = '<div class="entry">';
                 $inEntry = true;
                 $content = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $m[1]);
@@ -64,7 +74,6 @@ class ResumeRendererService
             }
             if (preg_match('/^## (.+)$/', $safe, $m)) {
                 $afterH1 = false;
-                // Close previous entry if open
                 if ($inEntry) {
                     $htmlLines[] = '</div>';
                     $inEntry = false;
@@ -73,18 +82,54 @@ class ResumeRendererService
                 continue;
             }
             if (preg_match('/^# (.+)$/', $safe, $m)) {
-                // Close previous entry if open
                 if ($inEntry) {
                     $htmlLines[] = '</div>';
                     $inEntry = false;
                 }
                 $htmlLines[] = '<h1>' . $m[1] . '</h1>';
                 $afterH1 = true;
+                $isFirstLine = false;
+                continue;
+            }
+
+            // Fallback: First non-empty line without # is likely the name (h1)
+            if ($isFirstLine && trim($safe) !== '' && !str_starts_with(trim($safe), '#')) {
+                $isFirstLine = false;
+                $htmlLines[] = '<h1>' . $safe . '</h1>';
+                $afterH1 = true;
+                continue;
+            }
+            $isFirstLine = false;
+
+            // Fallback: Detect section headers by known names (h2)
+            if (in_array($trimmedUpper, $sectionHeaders)) {
+                $afterH1 = false;
+                if ($inEntry) {
+                    $htmlLines[] = '</div>';
+                    $inEntry = false;
+                }
+                $htmlLines[] = '<h2>' . $safe . '</h2>';
+                continue;
+            }
+
+            // Fallback: Detect job titles / education entries (h3)
+            // Pattern: "Cargo – Empresa" or "Título - Institución" (contains dash/en-dash)
+            if (preg_match('/^[A-ZÁÉÍÓÚÑ][^#\n]{5,}[\s]*[–\-][\s]*[A-ZÁÉÍÓÚÑ]/u', trim($line)) &&
+                mb_strlen(trim($line)) < 100 &&
+                !preg_match('/^\d{4}/', trim($line))) {
+                $afterH1 = false;
+                if ($inEntry) {
+                    $htmlLines[] = '</div>';
+                }
+                $htmlLines[] = '<div class="entry">';
+                $inEntry = true;
+                $content = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $safe);
+                $htmlLines[] = '<h3>' . $content . '</h3>';
                 continue;
             }
 
             // Unicode bullet items (•)
-            if (preg_match('/^[\x{2022}]\s*(.+)$/u', $line, $m)) {
+            if (preg_match('/^[\x{2022}]\s*(.+)$/u', $originalLine, $m)) {
                 $afterH1 = false;
                 $item = htmlspecialchars($m[1], ENT_QUOTES, 'UTF-8');
                 $item = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $item);
