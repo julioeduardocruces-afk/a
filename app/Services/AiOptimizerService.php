@@ -37,12 +37,14 @@ REGLAS CRÍTICAS DE PRESERVACIÓN - NUNCA VIOLAR:
     - Formato: "Nombre del curso/certificación | Año" (sin inventar institución)
     - Ejemplo CORRECTO: "Operador CCTV y Alarmas | 2023"
     - Ejemplo INCORRECTO: "Operador CCTV y Alarmas - Institución no especificada | 2023"
-14. PRESERVACIÓN DE DESCRIPCIONES - REGLA CRÍTICA:
-    - Las descripciones de educación y certificaciones deben mantenerse COMPLETAS
-    - NO resumir, NO acortar, NO eliminar oraciones
-    - Si el original tiene 5 oraciones, el optimizado debe tener 5 oraciones equivalentes
-    - COPIA el contenido íntegro, solo mejora redacción si es necesario
-    - Ejemplo: Si dice "Formación entregada por la Unidad de análisis financiero con el objetivo de capacitar a los oficiales de cumplimiento" NO lo reduzcas a "Capacitación para..."
+14. PRESERVACIÓN DE DESCRIPCIONES - REGLA MÁS IMPORTANTE:
+    - COPIA TEXTUAL las descripciones de educación y certificaciones
+    - NO elimines NINGUNA información: instituciones, objetivos, destinatarios, lugares
+    - EJEMPLO DE LO QUE NO DEBES HACER:
+      ORIGINAL: "Formación entregada por la Unidad de análisis financiero con el objetivo de capacitar a los oficiales de cumplimiento para que puedan desarrollar e implementar un sistema preventivo contra los delitos de lavado de activos y financiamiento del terrorismo en sus entidades."
+      MAL (NO HAGAS ESTO): "Capacitación para desarrollar e implementar un sistema preventivo contra delitos de lavado de activos."
+      BIEN (HAZ ESTO): "Formación entregada por la Unidad de Análisis Financiero con el objetivo de capacitar a los oficiales de cumplimiento para desarrollar e implementar un sistema preventivo contra los delitos de lavado de activos y financiamiento del terrorismo en sus entidades."
+    - Mantén: institución que entrega (Unidad de análisis financiero), destinatarios (oficiales de cumplimiento), objetivos completos, lugares de aplicación (en sus entidades)
 15. EXPERIENCIAS NO ALINEADAS AL RUBRO:
     - Mínimo 2-3 bullets por experiencia, NUNCA menos
     - Mantener responsabilidades y logros principales
