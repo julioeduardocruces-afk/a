@@ -132,7 +132,7 @@ Ciudad, Región, País
 +56 X XXXX XXXX · correo@email.com
 
 ## PERFIL PROFESIONAL
-[Párrafo de 3-5 líneas en primera persona describiendo experiencia y competencias principales]
+[Párrafo de 3-5 líneas en PRIMERA PERSONA o forma impersonal. Destacar competencias principales, años de experiencia y logros relevantes. NUNCA usar "su" ni "sus".]
 
 ## EXPERIENCIA LABORAL
 
