@@ -62,7 +62,6 @@ Párrafo descriptivo con **palabras clave en negrita** relevantes al cargo objet
 ## EXPERIENCIA LABORAL
 
 ### Cargo – Empresa
-Ciudad, País
 **Año – Año**
 - Responsabilidad o logro con **keyword relevante**
 - Otra responsabilidad importante
@@ -70,7 +69,6 @@ Ciudad, País
 - Responsabilidad adicional
 
 ### Otro Cargo – Otra Empresa
-Ciudad, País
 **Año – Año**
 - Responsabilidad principal
 - Otra responsabilidad
@@ -106,6 +104,7 @@ REGLAS DE FORMATO CRÍTICAS:
 - CADA responsabilidad en su propia línea con guion (-)
 - PROHIBIDO texto continuo separado por " - " en una sola línea
 - PROHIBIDO aplastar múltiples responsabilidades en una línea
+- NO agregar ciudad/país en experiencias si NO existe en el original
 - Educación/Certificaciones: PRESERVAR descripciones completas del original
 - Si el original tiene 4 líneas de descripción, el optimizado debe tener contenido equivalente
 - Keywords relevantes en **negrita** dentro del texto
