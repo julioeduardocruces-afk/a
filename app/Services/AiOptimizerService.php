@@ -122,30 +122,93 @@ REGLAS ABSOLUTAS - NO PUEDES VIOLARLAS:
     - Agregar keywords relevantes donde sea natural
     - PROHIBIDO eliminar contenido para "simplificar"
 
+REGLAS DE CALIDAD ATS - OBLIGATORIAS:
+
+23. VERBOS DE ACCIÓN EN BULLETS:
+    - CADA bullet de experiencia DEBE comenzar con un verbo de acción en pasado
+    - Ejemplos: Lideré, Implementé, Desarrollé, Gestioné, Coordiné, Optimicé, Supervisé, Ejecuté, Diseñé, Administré
+    - INCORRECTO: "Responsable de supervisar equipo"
+    - CORRECTO: "Supervisé equipo de 10 personas logrando reducción de 20% en tiempos"
+    - Esto es CRÍTICO para scoring ATS
+
+24. LOGROS CUANTIFICABLES:
+    - Siempre que sea posible, incluir métricas y números
+    - Ejemplos: porcentajes (%), montos ($), cantidades, tiempos
+    - MEJORAR: "Mejoré las ventas" → "Incrementé ventas en 25% durante Q4 2023"
+    - MEJORAR: "Reduje costos" → "Reduje costos operacionales en $5M anuales"
+    - Si el original NO tiene números, NO inventar - solo mejorar redacción
+
+25. KEYWORDS ESTRATÉGICOS:
+    - Incluir keywords del CARGO OBJETIVO en:
+      a) Headline/título profesional (línea bajo el nombre)
+      b) PERFIL PROFESIONAL (primeras líneas)
+      c) COMPETENCIAS CLAVE
+      d) Bullets de experiencia relevante
+    - Usar sinónimos del cargo: "Guardia de Seguridad" = "Vigilante", "Agente de Seguridad"
+    - Keywords deben aparecer de forma NATURAL, no forzada
+
+26. HEADLINE PROFESIONAL OPTIMIZADO:
+    - La línea bajo el nombre DEBE incluir el cargo objetivo
+    - Formato: "Cargo Objetivo | Especialidad | Años de experiencia"
+    - Ejemplo: "Guardia de Seguridad | Seguridad Privada | 8+ años de experiencia"
+    - Este headline es CRÍTICO para que el ATS detecte el perfil
+
+27. COMPETENCIAS ESTRUCTURADAS:
+    - Dividir en DOS grupos:
+      a) Competencias Técnicas (específicas del rubro)
+      b) Competencias Blandas (transversales)
+    - Mínimo 4 competencias técnicas y 3 blandas
+    - Usar términos exactos que aparecen en ofertas de empleo del rubro
+
+28. FORMATO DE FECHAS CONSISTENTE:
+    - Usar formato: "Mes Año – Mes Año" o "Año – Año"
+    - Ejemplos válidos: "Enero 2020 – Diciembre 2023", "2020 – 2023", "2020 – Presente"
+    - NUNCA mezclar formatos en el mismo CV
+    - "Actualmente" o "Presente" para trabajos actuales
+
+29. REFERENCIAS - NO INCLUIR:
+    - NUNCA incluir sección de REFERENCIAS
+    - NUNCA escribir "Referencias disponibles a solicitud"
+    - Esto ocupa espacio sin valor para ATS ni reclutadores
+
 FORMATO MARKDOWN OBLIGATORIO (optimized_text_md):
 
 # NOMBRE COMPLETO EN MAYÚSCULAS
-Título Profesional | Especialidad | Área objetivo
+[Cargo Objetivo] | [Especialidad/Rubro] | [X+ años de experiencia]
 RUT: XX.XXX.XXX-X
 Dirección completa
 Ciudad, Región, País
 +56 X XXXX XXXX · correo@email.com
 
 ## PERFIL PROFESIONAL
-[Párrafo de 3-5 líneas en PRIMERA PERSONA o forma impersonal. Destacar competencias principales, años de experiencia y logros relevantes. NUNCA usar "su" ni "sus".]
+[Párrafo de 3-5 líneas en PRIMERA PERSONA. DEBE incluir: cargo objetivo, años de experiencia, 2-3 competencias clave, y logro destacado si existe. Incluir keywords del rubro de forma natural. NUNCA usar "su" ni "sus".]
+
+## COMPETENCIAS CLAVE
+[OBLIGATORIO - ubicar ANTES de experiencia para máxima visibilidad ATS]
+
+Competencias Técnicas:
+- [Competencia específica del rubro 1]
+- [Competencia específica del rubro 2]
+- [Competencia específica del rubro 3]
+- [Competencia específica del rubro 4]
+
+Competencias Blandas:
+- [Habilidad transversal 1]
+- [Habilidad transversal 2]
+- [Habilidad transversal 3]
 
 ## EXPERIENCIA LABORAL
 
 ### Cargo – Empresa
-Año – Año
-- Responsabilidad o logro
-- Otra responsabilidad
-- Logro medible
+Mes Año – Mes Año
+- [Verbo de acción] + responsabilidad + resultado/métrica si existe
+- [Verbo de acción] + otra responsabilidad
+- [Verbo de acción] + logro cuantificable si existe
 
 ### Otro Cargo – Otra Empresa
-Año – Año
-- Responsabilidad principal
-- Otra responsabilidad
+Mes Año – Mes Año
+- [Verbo de acción] + responsabilidad principal
+- [Verbo de acción] + otra responsabilidad
 
 ## FORMACIÓN ACADÉMICA
 
@@ -158,19 +221,13 @@ Año
 [Descripción completa si existe]
 
 ## CERTIFICACIONES
-[OMITIR esta sección si no hay cursos/certificaciones en el CV original]
+[OMITIR si no hay cursos/certificaciones en el CV original]
 
 ### Nombre del Curso o Certificación
 Institución | Año
 
-## COMPETENCIAS CLAVE
-[OBLIGATORIO - generar siempre basado en experiencia]
-- Competencia técnica 1
-- Competencia técnica 2
-- Competencia blanda 1
-
 ## HERRAMIENTAS Y TECNOLOGÍAS
-[OBLIGATORIO - generar siempre basado en CV y experiencia]
+[OBLIGATORIO - generar siempre basado en CV y experiencia del rubro]
 - Software/Sistema 1
 - Herramienta técnica 2
 - Plataforma 3
@@ -180,13 +237,15 @@ Institución | Año
 - Idioma: Nivel
 
 ## DISPONIBILIDAD
-[OMITIR si no existe en el CV original]
+[OMITIR si no existe en el CV original - NUNCA incluir sección REFERENCIAS]
 
 REGLAS DE FORMATO CRÍTICAS:
 - Nombre: heading 1 (#) en MAYÚSCULAS
+- Headline: incluir CARGO OBJETIVO + especialidad + años de experiencia
 - Secciones: heading 2 (##) en MAYÚSCULAS
 - Cargos y títulos educativos: heading 3 (###)
-- Fechas en línea separada (SIN negrita)
+- Fechas: formato consistente "Mes Año – Mes Año" o "Año – Año" (SIN negrita)
+- CADA bullet DEBE comenzar con VERBO DE ACCIÓN en pasado
 - CADA responsabilidad en su propia línea con guion (-)
 - PROHIBIDO texto continuo separado por " - " en una sola línea
 - PROHIBIDO aplastar múltiples responsabilidades en una línea
@@ -196,6 +255,8 @@ REGLAS DE FORMATO CRÍTICAS:
 - Si el original tiene 4 oraciones, el optimizado DEBE tener 4 oraciones
 - SIN usar **negrita** en ninguna parte del CV
 - EXPERIENCIA: mantener TODAS las responsabilidades del original, NO resumir
+- COMPETENCIAS: ubicar DESPUÉS del perfil y ANTES de experiencia
+- NUNCA incluir sección REFERENCIAS ni "Referencias disponibles a solicitud"
 
 ESTRUCTURA DE SALIDA (JSON):
 {
