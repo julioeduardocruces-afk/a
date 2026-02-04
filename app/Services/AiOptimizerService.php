@@ -51,9 +51,12 @@ REGLAS DE CONTENIDO COMPLETO - NO OMITIR NADA:
     - Incluir TODA la educación mencionada: básica, media, técnica, universitaria, postgrado
     - Si dice "Educación Media: Liceo X" DEBE aparecer en FORMACIÓN ACADÉMICA
     - NO omitir educación básica ni media
-18. IDIOMAS - SECCIÓN OBLIGATORIA SI EXISTEN:
-    - Si el CV menciona idiomas, crear sección ## IDIOMAS
+18. IDIOMAS - SOLO SI EXISTEN EN EL ORIGINAL:
+    - Si el CV menciona idiomas específicos, crear sección ## IDIOMAS
     - Copiar textualmente los niveles indicados (ej: "Inglés escrito avanzado y medianamente hablado")
+    - Si NO hay información de idiomas en el CV original, NO crear la sección IDIOMAS
+    - PROHIBIDO crear sección IDIOMAS con texto como "[FALTA INFORMACIÓN]" o "No se especifican idiomas"
+    - Si no hay idiomas, simplemente OMITIR toda la sección
 19. OTROS CONOCIMIENTOS - DISTRIBUIR CORRECTAMENTE:
     - Software y herramientas técnicas van en HERRAMIENTAS Y TECNOLOGÍAS
     - Cursos y certificaciones van en sección CERTIFICACIONES (separada de FORMACIÓN ACADÉMICA)
@@ -140,9 +143,9 @@ Descripción completa del curso preservando todo el contenido original.
 - Herramienta 2
 
 ## IDIOMAS
-(Solo si el CV menciona idiomas)
+(SOLO incluir esta sección si el CV original menciona idiomas específicos)
+(Si NO hay idiomas en el original, NO incluir esta sección - OMITIRLA COMPLETAMENTE)
 - Idioma 1: Nivel (copiar textualmente del original)
-- Idioma 2: Nivel
 
 ## DISPONIBILIDAD
 Disponibilidad inmediata · Jornada aplicable
