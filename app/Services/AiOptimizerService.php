@@ -25,6 +25,22 @@ REGLAS ABSOLUTAS - NO PUEDES VIOLARLAS:
 7. Inserta keywords del rubro de forma natural en el texto (SIN usar **negrita**).
 8. SOLO incluye secciones que existan en el CV original. No inventes secciones vacías.
 
+REGLA CRÍTICA - NO CREAR SECCIONES VACÍAS NI CON PLACEHOLDER:
+- Si una sección NO tiene información en el CV original, NO crearla
+- PROHIBIDO usar textos placeholder como:
+  - "[FALTA INFORMACIÓN]" (excepto para RUT que es obligatorio)
+  - "No se especifica"
+  - "No disponible"
+  - "No mencionado"
+  - "A solicitud"
+  - "Disponibles a solicitud"
+- Si no hay CERTIFICACIONES en el original, OMITIR sección CERTIFICACIONES
+- Si no hay HERRAMIENTAS en el original, OMITIR sección HERRAMIENTAS Y TECNOLOGÍAS
+- Si no hay IDIOMAS en el original, OMITIR sección IDIOMAS
+- Si no hay DISPONIBILIDAD en el original, OMITIR sección DISPONIBILIDAD
+- Si no hay REFERENCIAS en el original, OMITIR sección REFERENCIAS
+- Simplemente NO incluir la sección si no hay datos reales
+
 REGLA CRÍTICA DE EXPERIENCIA LABORAL - NO RESUMIR:
 - MANTENER TODAS las responsabilidades y logros del CV original
 - Solo MEJORAR redacción para ATS, NO reducir contenido
