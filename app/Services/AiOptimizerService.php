@@ -171,75 +171,83 @@ REGLAS DE CALIDAD ATS - OBLIGATORIAS:
     - NUNCA escribir "Referencias disponibles a solicitud"
     - Esto ocupa espacio sin valor para ATS ni reclutadores
 
-FORMATO MARKDOWN OBLIGATORIO (optimized_text_md):
+30. PROHIBIDO TEXTO PLACEHOLDER EN OUTPUT:
+    - NUNCA incluir texto entre corchetes [] en el CV final
+    - NUNCA escribir "[Descripción completa...]", "[OMITIR...]", "[Verbo de acción]"
+    - Si no hay descripción de un programa educativo, simplemente NO incluir descripción
+    - Si una sección debe omitirse, NO incluirla en absoluto (ni el título)
+    - El CV final debe verse PROFESIONAL, sin instrucciones ni placeholders
 
-# NOMBRE COMPLETO EN MAYÚSCULAS
-[Cargo Objetivo] | [Especialidad/Rubro] | [X+ años de experiencia]
-RUT: XX.XXX.XXX-X
-Dirección completa
-Ciudad, Región, País
-+56 X XXXX XXXX · correo@email.com
+FORMATO MARKDOWN - EJEMPLO DE ESTRUCTURA (NO copiar textos literalmente):
+
+# JUAN PÉREZ GONZÁLEZ
+Guardia de Seguridad | Seguridad Privada | 8+ años de experiencia
+RUT: 12.345.678-9
+Av. Principal 123, Depto 45
+Santiago, Región Metropolitana, Chile
++56 9 1234 5678 · juan.perez@email.com
 
 ## PERFIL PROFESIONAL
-[Párrafo de 3-5 líneas en PRIMERA PERSONA. DEBE incluir: cargo objetivo, años de experiencia, 2-3 competencias clave, y logro destacado si existe. Incluir keywords del rubro de forma natural. NUNCA usar "su" ni "sus".]
+Profesional con más de 8 años de experiencia en seguridad privada y control de accesos. Cuento con sólidas competencias en vigilancia, prevención de riesgos y manejo de situaciones de emergencia. Certificado en OS-10 y con experiencia en retail, industria y eventos masivos.
 
 ## COMPETENCIAS CLAVE
-[OBLIGATORIO - ubicar ANTES de experiencia para máxima visibilidad ATS]
 
 Competencias Técnicas:
-- [Competencia específica del rubro 1]
-- [Competencia específica del rubro 2]
-- [Competencia específica del rubro 3]
-- [Competencia específica del rubro 4]
+- Control de accesos y vigilancia perimetral
+- Manejo de sistemas CCTV y alarmas
+- Prevención de pérdidas y riesgos
+- Protocolos de emergencia y evacuación
 
 Competencias Blandas:
-- [Habilidad transversal 1]
-- [Habilidad transversal 2]
-- [Habilidad transversal 3]
+- Comunicación efectiva
+- Trabajo bajo presión
+- Resolución de conflictos
 
 ## EXPERIENCIA LABORAL
 
-### Cargo – Empresa
-Mes Año – Mes Año
-- [Verbo de acción] + responsabilidad + resultado/métrica si existe
-- [Verbo de acción] + otra responsabilidad
-- [Verbo de acción] + logro cuantificable si existe
+### Guardia de Seguridad – Empresa de Seguridad S.A.
+Enero 2020 – Presente
+- Supervisé el control de acceso de más de 500 personas diarias
+- Implementé protocolos de seguridad reduciendo incidentes en 30%
+- Coordiné equipo de 5 guardias en turnos rotativos
 
-### Otro Cargo – Otra Empresa
-Mes Año – Mes Año
-- [Verbo de acción] + responsabilidad principal
-- [Verbo de acción] + otra responsabilidad
+### Vigilante – Retail Chile Ltda.
+Marzo 2015 – Diciembre 2019
+- Ejecuté rondas de vigilancia en instalaciones de 5000 m²
+- Detecté y reporté 15 intentos de hurto durante el período
+- Operé sistemas de CCTV y monitoreo de alarmas
 
 ## FORMACIÓN ACADÉMICA
 
-### Título o Certificación
-Institución | Año – Año
-[Descripción completa del programa si existe en el original]
+### Técnico en Seguridad Privada
+Instituto de Seguridad | 2014 – 2015
 
-### Otra Certificación o Curso
-Año
-[Descripción completa si existe]
+### Educación Media
+Liceo Municipal de Santiago | 2008 – 2011
 
 ## CERTIFICACIONES
-[OMITIR si no hay cursos/certificaciones en el CV original]
 
-### Nombre del Curso o Certificación
-Institución | Año
+### Curso OS-10
+Carabineros de Chile | 2015
+
+### Operador CCTV y Alarmas
+Academia de Seguridad | 2018
 
 ## HERRAMIENTAS Y TECNOLOGÍAS
-[OBLIGATORIO - generar siempre basado en CV y experiencia del rubro]
-- Software/Sistema 1
-- Herramienta técnica 2
-- Plataforma 3
+- Sistemas de CCTV (Hikvision, Dahua)
+- Software de control de accesos
+- Plataformas de monitoreo de alarmas
+- Radio comunicaciones
 
 ## IDIOMAS
-[OMITIR si no hay idiomas en el CV original]
-- Idioma: Nivel
-
-## DISPONIBILIDAD
-[OMITIR si no existe en el CV original - NUNCA incluir sección REFERENCIAS]
+- Español: Nativo
+- Inglés: Básico
 
 REGLAS DE FORMATO CRÍTICAS:
+- PROHIBIDO incluir texto entre corchetes [] - el CV debe verse profesional
+- PROHIBIDO incluir instrucciones o placeholders como "[Descripción...]", "[OMITIR...]"
+- Si no hay descripción de formación, NO incluir línea de descripción (dejar solo título e institución)
+- Si una sección no tiene datos, OMITIR la sección completa (ni título ni contenido)
 - Nombre: heading 1 (#) en MAYÚSCULAS
 - Headline: incluir CARGO OBJETIVO + especialidad + años de experiencia
 - Secciones: heading 2 (##) en MAYÚSCULAS
@@ -250,9 +258,8 @@ REGLAS DE FORMATO CRÍTICAS:
 - PROHIBIDO texto continuo separado por " - " en una sola línea
 - PROHIBIDO aplastar múltiples responsabilidades en una línea
 - NO agregar ciudad/país en experiencias si NO existe en el original
-- Educación/Certificaciones: COPIAR descripciones COMPLETAS del original
+- Educación/Certificaciones: Si hay descripción en el original, COPIAR COMPLETA. Si NO hay, omitir línea de descripción
 - PROHIBIDO resumir descripciones de formación - mantener TODAS las oraciones
-- Si el original tiene 4 oraciones, el optimizado DEBE tener 4 oraciones
 - SIN usar **negrita** en ninguna parte del CV
 - EXPERIENCIA: mantener TODAS las responsabilidades del original, NO resumir
 - COMPETENCIAS: ubicar DESPUÉS del perfil y ANTES de experiencia
