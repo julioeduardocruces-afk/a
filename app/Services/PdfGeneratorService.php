@@ -47,6 +47,9 @@ class PdfGeneratorService
             'marginRight' => 1418,
         ]);
 
+        // Strip any Markdown symbols that may have leaked into plain text
+        $plainText = $this->stripMarkdown($plainText);
+
         $lines = explode("\n", $plainText);
         $isFirstLine = true;
         $foundName = false;
@@ -244,5 +247,33 @@ class PdfGeneratorService
         }
 
         return false;
+    }
+
+    /**
+     * Strip Markdown symbols from text (in case AI included them in plain text output).
+     */
+    private function stripMarkdown(string $text): string
+    {
+        $lines = explode("\n", $text);
+        $cleaned = [];
+
+        foreach ($lines as $line) {
+            // Remove heading markers (# ## ###)
+            $line = preg_replace('/^#{1,6}\s+/', '', $line);
+
+            // Remove bold markers (**text** or __text__)
+            $line = preg_replace('/\*\*(.+?)\*\*/', '$1', $line);
+            $line = preg_replace('/__(.+?)__/', '$1', $line);
+
+            // Remove italic markers (*text* or _text_) - be careful not to remove bullet dashes
+            $line = preg_replace('/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/', '$1', $line);
+
+            // Remove inline code (`text`)
+            $line = preg_replace('/`(.+?)`/', '$1', $line);
+
+            $cleaned[] = $line;
+        }
+
+        return implode("\n", $cleaned);
     }
 }
