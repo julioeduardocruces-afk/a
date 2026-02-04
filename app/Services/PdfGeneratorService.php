@@ -136,53 +136,100 @@ class PdfGeneratorService
 
     private function isSectionHeader(string $line): bool
     {
-        $headers = [
-            'RESUMEN', 'PERFIL', 'EXPERIENCIA', 'EDUCACION', 'EDUCACIÓN',
-            'HABILIDADES', 'CERTIFICACIONES', 'IDIOMAS', 'DATOS PERSONALES',
-            'SUMMARY', 'EXPERIENCE', 'EDUCATION', 'SKILLS', 'CERTIFICATIONS',
-            'LANGUAGES', 'PROFESSIONAL', 'FORMACION', 'FORMACIÓN',
-            'COMPETENCIAS', 'HERRAMIENTAS', 'TECNOLOGÍAS', 'TECNOLOGIAS',
-            'DISPONIBILIDAD', 'LOGROS', 'REFERENCIAS',
+        // Exact section header names (must match exactly or with minor variations)
+        $exactHeaders = [
+            'PERFIL PROFESIONAL',
+            'EXPERIENCIA LABORAL',
+            'FORMACIÓN ACADÉMICA',
+            'FORMACION ACADEMICA',
+            'EDUCACIÓN',
+            'EDUCACION',
+            'COMPETENCIAS CLAVE',
+            'HERRAMIENTAS Y TECNOLOGÍAS',
+            'HERRAMIENTAS Y TECNOLOGIAS',
+            'CERTIFICACIONES',
+            'IDIOMAS',
+            'DISPONIBILIDAD',
+            'DATOS PERSONALES',
+            'RESUMEN PROFESIONAL',
+            'HABILIDADES',
+            'LOGROS',
+            'REFERENCIAS',
+            'EDUCACIÓN BÁSICA Y MEDIA',
+            'EDUCACION BASICA Y MEDIA',
+            'CURSOS',
+            'OTROS CONOCIMIENTOS',
         ];
 
         $upper = mb_strtoupper(trim($line));
-        foreach ($headers as $h) {
-            if (str_contains($upper, $h)) {
-                return true;
+
+        // Check for exact match first
+        if (in_array($upper, $exactHeaders)) {
+            return true;
+        }
+
+        // Check if line is ONLY a known header keyword (short, < 35 chars, all caps)
+        $headerKeywords = [
+            'RESUMEN', 'PERFIL', 'EXPERIENCIA', 'EDUCACION', 'EDUCACIÓN',
+            'HABILIDADES', 'CERTIFICACIONES', 'IDIOMAS', 'FORMACION', 'FORMACIÓN',
+            'COMPETENCIAS', 'HERRAMIENTAS', 'TECNOLOGÍAS', 'DISPONIBILIDAD',
+        ];
+
+        if (mb_strlen($line) < 35 && $upper === $line) {
+            foreach ($headerKeywords as $h) {
+                if (str_contains($upper, $h)) {
+                    return true;
+                }
             }
         }
 
-        // All caps line
-        return $upper === $line && mb_strlen($line) < 60 && mb_strlen($line) > 2;
+        return false;
     }
 
     private function isSubHeader(string $line): bool
     {
-        // Lines that look like "Company Name - Role (Date - Date)" or similar patterns
-        // Pattern 1: Contains dash/hyphen with year (e.g., "Empresa - Cargo | 2020 - 2023")
+        $len = mb_strlen($line);
+
+        // Skip very short or very long lines
+        if ($len < 10 || $len > 120) {
+            return false;
+        }
+
+        // Pattern 1: Contains separator (–, -, |) with company/institution name
+        // e.g., "Operador de Monitoreo – PPI Chile Seguridad"
+        // e.g., "Guardia de Seguridad Administrativo – Gestión de Personas y Servicios SPA"
+        if (preg_match('/^[A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ\s]+\s*[–\-|]\s*[A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ\s\.]+$/u', $line)) {
+            return true;
+        }
+
+        // Pattern 2: Contains year (e.g., "Empresa - Cargo | 2020 - 2023")
         if (preg_match('/^[A-ZÁÉÍÓÚÑ].+\s[-–|]\s.+\d{4}/', $line)) {
             return true;
         }
 
-        // Pattern 2: Starts with capital letter, contains year range (e.g., "Analista Senior (2019 - 2022)")
-        if (preg_match('/^[A-ZÁÉÍÓÚÑ][^#\n]{10,}.*\(\d{4}\s*[-–]\s*(\d{4}|Presente|Actual)\)/ui', $line)) {
+        // Pattern 3: Year range in parentheses (e.g., "Analista Senior (2019 - 2022)")
+        if (preg_match('/^[A-ZÁÉÍÓÚÑ].+\(\d{4}\s*[-–]\s*(\d{4}|Presente|Actual|Actualidad)\)/ui', $line)) {
             return true;
         }
 
-        // Pattern 3: Job title pattern with separator (e.g., "Gerente de Finanzas – Banco XYZ")
-        if (preg_match('/^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(\s+[A-Za-záéíóúñÁÉÍÓÚÑ]+){1,5}\s*[–\-|]\s*[A-ZÁÉÍÓÚÑ]/u', $line)) {
+        // Pattern 4: Standalone date range line (e.g., "2019 – Actualmente")
+        if (preg_match('/^\d{4}\s*[-–]\s*(Actualmente|Presente|Actual|\d{4})$/ui', $line)) {
+            return false; // This is a date line, not a sub-header - render as normal text
+        }
+
+        // Pattern 5: Education degree (e.g., "Ingeniero Comercial", "Licenciado en...")
+        if (preg_match('/^(Ingenier[oaí]|Licenciad[oa]|Técnico|Magíster|Master|MBA|Diplomado|Contador|Abogad[oa]|Doctor|PhD|Bachiller|Egresado)/ui', $line) &&
+            !preg_match('/^(Egresado de la carrera|Egresado con|Egresado del)/ui', $line)) {
             return true;
         }
 
-        // Pattern 4: Education entry (e.g., "Ingeniero Comercial - Universidad de Chile")
-        if (preg_match('/^(Ingenier[oa]|Licenciad[oa]|Técnico|Magíster|Master|MBA|Diplomado|Contador|Abogad[oa]|Doctor|PhD|Bachiller)/ui', $line) &&
-            mb_strlen($line) > 15 && mb_strlen($line) < 120) {
+        // Pattern 6: Institution with year (e.g., "Instituto Profesional de Chile | 2015 - 2019")
+        if (preg_match('/^(Universidad|Instituto|Centro|Escuela|Colegio|Liceo|Academia).+(\d{4}|[-–|])/ui', $line)) {
             return true;
         }
 
-        // Pattern 5: Institution pattern (e.g., "Universidad de Santiago | 2015 - 2019")
-        if (preg_match('/^(Universidad|Instituto|Centro|Escuela|Colegio|Liceo|Academia)/ui', $line) &&
-            mb_strlen($line) > 10 && mb_strlen($line) < 120) {
+        // Pattern 7: "Educación Básica y Media" sub-section
+        if (preg_match('/^Educaci[óo]n\s+B[áa]sica/ui', $line)) {
             return true;
         }
 
