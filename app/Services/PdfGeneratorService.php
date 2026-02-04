@@ -136,6 +136,11 @@ class PdfGeneratorService
 
     private function isSectionHeader(string $line): bool
     {
+        // Exclude contact info lines - these should be regular text
+        if (preg_match('/^(RUT|Email|Correo|Teléfono|Telefono|Tel|Dirección|Direccion|Celular|Móvil|Movil)[\s]*:/ui', $line)) {
+            return false;
+        }
+
         // Exact section header names (must match exactly or with minor variations)
         $exactHeaders = [
             'PERFIL PROFESIONAL',
@@ -192,6 +197,11 @@ class PdfGeneratorService
 
         // Skip very short or very long lines
         if ($len < 10 || $len > 120) {
+            return false;
+        }
+
+        // Exclude contact info lines - these should be regular text
+        if (preg_match('/^(RUT|Email|Correo|Teléfono|Telefono|Tel|Dirección|Direccion|Celular|Móvil|Movil)[\s]*:/ui', $line)) {
             return false;
         }
 
