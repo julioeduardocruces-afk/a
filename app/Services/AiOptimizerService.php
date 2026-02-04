@@ -108,13 +108,28 @@ REGLAS ABSOLUTAS - NO PUEDES VIOLARLAS:
     - Ejemplo CORRECTO: "Operador CCTV y Alarmas | 2023"
     - Ejemplo INCORRECTO: "Operador CCTV y Alarmas - Institución no especificada | 2023"
 
-21. PRESERVACIÓN DE DESCRIPCIONES:
-    - COPIA TEXTUAL las descripciones de educación y certificaciones
-    - NO elimines NINGUNA información: instituciones, objetivos, destinatarios, lugares
-    - EJEMPLO DE LO QUE NO DEBES HACER:
-      ORIGINAL: "Formación entregada por la Unidad de análisis financiero con el objetivo de capacitar a los oficiales de cumplimiento para que puedan desarrollar e implementar un sistema preventivo contra los delitos de lavado de activos y financiamiento del terrorismo en sus entidades."
-      MAL: "Capacitación para desarrollar e implementar un sistema preventivo contra delitos de lavado de activos."
-      BIEN: "Formación entregada por la Unidad de Análisis Financiero con el objetivo de capacitar a los oficiales de cumplimiento para desarrollar e implementar un sistema preventivo contra los delitos de lavado de activos y financiamiento del terrorismo en sus entidades."
+21. PRESERVACIÓN DE DESCRIPCIONES - REGLA CRÍTICA:
+    - Si el CV original tiene descripción de un curso/certificación, DEBES COPIARLA COMPLETA
+    - PROHIBIDO eliminar descripciones que existen en el original
+    - PROHIBIDO resumir o acortar descripciones
+    - Solo omitir descripción si el original NO tiene descripción
+
+    EJEMPLO 1 - CERTIFICACIÓN CON DESCRIPCIÓN:
+    ORIGINAL: "OPERADOR CCTV Y ALARMAS (2023) - Formación para desarrollar actividades como operador de CCTV y Alarmas. Se adquirieron habilidades avanzadas en la instalación y monitoreo de sistemas de seguridad."
+
+    MAL (NO HAGAS ESTO - elimina la descripción):
+    ### Operador CCTV y Alarmas
+    2023
+
+    BIEN (HAZ ESTO - preserva la descripción):
+    ### Operador CCTV y Alarmas
+    2023
+    Formación para desarrollar actividades como operador de CCTV y Alarmas. Se adquirieron habilidades avanzadas en la instalación y monitoreo de sistemas de seguridad.
+
+    EJEMPLO 2 - EDUCACIÓN CON DESCRIPCIÓN:
+    ORIGINAL: "Formación entregada por la Unidad de análisis financiero con el objetivo de capacitar a los oficiales de cumplimiento..."
+    MAL: Omitir toda la descripción
+    BIEN: Copiar textualmente TODA la descripción
 
 22. EXPERIENCIAS NO ALINEADAS AL RUBRO:
     - MANTENER TODAS las responsabilidades del original
@@ -229,9 +244,11 @@ Liceo Municipal de Santiago | 2008 – 2011
 
 ### Curso OS-10
 Carabineros de Chile | 2015
+Capacitación oficial para ejercer funciones de guardia de seguridad privada en Chile, incluyendo marco legal, técnicas de vigilancia y procedimientos de emergencia.
 
 ### Operador CCTV y Alarmas
 Academia de Seguridad | 2018
+Formación para desarrollar actividades como operador de CCTV y Alarmas. Se adquirieron habilidades avanzadas en la instalación y monitoreo de sistemas de seguridad.
 
 ## HERRAMIENTAS Y TECNOLOGÍAS
 - Sistemas de CCTV (Hikvision, Dahua)
