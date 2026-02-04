@@ -347,28 +347,46 @@ class ResumeRendererService
             h1 {
                 font-size: 22px; font-weight: bold; margin-bottom: 2px;
                 text-transform: uppercase; color: #111; letter-spacing: 0.5px;
+                page-break-after: avoid;
             }
             h2 {
                 font-size: 13px; font-weight: bold; margin: 16px 0 6px;
                 border-bottom: 1.5px solid #333; padding-bottom: 3px;
                 text-transform: uppercase; color: #111; letter-spacing: 0.3px;
+                page-break-after: avoid;
             }
             h3 {
                 font-size: 12px; font-weight: bold; margin: 10px 0 2px;
                 color: #222;
+                page-break-after: avoid;
+                page-break-inside: avoid;
             }
             .contact-line {
                 font-size: 10.5px; color: #444; line-height: 1.4; margin: 0;
             }
             .contact-line strong { color: #222; }
             .spacer { height: 6px; }
-            p { margin: 3px 0; }
-            ul { padding-left: 16px; margin: 4px 0; }
+            p {
+                margin: 3px 0;
+                orphans: 3;
+                widows: 3;
+            }
+            ul {
+                padding-left: 16px; margin: 4px 0;
+                page-break-inside: avoid;
+            }
             ul.bullet-list { padding-left: 12px; list-style: none; }
             ul.bullet-list li { margin-bottom: 3px; }
             ul.bullet-list li::before { content: "• "; font-weight: bold; }
-            li { margin-bottom: 3px; }
+            li {
+                margin-bottom: 3px;
+                page-break-inside: avoid;
+            }
             strong { font-weight: bold; }
+            /* Evitar cortes de página en medio de secciones */
+            h3 + p, h3 + ul, h3 + .contact-line {
+                page-break-before: avoid;
+            }
         </style>
         </head><body>{$html}</body></html>
         HTML;

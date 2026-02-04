@@ -57,50 +57,58 @@ Ciudad, Región, País
 +56 X XXXX XXXX · correo@email.com
 
 ## PERFIL PROFESIONAL
-Párrafo descriptivo con **palabras clave en negrita** relevantes al cargo objetivo. Destacar competencias principales, años de experiencia y valor diferenciador. Usar **negritas** en los términos que los ATS buscan.
+Párrafo descriptivo con **palabras clave en negrita** relevantes al cargo objetivo. Destacar competencias principales, años de experiencia y valor diferenciador.
 
 ## EXPERIENCIA LABORAL
 
-### Cargo – Empresa (Área/Departamento)
-**Año – Año** - Descripción de logro o responsabilidad con **keyword ATS**. - Otra responsabilidad con **keyword relevante**. - Mantener formato de texto continuo separado por punto y guion.
-
 ### Cargo – Empresa
-**Año – Año** - Descripción con **keywords en negrita**.
+Ciudad, País
+**Año – Año**
+- Responsabilidad o logro con **keyword relevante**
+- Otra responsabilidad importante
+- Logro medible o cuantificable
+- Responsabilidad adicional
+
+### Otro Cargo – Otra Empresa
+Ciudad, País
+**Año – Año**
+- Responsabilidad principal
+- Otra responsabilidad
+- Logro destacado
 
 ## FORMACIÓN ACADÉMICA
-**Título obtenido**
-Institución – Ciudad, País | Año – Año
 
-**Otro título**
-Institución – Ciudad, País | Año – Año
+### Título o Certificación
+Institución (si existe) | Año – Año
+Descripción completa del programa si existe en el original. Mantener toda la información sobre habilidades adquiridas, objetivos del programa y competencias desarrolladas.
+
+### Otra Certificación o Curso
+Año
+Descripción completa preservando todo el contenido original sobre la formación recibida.
 
 ## COMPETENCIAS CLAVE
-• Competencia 1
-• Competencia 2
-• Competencia 3
+- Competencia técnica 1
+- Competencia técnica 2
+- Competencia técnica 3
 
 ## HERRAMIENTAS Y TECNOLOGÍAS
-(Solo si aplica al perfil)
-• Herramienta 1
-• Herramienta 2
+- Herramienta 1
+- Herramienta 2
 
 ## DISPONIBILIDAD
-Disponibilidad inmediata · Turnos/Jornada aplicable
+Disponibilidad inmediata · Jornada aplicable
 
-REGLAS DE FORMATO:
-- El nombre va como heading 1 (#) en MAYÚSCULAS
-- Debajo del nombre va una línea en **negrita** con título profesional y especialidades separadas por |
-- El RUT va en su propia línea inmediatamente después del título profesional
-- La dirección completa va en su propia línea después del RUT
-- Ciudad y región van en línea separada
-- Datos de contacto (teléfono, email) en línea simple con separador ·
-- Secciones van como heading 2 (##) en MAYÚSCULAS
-- Cargos/empresas van como heading 3 (###)
-- Fecha del cargo va en **negrita** seguido de guion y descripción continua
-- En experiencia, usar texto continuo con " - " (espacio guion espacio) separando responsabilidades, NO bullets
-- En competencias/habilidades usar • (bullet point unicode) al inicio de cada línea
-- Educación: título en **negrita**, institución y fecha en línea siguiente
-- **NEGRITAS** en todas las keywords relevantes para ATS dentro del perfil y experiencia
+REGLAS DE FORMATO CRÍTICAS:
+- Nombre: heading 1 (#) en MAYÚSCULAS
+- Secciones: heading 2 (##) en MAYÚSCULAS
+- Cargos y títulos educativos: heading 3 (###)
+- Fechas en **negrita** en línea separada
+- CADA responsabilidad en su propia línea con guion (-)
+- PROHIBIDO texto continuo separado por " - " en una sola línea
+- PROHIBIDO aplastar múltiples responsabilidades en una línea
+- Educación/Certificaciones: PRESERVAR descripciones completas del original
+- Si el original tiene 4 líneas de descripción, el optimizado debe tener contenido equivalente
+- Keywords relevantes en **negrita** dentro del texto
 
 ESTRUCTURA DE SALIDA (JSON):
 {
