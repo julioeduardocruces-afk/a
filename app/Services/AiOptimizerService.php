@@ -24,9 +24,28 @@ REGLAS ABSOLUTAS - NO PUEDES VIOLARLAS:
 6. Formato ATS estricto: SIN tablas, SIN columnas múltiples, SIN emojis, SIN íconos, SIN gráficos.
 7. Inserta keywords del rubro de forma natural con **negrita** en perfil y experiencia.
 8. SOLO incluye secciones que existan en el CV original. No inventes secciones vacías.
-9. OBLIGATORIO incluir RUT y Dirección del candidato si están presentes en los datos originales.
+9. RUT OBLIGATORIO:
+   - Si el RUT existe en el original, inclúyelo
+   - Si el RUT NO existe en el original, escribe exactamente: "RUT: [FALTA INFORMACIÓN]"
+   - NUNCA dejes "RUT:" vacío o sin texto después
 10. Si el PERFIL PROFESIONAL está vacío o contiene "[GENERAR AUTOMATICAMENTE BASADO EN EXPERIENCIA LABORAL]", créalo basándote en la experiencia real (3-5 líneas).
 11. Si las COMPETENCIAS CLAVE están vacías o contienen "[GENERAR AUTOMATICAMENTE BASADO EN EXPERIENCIA LABORAL]", genera COMPETENCIAS CLAVE y HERRAMIENTAS basándote en la experiencia real del candidato.
+
+REGLAS DE CONTENIDO COMPLETO - NO OMITIR NADA:
+16. CURSOS Y CERTIFICACIONES - INCLUIR TODOS:
+    - Si existe sección "Otros Conocimientos" con cursos, INCLUIRLOS en sección CERTIFICACIONES
+    - Ejemplo: "Curso OS-10 otorgado por Carabineros de Chile" DEBE aparecer en CERTIFICACIONES
+    - NO omitir cursos aunque no estén relacionados al rubro objetivo
+17. EDUCACIÓN COMPLETA - INCLUIR TODA:
+    - Incluir TODA la educación mencionada: básica, media, técnica, universitaria, postgrado
+    - Si dice "Educación Media: Liceo X" DEBE aparecer en FORMACIÓN ACADÉMICA
+    - NO omitir educación básica ni media
+18. IDIOMAS - SECCIÓN OBLIGATORIA SI EXISTEN:
+    - Si el CV menciona idiomas, crear sección ## IDIOMAS
+    - Copiar textualmente los niveles indicados (ej: "Inglés escrito avanzado y medianamente hablado")
+19. OTROS CONOCIMIENTOS - DISTRIBUIR CORRECTAMENTE:
+    - Software y herramientas técnicas van en HERRAMIENTAS Y TECNOLOGÍAS
+    - Cursos y certificaciones van en sección CERTIFICACIONES (separada de FORMACIÓN ACADÉMICA)
 
 REGLAS CRÍTICAS DE PRESERVACIÓN - NUNCA VIOLAR:
 12. NUNCA inventes información que no existe en el original:
@@ -87,6 +106,13 @@ Descripción completa del programa si existe en el original. Mantener toda la in
 Año
 Descripción completa preservando todo el contenido original sobre la formación recibida.
 
+## CERTIFICACIONES
+(Solo si existen cursos/certificaciones en el original)
+
+### Nombre del Curso o Certificación
+Institución que lo otorga (si existe)
+Descripción completa del curso preservando todo el contenido original.
+
 ## COMPETENCIAS CLAVE
 - Competencia técnica 1
 - Competencia técnica 2
@@ -95,6 +121,11 @@ Descripción completa preservando todo el contenido original sobre la formación
 ## HERRAMIENTAS Y TECNOLOGÍAS
 - Herramienta 1
 - Herramienta 2
+
+## IDIOMAS
+(Solo si el CV menciona idiomas)
+- Idioma 1: Nivel (copiar textualmente del original)
+- Idioma 2: Nivel
 
 ## DISPONIBILIDAD
 Disponibilidad inmediata · Jornada aplicable

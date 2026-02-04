@@ -103,6 +103,9 @@ class ResumeRendererService
             // Bold in normal text
             $safe = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $safe);
 
+            // Mark missing information in red
+            $safe = str_replace('[FALTA INFORMACIÓN]', '<span class="missing-info">[FALTA INFORMACIÓN]</span>', $safe);
+
             // Empty line
             if (trim($safe) === '') {
                 $afterH1 = false;
@@ -410,6 +413,11 @@ class ResumeRendererService
             .entry {
                 page-break-inside: avoid;
                 break-inside: avoid;
+            }
+            /* Texto de información faltante en rojo */
+            .missing-info {
+                color: #cc0000;
+                font-weight: bold;
             }
         </style>
         </head><body>{$html}</body></html>
