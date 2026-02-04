@@ -546,7 +546,43 @@ PROMPT;
         // Sanitize: strip HTML from plain text output (markdown is rendered server-side with escaping)
         $data['optimized_text_plain'] = strip_tags($data['optimized_text_plain']);
 
+        // Filter out placeholder text that shouldn't appear in final CV
+        $data['optimized_text_md'] = $this->filterPlaceholders($data['optimized_text_md']);
+        $data['optimized_text_plain'] = $this->filterPlaceholders($data['optimized_text_plain']);
+
         return $data;
+    }
+
+    /**
+     * Remove placeholder/instruction text that AI may have incorrectly included.
+     * This is a safety net to ensure clean CV output.
+     */
+    private function filterPlaceholders(string $text): string
+    {
+        // Patterns to remove (instruction-like text in brackets)
+        $patternsToRemove = [
+            // Lines that are ONLY a bracketed instruction (remove entire line)
+            '/^\s*\[(?:OMITIR|OBLIGATORIO|Descripción completa|Párrafo de|Verbo de acción|Competencia|Habilidad)[^\]]*\]\s*$/mu',
+            // Bracketed instructions at end of lines
+            '/\s*\[(?:OMITIR|OBLIGATORIO|si existe|si no hay|generar)[^\]]*\]\s*$/mui',
+            // Standalone instruction brackets (but preserve [FALTA INFORMACIÓN] for RUT)
+            '/\[(?!FALTA INFORMACIÓN)[A-ZÁÉÍÓÚ][^\]]{20,}\]/u',
+        ];
+
+        foreach ($patternsToRemove as $pattern) {
+            $text = preg_replace($pattern, '', $text);
+        }
+
+        // Clean up multiple blank lines that may result from removals
+        $text = preg_replace('/\n{3,}/', "\n\n", $text);
+
+        // Remove lines that are only whitespace
+        $lines = explode("\n", $text);
+        $lines = array_filter($lines, function($line) {
+            return trim($line) !== '' || $line === '';
+        });
+
+        return trim(implode("\n", $lines));
     }
 
     /**

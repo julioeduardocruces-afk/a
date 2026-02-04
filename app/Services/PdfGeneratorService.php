@@ -254,6 +254,9 @@ class PdfGeneratorService
      */
     private function stripMarkdown(string $text): string
     {
+        // First, filter out any placeholder/instruction text
+        $text = $this->filterPlaceholders($text);
+
         $lines = explode("\n", $text);
         $cleaned = [];
 
@@ -275,5 +278,31 @@ class PdfGeneratorService
         }
 
         return implode("\n", $cleaned);
+    }
+
+    /**
+     * Remove placeholder/instruction text that shouldn't appear in final documents.
+     * This is a safety net to catch any AI-generated instructions that leaked through.
+     */
+    private function filterPlaceholders(string $text): string
+    {
+        // Patterns to remove (instruction-like text in brackets)
+        $patternsToRemove = [
+            // Lines that are ONLY a bracketed instruction (remove entire line)
+            '/^\s*\[(?:OMITIR|OBLIGATORIO|Descripción completa|Párrafo de|Verbo de acción|Competencia|Habilidad)[^\]]*\]\s*$/mu',
+            // Bracketed instructions at end of lines
+            '/\s*\[(?:OMITIR|OBLIGATORIO|si existe|si no hay|generar)[^\]]*\]\s*$/mui',
+            // Standalone instruction brackets (but preserve [FALTA INFORMACIÓN] for RUT)
+            '/\[(?!FALTA INFORMACIÓN)[A-ZÁÉÍÓÚ][^\]]{20,}\]/u',
+        ];
+
+        foreach ($patternsToRemove as $pattern) {
+            $text = preg_replace($pattern, '', $text);
+        }
+
+        // Clean up multiple blank lines that may result from removals
+        $text = preg_replace('/\n{3,}/', "\n\n", $text);
+
+        return $text;
     }
 }
