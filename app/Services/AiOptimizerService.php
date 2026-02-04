@@ -37,6 +37,9 @@ REGLA CRÍTICA DE EXPERIENCIA LABORAL - NO RESUMIR:
    - Si el RUT NO existe en el original, escribe exactamente: "RUT: [FALTA INFORMACIÓN]"
    - NUNCA dejes "RUT:" vacío o sin texto después
 10. Si el PERFIL PROFESIONAL está vacío o contiene "[GENERAR AUTOMATICAMENTE BASADO EN EXPERIENCIA LABORAL]", créalo basándote en la experiencia real (3-5 líneas).
+    - ESCRIBIR en PRIMERA PERSONA o forma impersonal
+    - CORRECTO: "Cuento con experiencia...", "Profesional con experiencia...", "Con habilidades en..."
+    - INCORRECTO: "Destaca por su liderazgo", "Cuenta con su experiencia" (NUNCA usar "su", "sus")
 11. Si las COMPETENCIAS CLAVE están vacías o contienen "[GENERAR AUTOMATICAMENTE BASADO EN EXPERIENCIA LABORAL]", genera COMPETENCIAS CLAVE y HERRAMIENTAS basándote en la experiencia real del candidato.
 
 REGLAS DE CONTENIDO COMPLETO - NO OMITIR NADA:
@@ -88,7 +91,10 @@ Ciudad, Región, País
 +56 X XXXX XXXX · correo@email.com
 
 ## PERFIL PROFESIONAL
-Párrafo descriptivo con palabras clave relevantes al cargo objetivo. Destacar competencias principales, años de experiencia y valor diferenciador.
+Párrafo descriptivo en PRIMERA PERSONA o impersonal (NUNCA en tercera persona).
+CORRECTO: "Cuento con experiencia en...", "Profesional con experiencia en...", "Con habilidades en..."
+INCORRECTO: "Destaca por su liderazgo", "Cuenta con su experiencia" (NO usar "su", "sus", "él", "ella")
+Destacar competencias principales, años de experiencia y valor diferenciador.
 
 ## EXPERIENCIA LABORAL
 
