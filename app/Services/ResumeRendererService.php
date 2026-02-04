@@ -43,6 +43,7 @@ class ResumeRendererService
         $lines = explode("\n", $md);
         $htmlLines = [];
         $afterH1 = false; // Track lines right after name for subtitle/contact styling
+        $inEntry = false; // Track if we're inside an h3 entry block
 
         foreach ($lines as $line) {
             $safe = htmlspecialchars($line, ENT_QUOTES, 'UTF-8');
@@ -50,16 +51,33 @@ class ResumeRendererService
             // Headers
             if (preg_match('/^### (.+)$/', $safe, $m)) {
                 $afterH1 = false;
+                // Close previous entry if open
+                if ($inEntry) {
+                    $htmlLines[] = '</div>';
+                }
+                // Start new entry block
+                $htmlLines[] = '<div class="entry">';
+                $inEntry = true;
                 $content = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $m[1]);
                 $htmlLines[] = '<h3>' . $content . '</h3>';
                 continue;
             }
             if (preg_match('/^## (.+)$/', $safe, $m)) {
                 $afterH1 = false;
+                // Close previous entry if open
+                if ($inEntry) {
+                    $htmlLines[] = '</div>';
+                    $inEntry = false;
+                }
                 $htmlLines[] = '<h2>' . $m[1] . '</h2>';
                 continue;
             }
             if (preg_match('/^# (.+)$/', $safe, $m)) {
+                // Close previous entry if open
+                if ($inEntry) {
+                    $htmlLines[] = '</div>';
+                    $inEntry = false;
+                }
                 $htmlLines[] = '<h1>' . $m[1] . '</h1>';
                 $afterH1 = true;
                 continue;
@@ -99,6 +117,11 @@ class ResumeRendererService
             }
 
             $htmlLines[] = '<p>' . $safe . '</p>';
+        }
+
+        // Close last entry if open
+        if ($inEntry) {
+            $htmlLines[] = '</div>';
         }
 
         // Wrap consecutive <li> elements in <ul>
@@ -383,9 +406,10 @@ class ResumeRendererService
                 page-break-inside: avoid;
             }
             strong { font-weight: bold; }
-            /* Evitar cortes de página en medio de secciones */
-            h3 + p, h3 + ul, h3 + .contact-line {
-                page-break-before: avoid;
+            /* Contenedor de entrada - evita corte de página */
+            .entry {
+                page-break-inside: avoid;
+                break-inside: avoid;
             }
         </style>
         </head><body>{$html}</body></html>
