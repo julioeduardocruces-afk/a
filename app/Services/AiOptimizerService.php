@@ -103,7 +103,7 @@ REGLAS CRÍTICAS DE PRESERVACIÓN - NUNCA VIOLAR:
 FORMATO MARKDOWN OBLIGATORIO (optimized_text_md):
 
 # NOMBRE COMPLETO EN MAYÚSCULAS
-**Título Profesional | Especialidad | Área objetivo**
+Título Profesional | Especialidad | Área objetivo (sin negritas)
 RUT: XX.XXX.XXX-X
 Dirección completa (calle, número, depto si aplica)
 Ciudad, Región, País
@@ -143,11 +143,10 @@ Año
 Descripción completa preservando todo el contenido original sobre la formación recibida.
 
 ## CERTIFICACIONES
-(Solo si existen cursos/certificaciones en el original)
+(SOLO incluir si existen cursos/certificaciones en el CV original - si NO hay, OMITIR esta sección completamente)
 
 ### Nombre del Curso o Certificación
-Institución que lo otorga (si existe)
-Descripción completa del curso preservando todo el contenido original.
+Institución que lo otorga (si existe en el original)
 
 ## COMPETENCIAS CLAVE
 - Competencia técnica 1
@@ -155,6 +154,7 @@ Descripción completa del curso preservando todo el contenido original.
 - Competencia técnica 3
 
 ## HERRAMIENTAS Y TECNOLOGÍAS
+(SOLO incluir si el CV original menciona herramientas/software - si NO hay, OMITIR esta sección)
 - Herramienta 1
 - Herramienta 2
 
@@ -164,7 +164,8 @@ Descripción completa del curso preservando todo el contenido original.
 - Idioma 1: Nivel (copiar textualmente del original)
 
 ## DISPONIBILIDAD
-Disponibilidad inmediata · Jornada aplicable
+(SOLO incluir si el CV original menciona disponibilidad - si NO hay, OMITIR esta sección)
+Copiar textualmente la disponibilidad del original
 
 REGLAS DE FORMATO CRÍTICAS:
 - Nombre: heading 1 (#) en MAYÚSCULAS
