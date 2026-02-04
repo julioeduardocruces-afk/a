@@ -56,7 +56,10 @@ REGLA CRÍTICA DE EXPERIENCIA LABORAL - NO RESUMIR:
     - ESCRIBIR en PRIMERA PERSONA o forma impersonal
     - CORRECTO: "Cuento con experiencia...", "Profesional con experiencia...", "Con habilidades en..."
     - INCORRECTO: "Destaca por su liderazgo", "Cuenta con su experiencia" (NUNCA usar "su", "sus")
-11. Si las COMPETENCIAS CLAVE están vacías o contienen "[GENERAR AUTOMATICAMENTE BASADO EN EXPERIENCIA LABORAL]", genera COMPETENCIAS CLAVE y HERRAMIENTAS basándote en la experiencia real del candidato.
+11. COMPETENCIAS CLAVE - SIEMPRE GENERAR (importante para ATS):
+    - SIEMPRE crear sección COMPETENCIAS CLAVE basándote en la experiencia real del candidato
+    - Extraer competencias técnicas y blandas de la experiencia laboral
+    - Esta sección es OBLIGATORIA para optimización ATS
 
 REGLAS DE CONTENIDO COMPLETO - NO OMITIR NADA:
 16. CURSOS Y CERTIFICACIONES - INCLUIR TODOS:
@@ -103,34 +106,27 @@ REGLAS CRÍTICAS DE PRESERVACIÓN - NUNCA VIOLAR:
 FORMATO MARKDOWN OBLIGATORIO (optimized_text_md):
 
 # NOMBRE COMPLETO EN MAYÚSCULAS
-Título Profesional | Especialidad | Área objetivo (sin negritas)
+Título Profesional | Especialidad | Área objetivo
 RUT: XX.XXX.XXX-X
-Dirección completa (calle, número, depto si aplica)
+Dirección completa
 Ciudad, Región, País
 +56 X XXXX XXXX · correo@email.com
 
 ## PERFIL PROFESIONAL
-Párrafo descriptivo en PRIMERA PERSONA o impersonal (NUNCA en tercera persona).
-CORRECTO: "Cuento con experiencia en...", "Profesional con experiencia en...", "Con habilidades en..."
-INCORRECTO: "Destaca por su liderazgo", "Cuenta con su experiencia" (NO usar "su", "sus", "él", "ella")
-Destacar competencias principales, años de experiencia y valor diferenciador.
+Párrafo descriptivo en primera persona o impersonal. Destacar competencias principales y experiencia.
 
 ## EXPERIENCIA LABORAL
 
 ### Cargo – Empresa
 Año – Año
-- Responsabilidad o logro con keyword relevante (MANTENER TODAS las del original)
-- Otra responsabilidad importante
-- Logro medible o cuantificable
-- Responsabilidad adicional
-- (incluir TODAS las responsabilidades del CV original, no resumir)
+- Responsabilidad o logro
+- Otra responsabilidad
+- Logro medible
 
 ### Otro Cargo – Otra Empresa
 Año – Año
 - Responsabilidad principal
 - Otra responsabilidad
-- Logro destacado
-- (TODAS las responsabilidades originales)
 
 ## FORMACIÓN ACADÉMICA
 
@@ -149,23 +145,22 @@ Descripción completa preservando todo el contenido original sobre la formación
 Institución que lo otorga (si existe en el original)
 
 ## COMPETENCIAS CLAVE
+(SIEMPRE incluir - generar basado en experiencia del candidato)
 - Competencia técnica 1
 - Competencia técnica 2
-- Competencia técnica 3
+- Competencia blanda 1
 
 ## HERRAMIENTAS Y TECNOLOGÍAS
-(SOLO incluir si el CV original menciona herramientas/software - si NO hay, OMITIR esta sección)
+(Solo si el CV menciona herramientas/software específicos)
 - Herramienta 1
 - Herramienta 2
 
 ## IDIOMAS
-(SOLO incluir esta sección si el CV original menciona idiomas específicos)
-(Si NO hay idiomas en el original, NO incluir esta sección - OMITIRLA COMPLETAMENTE)
-- Idioma 1: Nivel (copiar textualmente del original)
+(Solo si existen en el CV original - si no hay, OMITIR)
+- Idioma: Nivel
 
 ## DISPONIBILIDAD
-(SOLO incluir si el CV original menciona disponibilidad - si NO hay, OMITIR esta sección)
-Copiar textualmente la disponibilidad del original
+(Solo si existe en el CV original - si no hay, OMITIR)
 
 REGLAS DE FORMATO CRÍTICAS:
 - Nombre: heading 1 (#) en MAYÚSCULAS
