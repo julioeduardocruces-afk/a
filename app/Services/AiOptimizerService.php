@@ -37,11 +37,12 @@ REGLAS CRÍTICAS DE PRESERVACIÓN - NUNCA VIOLAR:
     - Formato: "Nombre del curso/certificación | Año" (sin inventar institución)
     - Ejemplo CORRECTO: "Operador CCTV y Alarmas | 2023"
     - Ejemplo INCORRECTO: "Operador CCTV y Alarmas - Institución no especificada | 2023"
-    - PRESERVA las descripciones de certificaciones, no las elimines ni resumas excesivamente
-14. PRESERVACIÓN DE DESCRIPCIONES:
-    - NO reducir descripciones de 4-5 líneas a 1 línea
-    - Puedes reformular para ATS pero PRESERVANDO el contenido sustancial
-    - Mantén logros, habilidades adquiridas y detalles relevantes
+14. PRESERVACIÓN DE DESCRIPCIONES - REGLA CRÍTICA:
+    - Las descripciones de educación y certificaciones deben mantenerse COMPLETAS
+    - NO resumir, NO acortar, NO eliminar oraciones
+    - Si el original tiene 5 oraciones, el optimizado debe tener 5 oraciones equivalentes
+    - COPIA el contenido íntegro, solo mejora redacción si es necesario
+    - Ejemplo: Si dice "Formación entregada por la Unidad de análisis financiero con el objetivo de capacitar a los oficiales de cumplimiento" NO lo reduzcas a "Capacitación para..."
 15. EXPERIENCIAS NO ALINEADAS AL RUBRO:
     - Mínimo 2-3 bullets por experiencia, NUNCA menos
     - Mantener responsabilidades y logros principales
@@ -105,8 +106,9 @@ REGLAS DE FORMATO CRÍTICAS:
 - PROHIBIDO texto continuo separado por " - " en una sola línea
 - PROHIBIDO aplastar múltiples responsabilidades en una línea
 - NO agregar ciudad/país en experiencias si NO existe en el original
-- Educación/Certificaciones: PRESERVAR descripciones completas del original
-- Si el original tiene 4 líneas de descripción, el optimizado debe tener contenido equivalente
+- Educación/Certificaciones: COPIAR descripciones COMPLETAS del original
+- PROHIBIDO resumir descripciones de formación - mantener TODAS las oraciones
+- Si el original tiene 4 oraciones, el optimizado DEBE tener 4 oraciones
 - Keywords relevantes en **negrita** dentro del texto
 
 ESTRUCTURA DE SALIDA (JSON):
