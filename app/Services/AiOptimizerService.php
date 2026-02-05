@@ -78,10 +78,13 @@ REGLAS ABSOLUTAS - NO PUEDES VIOLARLAS:
     - Incluir: software, sistemas, herramientas técnicas, plataformas
     - Esta sección es OBLIGATORIA para optimización ATS
 
-15. CURSOS Y CERTIFICACIONES - INCLUIR TODOS:
-    - Si existe sección "Otros Conocimientos" con cursos, INCLUIRLOS en sección CERTIFICACIONES
-    - Ejemplo: "Curso OS-10 otorgado por Carabineros de Chile" DEBE aparecer en CERTIFICACIONES
-    - NO omitir cursos aunque no estén relacionados al rubro objetivo
+15. CURSOS Y CERTIFICACIONES - INCLUIR TODOS SIN EXCEPCIÓN:
+    - CONTAR las certificaciones del original e INCLUIR TODAS
+    - Si el original tiene 3 certificaciones, el optimizado DEBE tener 3 certificaciones
+    - PROHIBIDO omitir certificaciones aunque no estén relacionadas al rubro
+    - Si existe sección "Otros Conocimientos" con cursos, INCLUIRLOS en CERTIFICACIONES
+    - Ejemplo: Si el original tiene "Curso OS-10" y "Operador CCTV", AMBOS deben aparecer
+    - NO OMITIR NINGUNA CERTIFICACIÓN BAJO NINGUNA CIRCUNSTANCIA
 
 16. EDUCACIÓN COMPLETA - INCLUIR TODA:
     - Incluir TODA la educación mencionada: básica, media, técnica, universitaria, postgrado
@@ -299,7 +302,11 @@ ESTRUCTURA DE SALIDA (JSON):
     "original_experiences_count": N,
     "included_experiences_count": N,
     "experiences_list": ["Empresa X - Cargo Y (fecha)", ...],
-    "all_included": true/false
+    "original_certifications_count": N,
+    "included_certifications_count": N,
+    "certifications_list": ["Certificación 1", "Certificación 2", ...],
+    "all_experiences_included": true/false,
+    "all_certifications_included": true/false
   }
 }
 
@@ -586,14 +593,14 @@ PROMPT;
     }
 
     /**
-     * Heuristic check: verify all original experiences appear in optimized output.
+     * Heuristic check: verify all original experiences and certifications appear in optimized output.
      */
     private function validateConsistency(array $aiResponse, array $structured): void
     {
         $report = $aiResponse['consistency_report'] ?? null;
 
-        // BLOCKING check: if the AI itself reports missing experiences, reject the output
-        if ($report && isset($report['all_included']) && $report['all_included'] === false) {
+        // BLOCKING check: if the AI reports missing experiences
+        if ($report && isset($report['all_experiences_included']) && $report['all_experiences_included'] === false) {
             $originalCount = $report['original_experiences_count'] ?? '?';
             $includedCount = $report['included_experiences_count'] ?? '?';
             Log::error('AI consistency check FAILED: not all experiences included', [
@@ -603,6 +610,25 @@ PROMPT;
                 "La IA omitió experiencias laborales ({$includedCount}/{$originalCount} incluidas). "
                 . "Reintentando para garantizar integridad del CV."
             );
+        }
+
+        // BLOCKING check: if the AI reports missing certifications
+        if ($report && isset($report['all_certifications_included']) && $report['all_certifications_included'] === false) {
+            $originalCount = $report['original_certifications_count'] ?? '?';
+            $includedCount = $report['included_certifications_count'] ?? '?';
+            Log::error('AI consistency check FAILED: not all certifications included', [
+                'report' => $report,
+            ]);
+            throw new RuntimeException(
+                "La IA omitió certificaciones ({$includedCount}/{$originalCount} incluidas). "
+                . "Reintentando para garantizar integridad del CV."
+            );
+        }
+
+        // Backward compatibility: check old 'all_included' field
+        if ($report && isset($report['all_included']) && $report['all_included'] === false) {
+            Log::error('AI consistency check FAILED (legacy): content missing', ['report' => $report]);
+            throw new RuntimeException("La IA omitió contenido del CV original. Reintentando.");
         }
 
         // Additional heuristic: log keyword overlap for monitoring (non-blocking)
