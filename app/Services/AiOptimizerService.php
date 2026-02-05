@@ -71,12 +71,13 @@ REGLAS ABSOLUTAS - NO PUEDES VIOLARLAS:
     - Extraer competencias técnicas y blandas de la experiencia laboral
     - Esta sección es OBLIGATORIA para optimización ATS
 
-14. HERRAMIENTAS Y TECNOLOGÍAS - SIEMPRE GENERAR:
-    - SIEMPRE crear esta sección basándote en:
-      a) Herramientas/software mencionados explícitamente en el CV
-      b) Herramientas inferidas de la experiencia laboral del candidato
-    - Incluir: software, sistemas, herramientas técnicas, plataformas
-    - Esta sección es OBLIGATORIA para optimización ATS
+14. HERRAMIENTAS Y TECNOLOGÍAS - SOLO DEL ORIGINAL:
+    - SOLO incluir herramientas/software MENCIONADOS EXPLÍCITAMENTE en el CV
+    - PROHIBIDO inventar marcas o modelos (ej: NO agregar "Hikvision, Dahua" si no están en el original)
+    - PROHIBIDO inferir herramientas que no están escritas
+    - Si el original dice "sistemas de CCTV", escribir "Sistemas de CCTV" (NO "Hikvision, Dahua")
+    - Si el original dice "sistemas delfos", escribir "Sistemas Delfos" (NO inventar otros)
+    - Esta sección es OBLIGATORIA pero SOLO con contenido del original
 
 15. CURSOS Y CERTIFICACIONES - INCLUIR TODOS SIN EXCEPCIÓN:
     - CONTAR las certificaciones del original e INCLUIR TODAS
@@ -86,22 +87,29 @@ REGLAS ABSOLUTAS - NO PUEDES VIOLARLAS:
     - Ejemplo: Si el original tiene "Curso OS-10" y "Operador CCTV", AMBOS deben aparecer
     - NO OMITIR NINGUNA CERTIFICACIÓN BAJO NINGUNA CIRCUNSTANCIA
 
-16. EDUCACIÓN COMPLETA - INCLUIR TODA:
+16. EDUCACIÓN COMPLETA - INCLUIR TODA SIN EXCEPCIÓN:
     - Incluir TODA la educación mencionada: básica, media, técnica, universitaria, postgrado
+    - Si dice "Enseñanza Media: Completa" DEBE aparecer en FORMACIÓN ACADÉMICA
     - Si dice "Educación Media: Liceo X" DEBE aparecer en FORMACIÓN ACADÉMICA
     - NO omitir educación básica ni media
+    - NO omitir ningún nivel educativo que aparezca en el original
 
-17. IDIOMAS - SOLO SI EXISTEN EN EL ORIGINAL:
+17. DISPONIBILIDAD - INCLUIR SI EXISTE:
+    - Si el original menciona "Disponibilidad Inmediata" o similar, INCLUIR sección ## DISPONIBILIDAD
+    - Copiar textualmente la disponibilidad indicada
+    - Si NO hay información de disponibilidad, NO crear la sección
+
+18. IDIOMAS - SOLO SI EXISTEN EN EL ORIGINAL:
     - Si el CV menciona idiomas específicos, crear sección ## IDIOMAS
     - Copiar textualmente los niveles indicados (ej: "Inglés escrito avanzado y medianamente hablado")
     - Si NO hay información de idiomas en el CV original, NO crear la sección IDIOMAS
     - Si no hay idiomas, simplemente OMITIR toda la sección
 
-18. OTROS CONOCIMIENTOS - DISTRIBUIR CORRECTAMENTE:
+19. OTROS CONOCIMIENTOS - DISTRIBUIR CORRECTAMENTE:
     - Software y herramientas técnicas van en HERRAMIENTAS Y TECNOLOGÍAS
     - Cursos y certificaciones van en sección CERTIFICACIONES
 
-19. NUNCA INVENTES INFORMACIÓN - REGLA ABSOLUTA:
+20. NUNCA INVENTES INFORMACIÓN - REGLA ABSOLUTA:
     - PROHIBIDO inventar AÑOS de certificaciones que no están en el original
     - PROHIBIDO inventar MESES si el original solo tiene años (ej: "2024" NO es "Enero 2024")
     - PROHIBIDO inventar DESCRIPCIONES de certificaciones
@@ -122,12 +130,12 @@ REGLAS ABSOLUTAS - NO PUEDES VIOLARLAS:
     Carabineros de Chile
     Para ejercer como guardia de seguridad privada.  ← Solo lo que dice el original
 
-20. CERTIFICACIONES Y CURSOS - FORMATO:
+21. CERTIFICACIONES Y CURSOS - FORMATO:
     - Formato: "Nombre del curso/certificación | Año" (sin inventar institución)
     - Ejemplo CORRECTO: "Operador CCTV y Alarmas | 2023"
     - Ejemplo INCORRECTO: "Operador CCTV y Alarmas - Institución no especificada | 2023"
 
-21. PRESERVACIÓN DE DESCRIPCIONES - REGLA CRÍTICA:
+22. PRESERVACIÓN DE DESCRIPCIONES - REGLA CRÍTICA:
     - Si el CV original tiene descripción de un curso/certificación, DEBES COPIARLA COMPLETA
     - PROHIBIDO eliminar descripciones que existen en el original
     - PROHIBIDO resumir o acortar descripciones
@@ -150,7 +158,7 @@ REGLAS ABSOLUTAS - NO PUEDES VIOLARLAS:
     MAL: Omitir toda la descripción
     BIEN: Copiar textualmente TODA la descripción
 
-22. EXPERIENCIAS NO ALINEADAS AL RUBRO:
+23. EXPERIENCIAS NO ALINEADAS AL RUBRO:
     - MANTENER TODAS las responsabilidades del original
     - NO reducir ni resumir, solo mejorar redacción
     - Agregar keywords relevantes donde sea natural
@@ -158,21 +166,21 @@ REGLAS ABSOLUTAS - NO PUEDES VIOLARLAS:
 
 REGLAS DE CALIDAD ATS - OBLIGATORIAS:
 
-23. VERBOS DE ACCIÓN EN BULLETS:
+24. VERBOS DE ACCIÓN EN BULLETS:
     - CADA bullet de experiencia DEBE comenzar con un verbo de acción en pasado
     - Ejemplos: Lideré, Implementé, Desarrollé, Gestioné, Coordiné, Optimicé, Supervisé, Ejecuté, Diseñé, Administré
     - INCORRECTO: "Responsable de supervisar equipo"
     - CORRECTO: "Supervisé equipo de 10 personas logrando reducción de 20% en tiempos"
     - Esto es CRÍTICO para scoring ATS
 
-24. LOGROS CUANTIFICABLES:
+25. LOGROS CUANTIFICABLES:
     - Siempre que sea posible, incluir métricas y números
     - Ejemplos: porcentajes (%), montos ($), cantidades, tiempos
     - MEJORAR: "Mejoré las ventas" → "Incrementé ventas en 25% durante Q4 2023"
     - MEJORAR: "Reduje costos" → "Reduje costos operacionales en $5M anuales"
     - Si el original NO tiene números, NO inventar - solo mejorar redacción
 
-25. KEYWORDS ESTRATÉGICOS:
+26. KEYWORDS ESTRATÉGICOS:
     - Incluir keywords del CARGO OBJETIVO en:
       a) Headline/título profesional (línea bajo el nombre)
       b) PERFIL PROFESIONAL (primeras líneas)
@@ -181,20 +189,20 @@ REGLAS DE CALIDAD ATS - OBLIGATORIAS:
     - Usar sinónimos del cargo: "Guardia de Seguridad" = "Vigilante", "Agente de Seguridad"
     - Keywords deben aparecer de forma NATURAL, no forzada
 
-26. HEADLINE PROFESIONAL OPTIMIZADO:
+27. HEADLINE PROFESIONAL OPTIMIZADO:
     - La línea bajo el nombre DEBE incluir el cargo objetivo
     - Formato: "Cargo Objetivo | Especialidad | Años de experiencia"
     - Ejemplo: "Guardia de Seguridad | Seguridad Privada | 8+ años de experiencia"
     - Este headline es CRÍTICO para que el ATS detecte el perfil
 
-27. COMPETENCIAS ESTRUCTURADAS:
+28. COMPETENCIAS ESTRUCTURADAS:
     - Dividir en DOS grupos:
       a) Competencias Técnicas (específicas del rubro)
       b) Competencias Blandas (transversales)
     - Mínimo 4 competencias técnicas y 3 blandas
     - Usar términos exactos que aparecen en ofertas de empleo del rubro
 
-28. FORMATO DE FECHAS - NO INVENTAR:
+29. FORMATO DE FECHAS - NO INVENTAR:
     - USAR EL MISMO FORMATO QUE EL ORIGINAL
     - Si original dice "2024", escribir "2024" (NO "Enero 2024")
     - Si original dice "2020 - 2023", escribir "2020 – 2023"
@@ -205,12 +213,12 @@ REGLAS DE CALIDAD ATS - OBLIGATORIAS:
       Original: "2024" → Optimizado: "2024" (NO "Enero 2024 – Presente")
       Original: "2020 - 2023" → Optimizado: "2020 – 2023"
 
-29. REFERENCIAS - NO INCLUIR:
+30. REFERENCIAS - NO INCLUIR:
     - NUNCA incluir sección de REFERENCIAS
     - NUNCA escribir "Referencias disponibles a solicitud"
     - Esto ocupa espacio sin valor para ATS ni reclutadores
 
-30. PROHIBIDO TEXTO PLACEHOLDER EN OUTPUT:
+31. PROHIBIDO TEXTO PLACEHOLDER EN OUTPUT:
     - NUNCA incluir texto entre corchetes [] en el CV final
     - NUNCA escribir "[Descripción completa...]", "[OMITIR...]", "[Verbo de acción]"
     - Si no hay descripción de un programa educativo, simplemente NO incluir descripción
@@ -275,9 +283,9 @@ Para ejercer como guardia de seguridad privada.
 Formación para desarrollar actividades como operador de CCTV y Alarmas. Se adquirieron habilidades avanzadas en la instalación y monitoreo de sistemas de seguridad.
 
 ## HERRAMIENTAS Y TECNOLOGÍAS
-- Sistemas de CCTV (Hikvision, Dahua)
+- Sistemas de CCTV y videovigilancia
 - Software de control de accesos
-- Plataformas de monitoreo de alarmas
+- Sistemas de alarmas y monitoreo
 - Radio comunicaciones
 
 ## IDIOMAS
