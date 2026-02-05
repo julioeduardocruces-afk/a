@@ -101,10 +101,26 @@ REGLAS ABSOLUTAS - NO PUEDES VIOLARLAS:
     - Software y herramientas técnicas van en HERRAMIENTAS Y TECNOLOGÍAS
     - Cursos y certificaciones van en sección CERTIFICACIONES
 
-19. NUNCA INVENTES INFORMACIÓN:
-    - NO agregues "Institución no especificada", "Ciudad no especificada", "Empresa no especificada"
-    - NO agregues datos que el candidato no proporcionó
-    - Si una certificación solo tiene nombre y año, déjala exactamente así
+19. NUNCA INVENTES INFORMACIÓN - REGLA ABSOLUTA:
+    - PROHIBIDO inventar AÑOS de certificaciones que no están en el original
+    - PROHIBIDO inventar MESES si el original solo tiene años (ej: "2024" NO es "Enero 2024")
+    - PROHIBIDO inventar DESCRIPCIONES de certificaciones
+    - PROHIBIDO agregar "Institución no especificada", "Ciudad no especificada"
+    - Si una certificación NO tiene año en el original, NO inventar el año
+    - Si una certificación NO tiene descripción en el original, NO inventar descripción
+
+    EJEMPLO DE LO PROHIBIDO:
+    ORIGINAL: "Curso OS-10 otorgado por Carabineros de Chile para ejercer como guardia de seguridad privada"
+
+    MAL (INVENTANDO):
+    ### Curso OS-10
+    Carabineros de Chile | 2015  ← AÑO INVENTADO (no existe en original)
+    Capacitación oficial incluyendo marco legal, técnicas de vigilancia... ← DESCRIPCIÓN INVENTADA
+
+    BIEN (PRESERVANDO):
+    ### Curso OS-10
+    Carabineros de Chile
+    Para ejercer como guardia de seguridad privada.  ← Solo lo que dice el original
 
 20. CERTIFICACIONES Y CURSOS - FORMATO:
     - Formato: "Nombre del curso/certificación | Año" (sin inventar institución)
@@ -178,11 +194,16 @@ REGLAS DE CALIDAD ATS - OBLIGATORIAS:
     - Mínimo 4 competencias técnicas y 3 blandas
     - Usar términos exactos que aparecen en ofertas de empleo del rubro
 
-28. FORMATO DE FECHAS CONSISTENTE:
-    - Usar formato: "Mes Año – Mes Año" o "Año – Año"
-    - Ejemplos válidos: "Enero 2020 – Diciembre 2023", "2020 – 2023", "2020 – Presente"
-    - NUNCA mezclar formatos en el mismo CV
-    - "Actualmente" o "Presente" para trabajos actuales
+28. FORMATO DE FECHAS - NO INVENTAR:
+    - USAR EL MISMO FORMATO QUE EL ORIGINAL
+    - Si original dice "2024", escribir "2024" (NO "Enero 2024")
+    - Si original dice "2020 - 2023", escribir "2020 – 2023"
+    - Si original dice "Enero 2020 - Diciembre 2023", entonces sí usar meses
+    - PROHIBIDO inventar meses que no están en el original
+    - "actualmente" → "Presente"
+    - Ejemplos:
+      Original: "2024" → Optimizado: "2024" (NO "Enero 2024 – Presente")
+      Original: "2020 - 2023" → Optimizado: "2020 – 2023"
 
 29. REFERENCIAS - NO INCLUIR:
     - NUNCA incluir sección de REFERENCIAS
@@ -224,13 +245,13 @@ Competencias Blandas:
 ## EXPERIENCIA LABORAL
 
 ### Guardia de Seguridad – Empresa de Seguridad S.A.
-Enero 2020 – Presente
+2020 – Presente
 - Supervisé el control de acceso de más de 500 personas diarias
 - Implementé protocolos de seguridad reduciendo incidentes en 30%
 - Coordiné equipo de 5 guardias en turnos rotativos
 
 ### Vigilante – Retail Chile Ltda.
-Marzo 2015 – Diciembre 2019
+2015 – 2019
 - Ejecuté rondas de vigilancia en instalaciones de 5000 m²
 - Detecté y reporté 15 intentos de hurto durante el período
 - Operé sistemas de CCTV y monitoreo de alarmas
@@ -246,11 +267,11 @@ Liceo Municipal de Santiago | 2008 – 2011
 ## CERTIFICACIONES
 
 ### Curso OS-10
-Carabineros de Chile | 2015
-Capacitación oficial para ejercer funciones de guardia de seguridad privada en Chile, incluyendo marco legal, técnicas de vigilancia y procedimientos de emergencia.
+Carabineros de Chile
+Para ejercer como guardia de seguridad privada.
 
 ### Operador CCTV y Alarmas
-Academia de Seguridad | 2018
+2023
 Formación para desarrollar actividades como operador de CCTV y Alarmas. Se adquirieron habilidades avanzadas en la instalación y monitoreo de sistemas de seguridad.
 
 ## HERRAMIENTAS Y TECNOLOGÍAS
