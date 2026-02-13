@@ -163,6 +163,25 @@
             </div>
         </div>
 
+        {{-- LICENCIA DE CONDUCIR --}}
+        <div class="card">
+            <h3 style="margin-bottom:12px;color:#1a1a2e;">Licencia de Conducir (opcional)</h3>
+            <p style="font-size:0.85rem;color:#666;margin-bottom:12px;">Importante para ATS: muchas empresas filtran por licencia de conducir.</p>
+            <div class="form-group" style="margin-bottom:0;">
+                <label for="driver_license">Tipo de licencia</label>
+                <input type="text" id="driver_license" name="driver_license" value="{{ old('driver_license') }}" maxlength="100" placeholder="Ej: Clase B, Clase A2, Clase D">
+            </div>
+        </div>
+
+        {{-- DISPONIBILIDAD --}}
+        <div class="card">
+            <h3 style="margin-bottom:12px;color:#1a1a2e;">Disponibilidad (opcional)</h3>
+            <div class="form-group" style="margin-bottom:0;">
+                <label for="availability">Ej: Inmediata, 2 semanas, etc.</label>
+                <input type="text" id="availability" name="availability" value="{{ old('availability') }}" maxlength="100" placeholder="Ej: Disponibilidad Inmediata">
+            </div>
+        </div>
+
         <button type="submit" class="btn btn-primary" style="width:100%;margin-bottom:16px;">Continuar</button>
     </form>
 

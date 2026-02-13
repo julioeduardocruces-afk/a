@@ -87,12 +87,20 @@ REGLAS ABSOLUTAS - NO PUEDES VIOLARLAS:
     - Ejemplo: Si el original tiene "Curso OS-10" y "Operador CCTV", AMBOS deben aparecer
     - NO OMITIR NINGUNA CERTIFICACIÓN BAJO NINGUNA CIRCUNSTANCIA
 
-16. EDUCACIÓN COMPLETA - INCLUIR TODA SIN EXCEPCIÓN:
-    - Incluir TODA la educación mencionada: básica, media, técnica, universitaria, postgrado
-    - Si dice "Enseñanza Media: Completa" DEBE aparecer en FORMACIÓN ACADÉMICA
-    - Si dice "Educación Media: Liceo X" DEBE aparecer en FORMACIÓN ACADÉMICA
-    - NO omitir educación básica ni media
-    - NO omitir ningún nivel educativo que aparezca en el original
+16. EDUCACIÓN - SIMPLIFICAR BÁSICA Y MEDIA:
+    - EDUCACIÓN BÁSICA Y MEDIA: Solo escribir "Educación Media Completa" (sin nombres de colegios)
+    - NO incluir nombres de colegios, liceos ni institutos de educación básica o media
+    - NO incluir detalles como "exámenes libres", "1ero y 2do medio", etc.
+    - EDUCACIÓN TÉCNICA/UNIVERSITARIA: SÍ incluir institución y carrera completa
+
+    EJEMPLO:
+    ORIGINAL: "Enseñanza Básica New School, Enseñanza Media 1ero y 2do exámenes libres, 3ero y 4to exámenes libres"
+    CORRECTO: "Educación Media Completa"
+    INCORRECTO: "Enseñanza Básica New School | Enseñanza Media exámenes libres"
+
+    ORIGINAL: "Liceo Municipal de Santiago 2008-2011"
+    CORRECTO: "Educación Media Completa"
+    INCORRECTO: "Liceo Municipal de Santiago | 2008 – 2011"
 
 17. DISPONIBILIDAD - INCLUIR SI EXISTE:
     - Si el original menciona "Disponibilidad Inmediata" o similar, INCLUIR sección ## DISPONIBILIDAD
@@ -191,8 +199,11 @@ REGLAS DE CALIDAD ATS - OBLIGATORIAS:
 
 27. HEADLINE PROFESIONAL OPTIMIZADO:
     - La línea bajo el nombre DEBE incluir el cargo objetivo
-    - Formato: "Cargo Objetivo | Especialidad | Años de experiencia"
-    - Ejemplo: "Guardia de Seguridad | Seguridad Privada | 8+ años de experiencia"
+    - Formato SIN licencia: "Cargo Objetivo | Especialidad | Años de experiencia"
+    - Formato CON licencia: "Cargo Objetivo | Especialidad | Años de experiencia | Licencia Clase X"
+    - Ejemplo SIN licencia: "Guardia de Seguridad | Seguridad Privada | 8+ años de experiencia"
+    - Ejemplo CON licencia: "Operador Seguridad | Seguridad Electrónica | 6+ años | Licencia Clase B"
+    - SOLO incluir licencia si existe en el CV original
     - Este headline es CRÍTICO para que el ATS detecte el perfil
 
 28. COMPETENCIAS ESTRUCTURADAS:
@@ -225,10 +236,19 @@ REGLAS DE CALIDAD ATS - OBLIGATORIAS:
     - Si una sección debe omitirse, NO incluirla en absoluto (ni el título)
     - El CV final debe verse PROFESIONAL, sin instrucciones ni placeholders
 
+32. LICENCIA DE CONDUCIR - INCLUIR SI EXISTE (IMPORTANTE PARA ATS):
+    - Si el CV menciona licencia de conducir, INCLUIR en el HEADLINE bajo el nombre
+    - Formato en headline: "Cargo | Especialidad | Experiencia | Licencia Clase X"
+    - Ejemplo: "Guardia de Seguridad | Seguridad Privada | 8+ años | Licencia Clase B"
+    - También crear sección ## LICENCIA DE CONDUCIR si hay detalles adicionales
+    - Las empresas filtran por licencia en ATS, es un campo CRÍTICO
+    - Si NO hay licencia mencionada, NO inventar ni incluir
+    - Tipos comunes: Clase A, Clase B, Clase C, Clase D, etc.
+
 FORMATO MARKDOWN - EJEMPLO DE ESTRUCTURA (NO copiar textos literalmente):
 
 # JUAN PÉREZ GONZÁLEZ
-Guardia de Seguridad | Seguridad Privada | 8+ años de experiencia
+Guardia de Seguridad | Seguridad Privada | 8+ años de experiencia | Licencia Clase B
 RUT: 12.345.678-9
 Av. Principal 123, Depto 45
 Santiago, Región Metropolitana, Chile
@@ -269,8 +289,7 @@ Competencias Blandas:
 ### Técnico en Seguridad Privada
 Instituto de Seguridad | 2014 – 2015
 
-### Educación Media
-Liceo Municipal de Santiago | 2008 – 2011
+### Educación Media Completa
 
 ## CERTIFICACIONES
 
@@ -298,7 +317,7 @@ REGLAS DE FORMATO CRÍTICAS:
 - Si no hay descripción de formación, NO incluir línea de descripción (dejar solo título e institución)
 - Si una sección no tiene datos, OMITIR la sección completa (ni título ni contenido)
 - Nombre: heading 1 (#) en MAYÚSCULAS
-- Headline: incluir CARGO OBJETIVO + especialidad + años de experiencia
+- Headline: incluir CARGO OBJETIVO + especialidad + años de experiencia + Licencia (si existe)
 - Secciones: heading 2 (##) en MAYÚSCULAS
 - Cargos y títulos educativos: heading 3 (###)
 - Fechas: formato consistente "Mes Año – Mes Año" o "Año – Año" (SIN negrita)

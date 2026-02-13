@@ -485,6 +485,8 @@ class ResumeController extends Controller
             'skills' => ['nullable', 'string', 'max:2000'],
             'certifications' => ['nullable', 'string', 'max:2000'],
             'languages' => ['nullable', 'string', 'max:500'],
+            'driver_license' => ['nullable', 'string', 'max:100'],
+            'availability' => ['nullable', 'string', 'max:100'],
         ]);
 
         // Sanitize all text fields
@@ -499,6 +501,8 @@ class ResumeController extends Controller
         $skillsRaw = $this->sanitizeUserText($validated['skills'] ?? '');
         $certsRaw = $this->sanitizeUserText($validated['certifications'] ?? '', true);
         $langsRaw = $this->sanitizeUserText($validated['languages'] ?? '');
+        $driverLicense = $this->sanitizeUserText($validated['driver_license'] ?? '');
+        $availability = $this->sanitizeUserText($validated['availability'] ?? '');
 
         // Build structured_json (same format as TextExtractorService::structureText)
         $experienceEntries = [];
@@ -569,6 +573,8 @@ class ResumeController extends Controller
             'skills' => array_values($skills),
             'certifications' => array_values($certs),
             'languages' => array_values($langs),
+            'driver_license' => $driverLicense,
+            'availability' => $availability,
             'other' => '',
         ];
 
@@ -603,6 +609,16 @@ class ResumeController extends Controller
             $textParts[] = '';
             $textParts[] = 'IDIOMAS';
             $textParts[] = implode(', ', $langs);
+        }
+        if ($driverLicense) {
+            $textParts[] = '';
+            $textParts[] = 'LICENCIA DE CONDUCIR';
+            $textParts[] = 'Licencia ' . $driverLicense;
+        }
+        if ($availability) {
+            $textParts[] = '';
+            $textParts[] = 'DISPONIBILIDAD';
+            $textParts[] = $availability;
         }
 
         $extractedText = implode("\n", $textParts);
