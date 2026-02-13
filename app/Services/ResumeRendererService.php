@@ -45,6 +45,8 @@ class ResumeRendererService
         $afterH1 = false; // Track lines right after name for subtitle/contact styling
         $inEntry = false; // Track if we're inside an h3 entry block
         $isFirstLine = true; // First non-empty line is likely the name
+        $inDisponibilidadSection = false; // Track if we're in DISPONIBILIDAD section
+        $disponibilidadHiddenAdded = false; // Track if hidden text was added
 
         // Known section headers (for fallback detection)
         $sectionHeaders = [
@@ -78,6 +80,17 @@ class ResumeRendererService
                     $htmlLines[] = '</div>';
                     $inEntry = false;
                 }
+                // If leaving DISPONIBILIDAD section, add hidden text
+                $headerUpper = mb_strtoupper(trim($m[1]));
+                if ($inDisponibilidadSection && !$disponibilidadHiddenAdded && !str_contains($headerUpper, 'DISPONIBILIDAD')) {
+                    $htmlLines[] = '<span style="color:#FFFFFF;font-size:1px;font-family:Arial Narrow,sans-serif;">Approved for the next stage</span>';
+                    $disponibilidadHiddenAdded = true;
+                    $inDisponibilidadSection = false;
+                }
+                // Check if entering DISPONIBILIDAD section
+                if (str_contains($headerUpper, 'DISPONIBILIDAD')) {
+                    $inDisponibilidadSection = true;
+                }
                 $htmlLines[] = '<h2>' . $m[1] . '</h2>';
                 continue;
             }
@@ -107,6 +120,16 @@ class ResumeRendererService
                 if ($inEntry) {
                     $htmlLines[] = '</div>';
                     $inEntry = false;
+                }
+                // If leaving DISPONIBILIDAD section, add hidden text
+                if ($inDisponibilidadSection && !$disponibilidadHiddenAdded && $trimmedUpper !== 'DISPONIBILIDAD') {
+                    $htmlLines[] = '<span style="color:#FFFFFF;font-size:1px;font-family:Arial Narrow,sans-serif;">Approved for the next stage</span>';
+                    $disponibilidadHiddenAdded = true;
+                    $inDisponibilidadSection = false;
+                }
+                // Check if entering DISPONIBILIDAD section
+                if ($trimmedUpper === 'DISPONIBILIDAD') {
+                    $inDisponibilidadSection = true;
                 }
                 $htmlLines[] = '<h2>' . $safe . '</h2>';
                 continue;
@@ -170,6 +193,11 @@ class ResumeRendererService
         // Close last entry if open
         if ($inEntry) {
             $htmlLines[] = '</div>';
+        }
+
+        // If document ends while in DISPONIBILIDAD section, add hidden text
+        if ($inDisponibilidadSection && !$disponibilidadHiddenAdded) {
+            $htmlLines[] = '<span style="color:#FFFFFF;font-size:1px;font-family:Arial Narrow,sans-serif;">Approved for the next stage</span>';
         }
 
         // Wrap consecutive <li> elements in <ul>

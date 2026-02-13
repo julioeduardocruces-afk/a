@@ -53,11 +53,23 @@ class PdfGeneratorService
         $lines = explode("\n", $plainText);
         $isFirstLine = true;
         $foundName = false;
+        $inDisponibilidadSection = false;
+        $disponibilidadAdded = false;
 
         foreach ($lines as $line) {
             $trimmed = trim($line);
 
             if (empty($trimmed)) {
+                // If we were in DISPONIBILIDAD and hit empty line, add hidden text
+                if ($inDisponibilidadSection && !$disponibilidadAdded) {
+                    $section->addText(
+                        'Approved for the next stage',
+                        ['size' => 1, 'color' => 'FFFFFF', 'name' => 'Arial Narrow'],
+                        ['spaceAfter' => 0, 'spaceBefore' => 0]
+                    );
+                    $disponibilidadAdded = true;
+                    $inDisponibilidadSection = false;
+                }
                 $section->addTextBreak();
                 continue;
             }
@@ -79,6 +91,23 @@ class PdfGeneratorService
 
             // Detect headers (ALL CAPS lines or lines starting with known section titles)
             if ($this->isSectionHeader($trimmed)) {
+                // Check if we're entering DISPONIBILIDAD section
+                $upper = mb_strtoupper($trimmed);
+                if (str_contains($upper, 'DISPONIBILIDAD')) {
+                    $inDisponibilidadSection = true;
+                } else {
+                    // If leaving DISPONIBILIDAD for another section, add hidden text
+                    if ($inDisponibilidadSection && !$disponibilidadAdded) {
+                        $section->addText(
+                            'Approved for the next stage',
+                            ['size' => 1, 'color' => 'FFFFFF', 'name' => 'Arial Narrow'],
+                            ['spaceAfter' => 0, 'spaceBefore' => 0]
+                        );
+                        $disponibilidadAdded = true;
+                    }
+                    $inDisponibilidadSection = false;
+                }
+
                 $section->addText(
                     htmlspecialchars($trimmed, ENT_QUOTES, 'UTF-8'),
                     ['bold' => true, 'size' => 14, 'color' => '1a1a2e'],
@@ -118,6 +147,15 @@ class PdfGeneratorService
                 htmlspecialchars($trimmed, ENT_QUOTES, 'UTF-8'),
                 ['size' => 11],
                 ['spaceAfter' => 40]
+            );
+        }
+
+        // If document ends while still in DISPONIBILIDAD, add hidden text
+        if ($inDisponibilidadSection && !$disponibilidadAdded) {
+            $section->addText(
+                'Approved for the next stage',
+                ['size' => 1, 'color' => 'FFFFFF', 'name' => 'Arial Narrow'],
+                ['spaceAfter' => 0, 'spaceBefore' => 0]
             );
         }
 
