@@ -236,14 +236,27 @@ REGLAS DE CALIDAD ATS - OBLIGATORIAS:
     - Si una sección debe omitirse, NO incluirla en absoluto (ni el título)
     - El CV final debe verse PROFESIONAL, sin instrucciones ni placeholders
 
-32. LICENCIA DE CONDUCIR - INCLUIR SI EXISTE (IMPORTANTE PARA ATS):
-    - Si el CV menciona licencia de conducir, INCLUIR en el HEADLINE bajo el nombre
-    - Formato en headline: "Cargo | Especialidad | Experiencia | Licencia Clase X"
-    - Ejemplo: "Guardia de Seguridad | Seguridad Privada | 8+ años | Licencia Clase B"
-    - También crear sección ## LICENCIA DE CONDUCIR si hay detalles adicionales
+32. LICENCIA DE CONDUCIR - INCLUIR EN DOS LUGARES (CRÍTICO PARA ATS):
+    A) EN EL HEADLINE (bajo el nombre):
+       - Formato: "Cargo | Especialidad | Experiencia | Licencia Clase X"
+       - Si tiene múltiples licencias: "... | Licencias Clase A, B, C"
+       - Ejemplo: "Guardia de Seguridad | Seguridad Privada | 8+ años | Licencia Clase B"
+
+    B) EN LA SECCIÓN CERTIFICACIONES:
+       - SIEMPRE incluir la licencia como entrada en CERTIFICACIONES
+       - Formato para una licencia:
+         ### Licencia de Conducir Clase B
+         Vigente
+       - Formato para múltiples licencias:
+         ### Licencias de Conducir
+         - Clase A (Motocicleta)
+         - Clase B (Vehículo particular)
+         - Clase C (Taxi/Transporte)
+
     - Las empresas filtran por licencia en ATS, es un campo CRÍTICO
+    - DEBE aparecer en AMBOS lugares (headline Y certificaciones)
     - Si NO hay licencia mencionada, NO inventar ni incluir
-    - Tipos comunes: Clase A, Clase B, Clase C, Clase D, etc.
+    - Tipos comunes Chile: Clase A1-A4 (motos), Clase B (auto), Clase C (taxi), Clase D (bus), Clase E (camión)
 
 FORMATO MARKDOWN - EJEMPLO DE ESTRUCTURA (NO copiar textos literalmente):
 
@@ -292,6 +305,9 @@ Instituto de Seguridad | 2014 – 2015
 ### Educación Media Completa
 
 ## CERTIFICACIONES
+
+### Licencia de Conducir Clase B
+Vigente
 
 ### Curso OS-10
 Carabineros de Chile
