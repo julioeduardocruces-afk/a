@@ -236,32 +236,40 @@ REGLAS DE CALIDAD ATS - OBLIGATORIAS:
     - Si una sección debe omitirse, NO incluirla en absoluto (ni el título)
     - El CV final debe verse PROFESIONAL, sin instrucciones ni placeholders
 
-32. LICENCIA DE CONDUCIR - INCLUIR EN DOS LUGARES (CRÍTICO PARA ATS):
+32. LICENCIA DE CONDUCIR - SOLO SI EXISTE EN EL ORIGINAL (PROHIBIDO INVENTAR):
+
+    ⚠️ REGLA CRÍTICA: SOLO incluir licencia si el CV ORIGINAL la menciona explícitamente.
+    ⚠️ Si el CV original NO menciona licencia de conducir, NO INCLUIRLA EN NINGÚN LUGAR.
+    ⚠️ PROHIBIDO inventar "Licencia Clase B" u otra licencia que no esté en el original.
+
+    VERIFICACIÓN OBLIGATORIA:
+    - Buscar en el CV original palabras como: "licencia", "conducir", "Clase A", "Clase B", "Clase C", "Clase D"
+    - Si NO encuentras ninguna mención → NO incluir licencia en headline NI en certificaciones
+    - Si SÍ encuentras mención → incluir en AMBOS lugares (headline Y certificaciones)
+
+    SI EXISTE LICENCIA EN EL ORIGINAL:
     A) EN EL HEADLINE (bajo el nombre):
        - Formato: "Cargo | Especialidad | Experiencia | Licencia Clase X"
-       - Si tiene múltiples licencias: "... | Licencias Clase A, B, C"
        - Ejemplo: "Guardia de Seguridad | Seguridad Privada | 8+ años | Licencia Clase B"
 
     B) EN LA SECCIÓN CERTIFICACIONES:
-       - SIEMPRE incluir la licencia como entrada en CERTIFICACIONES
-       - Formato para una licencia:
+       - Formato:
          ### Licencia de Conducir Clase B
          Vigente
-       - Formato para múltiples licencias:
-         ### Licencias de Conducir
-         - Clase A (Motocicleta)
-         - Clase B (Vehículo particular)
-         - Clase C (Taxi/Transporte)
 
-    - Las empresas filtran por licencia en ATS, es un campo CRÍTICO
-    - DEBE aparecer en AMBOS lugares (headline Y certificaciones)
+    SI NO EXISTE LICENCIA EN EL ORIGINAL:
+    - Headline SIN licencia: "Cargo | Especialidad | Experiencia"
+    - NO crear entrada de licencia en CERTIFICACIONES
+    - Ejemplo correcto SIN licencia: "Operador Seguridad | Seguridad Electrónica | 5+ años"
     - Si NO hay licencia mencionada, NO inventar ni incluir
     - Tipos comunes Chile: Clase A1-A4 (motos), Clase B (auto), Clase C (taxi), Clase D (bus), Clase E (camión)
 
 FORMATO MARKDOWN - EJEMPLO DE ESTRUCTURA (NO copiar textos literalmente):
 
+(Este ejemplo NO tiene licencia de conducir - el headline NO incluye licencia)
+
 # JUAN PÉREZ GONZÁLEZ
-Guardia de Seguridad | Seguridad Privada | 8+ años de experiencia | Licencia Clase B
+Guardia de Seguridad | Seguridad Privada | 8+ años de experiencia
 RUT: 12.345.678-9
 Av. Principal 123, Depto 45
 Santiago, Región Metropolitana, Chile
@@ -305,9 +313,6 @@ Instituto de Seguridad | 2014 – 2015
 ### Educación Media Completa
 
 ## CERTIFICACIONES
-
-### Licencia de Conducir Clase B
-Vigente
 
 ### Curso OS-10
 Carabineros de Chile
