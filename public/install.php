@@ -220,7 +220,7 @@ MAIL_FROM_NAME="CV Optimizer ATS"
 ATS_AI_PROVIDER={$data['ai_provider']}
 ATS_PRICE_CLP={$data['price_clp']}
 ATS_MAX_UPLOAD_MB=10
-ATS_DOWNLOAD_TOKEN_TTL=15
+ATS_DOWNLOAD_TOKEN_TTL=10080
 WKHTMLTOIMAGE_PATH=/usr/local/bin/wkhtmltoimage
 
 VITE_APP_NAME="CV Optimizer ATS"
