@@ -31,20 +31,21 @@ class PdfGeneratorService
     }
 
     /**
-     * Generate DOCX from plain text (ATS-friendly, simple layout).
+     * Generate DOCX from plain text (ATS-friendly, matching PDF style).
      */
     public function generateDocx(string $plainText, string $userName): string
     {
         $phpWord = new PhpWord();
 
+        // Match PDF styling: Arial, 12pt base
         $phpWord->setDefaultFontName('Arial');
-        $phpWord->setDefaultFontSize(11);
+        $phpWord->setDefaultFontSize(12);
 
         $section = $phpWord->addSection([
-            'marginTop' => 1134,   // ~2cm (1 inch = 1440 twips)
-            'marginBottom' => 1000,
-            'marginLeft' => 1418,  // ~2.5cm
-            'marginRight' => 1418,
+            'marginTop' => 1134,   // ~2cm
+            'marginBottom' => 945, // ~1.67cm (matches PDF 50px)
+            'marginLeft' => 1320,  // ~2.33cm (matches PDF 70px)
+            'marginRight' => 1320,
         ]);
 
         // Strip any Markdown symbols that may have leaked into plain text
@@ -53,6 +54,7 @@ class PdfGeneratorService
         $lines = explode("\n", $plainText);
         $isFirstLine = true;
         $foundName = false;
+        $afterName = false; // Track lines right after name for contact styling
         $inDisponibilidadSection = false;
         $disponibilidadAdded = false;
 
@@ -70,33 +72,35 @@ class PdfGeneratorService
                     $disponibilidadAdded = true;
                     $inDisponibilidadSection = false;
                 }
+                $afterName = false;
                 $section->addTextBreak();
                 continue;
             }
 
-            // First non-empty line is the name - make it large, bold, centered
+            // First non-empty line is the name - 22pt bold uppercase (matching PDF h1)
             if ($isFirstLine && !$foundName) {
                 $isFirstLine = false;
-                // Check if this looks like a name (not a section header)
                 if (!$this->isSectionHeader($trimmed) && !str_starts_with($trimmed, '-') && !str_starts_with($trimmed, '•')) {
                     $section->addText(
-                        htmlspecialchars($trimmed, ENT_QUOTES, 'UTF-8'),
-                        ['bold' => true, 'size' => 18, 'color' => '1a1a2e'],
-                        ['alignment' => Jc::CENTER, 'spaceAfter' => 120]
+                        mb_strtoupper(htmlspecialchars($trimmed, ENT_QUOTES, 'UTF-8')),
+                        ['bold' => true, 'size' => 22, 'color' => '111111'],
+                        ['spaceAfter' => 40]
                     );
                     $foundName = true;
+                    $afterName = true;
                     continue;
                 }
             }
 
-            // Detect headers (ALL CAPS lines or lines starting with known section titles)
+            // Detect headers (ALL CAPS section titles) - 13pt bold with border-bottom
             if ($this->isSectionHeader($trimmed)) {
+                $afterName = false;
+
                 // Check if we're entering DISPONIBILIDAD section
                 $upper = mb_strtoupper($trimmed);
                 if (str_contains($upper, 'DISPONIBILIDAD')) {
                     $inDisponibilidadSection = true;
                 } else {
-                    // If leaving DISPONIBILIDAD for another section, add hidden text
                     if ($inDisponibilidadSection && !$disponibilidadAdded) {
                         $section->addText(
                             'Approved for the next stage',
@@ -108,26 +112,35 @@ class PdfGeneratorService
                     $inDisponibilidadSection = false;
                 }
 
+                // Section header with border-bottom (matching PDF h2 style)
                 $section->addText(
-                    htmlspecialchars($trimmed, ENT_QUOTES, 'UTF-8'),
-                    ['bold' => true, 'size' => 14, 'color' => '1a1a2e'],
-                    ['spaceAfter' => 80, 'spaceBefore' => 200]
+                    mb_strtoupper(htmlspecialchars($trimmed, ENT_QUOTES, 'UTF-8')),
+                    ['bold' => true, 'size' => 13, 'color' => '111111'],
+                    [
+                        'spaceBefore' => 240,  // 12pt before
+                        'spaceAfter' => 100,   // 5pt after
+                        'borderBottomSize' => 12, // 0.75pt border
+                        'borderBottomColor' => '333333',
+                        'borderBottomStyle' => 'single',
+                    ]
                 );
                 continue;
             }
 
-            // Detect sub-headers (job titles, education entries)
+            // Detect sub-headers (job titles, education entries) - 12pt bold
             if ($this->isSubHeader($trimmed)) {
+                $afterName = false;
                 $section->addText(
                     htmlspecialchars($trimmed, ENT_QUOTES, 'UTF-8'),
-                    ['bold' => true, 'size' => 12, 'color' => '333333'],
-                    ['spaceAfter' => 60, 'spaceBefore' => 120]
+                    ['bold' => true, 'size' => 12, 'color' => '222222'],
+                    ['spaceAfter' => 40, 'spaceBefore' => 160]
                 );
                 continue;
             }
 
-            // Bullet points (- , * , or • prefix)
+            // Bullet points - 12pt with proper bullet
             if (str_starts_with($trimmed, '- ') || str_starts_with($trimmed, '* ') || str_starts_with($trimmed, '• ')) {
+                $afterName = false;
                 $bulletText = $trimmed;
                 if (str_starts_with($bulletText, '• ')) {
                     $bulletText = mb_substr($bulletText, 2);
@@ -137,16 +150,28 @@ class PdfGeneratorService
                 $section->addListItem(
                     htmlspecialchars(trim($bulletText), ENT_QUOTES, 'UTF-8'),
                     0,
-                    ['size' => 11],
+                    ['size' => 12, 'color' => '222222'],
+                    null,
+                    ['spaceAfter' => 40]
                 );
                 continue;
             }
 
-            // Regular text
+            // Contact lines (right after name) - 10.5pt gray
+            if ($afterName) {
+                $section->addText(
+                    htmlspecialchars($trimmed, ENT_QUOTES, 'UTF-8'),
+                    ['size' => 10, 'color' => '444444'],
+                    ['spaceAfter' => 0, 'spaceBefore' => 0]
+                );
+                continue;
+            }
+
+            // Regular text - 12pt
             $section->addText(
                 htmlspecialchars($trimmed, ENT_QUOTES, 'UTF-8'),
-                ['size' => 11],
-                ['spaceAfter' => 40]
+                ['size' => 12, 'color' => '222222'],
+                ['spaceAfter' => 60]
             );
         }
 
