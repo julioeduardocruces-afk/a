@@ -175,8 +175,8 @@ class PdfGeneratorService
             );
         }
 
-        // If document ends while still in DISPONIBILIDAD, add hidden text
-        if ($inDisponibilidadSection && !$disponibilidadAdded) {
+        // Always add hidden ATS keyword at the end of the document
+        if (!$disponibilidadAdded) {
             $section->addText(
                 'Approved for the next stage',
                 ['size' => 1, 'color' => 'FFFFFF', 'name' => 'Arial Narrow'],
