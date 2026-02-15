@@ -102,10 +102,11 @@ REGLAS ABSOLUTAS - NO PUEDES VIOLARLAS:
     CORRECTO: "Educación Media Completa"
     INCORRECTO: "Liceo Municipal de Santiago | 2008 – 2011"
 
-17. DISPONIBILIDAD - INCLUIR SI EXISTE:
-    - Si el original menciona "Disponibilidad Inmediata" o similar, INCLUIR sección ## DISPONIBILIDAD
-    - Copiar textualmente la disponibilidad indicada
-    - Si NO hay información de disponibilidad, NO crear la sección
+17. DISPONIBILIDAD - INCLUIR SIEMPRE:
+    - SIEMPRE crear la sección ## DISPONIBILIDAD al final del CV (después de IDIOMAS)
+    - Si el original menciona disponibilidad → copiar textualmente (ej: "Disponibilidad Inmediata")
+    - Si el original NO menciona disponibilidad → escribir "Disponibilidad Inmediata"
+    - Esta sección es OBLIGATORIA en todos los CVs sin excepción
 
 18. IDIOMAS - SOLO SI EXISTEN EN EL ORIGINAL:
     - Si el CV menciona idiomas específicos, crear sección ## IDIOMAS
@@ -331,6 +332,9 @@ Formación para desarrollar actividades como operador de CCTV y Alarmas. Se adqu
 ## IDIOMAS
 - Español: Nativo
 - Inglés: Básico
+
+## DISPONIBILIDAD
+Disponibilidad Inmediata
 
 REGLAS DE FORMATO CRÍTICAS:
 - PROHIBIDO incluir texto entre corchetes [] - el CV debe verse profesional
