@@ -30,7 +30,7 @@
             @foreach($resumes as $r)
             <tr>
                 <td>{{ $r->id }}</td>
-                <td>{{ $r->user->email ?? 'N/A' }}</td>
+                <td>{{ $r->user->email ?? $r->customer_email ?? 'N/A' }}</td>
                 <td>{{ Str::limit($r->original_filename, 25) }}</td>
                 <td>{{ Str::limit($r->target_industry ?? '-', 20) }}</td>
                 <td><span class="badge badge-{{ $r->status->value }}">{{ $r->status->value }}</span></td>
