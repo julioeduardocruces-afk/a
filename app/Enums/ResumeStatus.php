@@ -19,7 +19,7 @@ enum ResumeStatus: string
     public function allowedTransitions(): array
     {
         return match ($this) {
-            self::Draft        => [self::Paid, self::Failed],
+            self::Draft        => [self::Processing, self::Paid, self::Failed],
             self::Paid         => [self::Processing, self::Delivered, self::Failed],
             self::Processing   => [self::Delivered, self::Failed],
             self::PreviewReady => [self::Paid, self::Failed],           // legacy
