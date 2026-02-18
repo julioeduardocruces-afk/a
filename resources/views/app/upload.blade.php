@@ -1,5 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Subir CV')
+@section('meta_description', 'Sube tu CV en PDF o DOCX y optimizalo para sistemas ATS. Sin registro necesario. Compatible con Laborum, ChileTrabajos y principales portales de empleo.')
+@section('meta_keywords', 'subir CV, cargar curriculum, optimizar CV online, CV PDF, CV DOCX, subir curriculum Chile')
 @push('fb_events')
 <script>
 (function(){

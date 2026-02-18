@@ -1,7 +1,9 @@
 @extends('layouts.app')
 @section('title', 'Preguntas Frecuentes')
+@section('meta_description', 'Resuelve tus dudas sobre optimizacion de CV para ATS. Que es un sistema ATS, formatos aceptados, seguridad de datos, compatibilidad con Laborum y mas.')
+@section('meta_keywords', 'preguntas frecuentes CV ATS, FAQ curriculum, dudas optimizacion CV, que es ATS, CV Laborum FAQ')
 
-@section('meta_extra')
+@section('schema_extra')
 <script type="application/ld+json">
 {!! json_encode([
     '@context' => 'https://schema.org',

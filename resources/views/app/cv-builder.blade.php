@@ -1,5 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Crear CV - Formulario')
+@section('meta_description', 'Crea tu curriculum vitae desde cero con nuestro formulario guiado. Genera un CV profesional optimizado para ATS sin necesidad de registro.')
+@section('meta_keywords', 'crear CV online, formulario curriculum, generar CV gratis, crear curriculum Chile, CV profesional online')
 @push('fb_events')
 <script>
 (function(){

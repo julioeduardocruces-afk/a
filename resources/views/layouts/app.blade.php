@@ -4,8 +4,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'CV Optimizer ATS') - Optimiza tu CV</title>
-    <meta name="description" content="@yield('meta_description', 'Optimiza tu CV para sistemas ATS. Mejora tus posibilidades en Laborum, ChileTrabajos y mas.')">
+
+    @php
+        $__seoTitle = View::yieldContent('title', 'CV Optimizer ATS');
+        $__seoFullTitle = $__seoTitle . ' - Optimiza tu CV';
+        $__seoDescription = View::yieldContent('meta_description', 'Optimiza tu CV para sistemas ATS. Mejora tus posibilidades en Laborum, ChileTrabajos y portales de empleo en Chile.');
+        $__seoKeywords = View::yieldContent('meta_keywords', 'CV ATS, curriculum vitae, optimizar CV, Laborum, ChileTrabajos, trabajos Chile, curriculum optimizado, ATS Chile');
+        $__seoImage = View::yieldContent('meta_image', url('/images/og-default.jpg'));
+        $__seoUrl = url()->current();
+        $__seoType = View::yieldContent('meta_type', 'website');
+        $__siteName = 'CV Optimizer ATS';
+    @endphp
+
+    <title>{{ $__seoFullTitle }}</title>
+    <meta name="description" content="{{ $__seoDescription }}">
+    <meta name="keywords" content="{{ $__seoKeywords }}">
+    <meta name="author" content="{{ $__siteName }}">
+    <meta name="robots" content="index, follow">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{{ $__seoUrl }}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="{{ $__seoType }}">
+    <meta property="og:url" content="{{ $__seoUrl }}">
+    <meta property="og:title" content="{{ $__seoFullTitle }}">
+    <meta property="og:description" content="{{ $__seoDescription }}">
+    <meta property="og:image" content="{{ $__seoImage }}">
+    <meta property="og:site_name" content="{{ $__siteName }}">
+    <meta property="og:locale" content="es_CL">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ $__seoUrl }}">
+    <meta name="twitter:title" content="{{ $__seoFullTitle }}">
+    <meta name="twitter:description" content="{{ $__seoDescription }}">
+    <meta name="twitter:image" content="{{ $__seoImage }}">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "{{ $__siteName }}",
+        "url": "{{ url('/') }}",
+        "description": "{{ $__seoDescription }}",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "{{ url('/') }}?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+    @hasSection('schema_extra')
+    @yield('schema_extra')
+    @else
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "ProfessionalService",
+        "name": "{{ $__siteName }}",
+        "description": "Servicio de optimizacion de CV para sistemas ATS (Applicant Tracking System). Mejora tu curriculum para portales de empleo como Laborum y ChileTrabajos.",
+        "url": "{{ url('/') }}",
+        "priceRange": "$$",
+        "areaServed": {
+            "@type": "Country",
+            "name": "Chile"
+        },
+        "serviceType": "Optimizacion de Curriculum Vitae",
+        "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "Servicios de CV",
+            "itemListElement": [
+                {
+                    "@type": "Offer",
+                    "itemOffered": {
+                        "@type": "Service",
+                        "name": "Optimizacion CV ATS",
+                        "description": "Analisis y optimizacion de tu CV para sistemas de seguimiento de candidatos"
+                    }
+                }
+            ]
+        }
+    }
+    </script>
+    @endif
+
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; background: #f8f9fa; }

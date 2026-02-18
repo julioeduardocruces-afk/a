@@ -1,5 +1,51 @@
 @extends('layouts.app')
 @section('title', 'Como Funciona')
+@section('meta_description', 'Aprende como optimizar tu CV para sistemas ATS en 5 simples pasos. Sube tu CV, selecciona tu rubro, y recibe tu curriculum optimizado para Laborum y ChileTrabajos.')
+@section('meta_keywords', 'como optimizar CV, pasos optimizar curriculum, tutorial CV ATS, mejorar CV Chile, proceso optimizacion CV')
+
+@section('schema_extra')
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "Como Optimizar tu CV para Sistemas ATS",
+    "description": "Guia paso a paso para optimizar tu curriculum vitae para sistemas de seguimiento de candidatos",
+    "step": [
+        {
+            "@type": "HowToStep",
+            "position": 1,
+            "name": "Sube o Crea tu CV",
+            "text": "Sube tu CV actual en formato PDF o DOCX, o crealo desde cero con nuestro formulario guiado."
+        },
+        {
+            "@type": "HowToStep",
+            "position": 2,
+            "name": "Selecciona tu Rubro",
+            "text": "Elige el area y cargo al que deseas postular para optimizar las palabras clave especificas."
+        },
+        {
+            "@type": "HowToStep",
+            "position": 3,
+            "name": "Optimizacion Especializada",
+            "text": "Nuestro sistema analiza tu CV y lo reestructura para maximizar compatibilidad con filtros ATS."
+        },
+        {
+            "@type": "HowToStep",
+            "position": 4,
+            "name": "Revisa el Preview",
+            "text": "Visualiza tu CV optimizado con puntaje ATS antes de pagar."
+        },
+        {
+            "@type": "HowToStep",
+            "position": 5,
+            "name": "Paga y Descarga",
+            "text": "Realiza el pago seguro y recibe tu CV en PDF y Word por email."
+        }
+    ]
+}
+</script>
+@endsection
+
 @section('content')
 <h1 style="margin-bottom:24px;">Como Funciona CV Optimizer ATS</h1>
 

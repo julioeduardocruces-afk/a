@@ -2,8 +2,9 @@
 
 @section('title', 'Optimiza tu CV para ATS - Consigue mas Entrevistas')
 @section('meta_description', 'Servicio especializado en optimizacion de CV para sistemas ATS. Compatible con Laborum, ChileTrabajos, Trabajando.com, LinkedIn, Indeed y Computrabajo.')
+@section('meta_keywords', 'CV ATS Chile, optimizar curriculum vitae, CV Laborum, CV ChileTrabajos, curriculum profesional, mejorar CV, CV compatible ATS, conseguir trabajo Chile')
 
-@section('meta_extra')
+@section('schema_extra')
 <script type="application/ld+json">
 {!! json_encode([
     '@context' => 'https://schema.org',

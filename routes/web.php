@@ -25,6 +25,8 @@ Route::get('/sitemap.xml', function () {
         url('/'),
         url('/como-funciona'),
         url('/preguntas-frecuentes'),
+        url('/subir-cv'),
+        url('/crear-cv'),
     ];
     return response()->view('seo.sitemap', compact('urls'))
         ->header('Content-Type', 'application/xml');
