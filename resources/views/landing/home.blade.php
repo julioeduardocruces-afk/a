@@ -16,6 +16,9 @@
     'operatingSystem' => 'Web',
 ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
 </script>
+@endsection
+
+@section('meta_extra')
 <style>
     .main-content { padding: 0; min-height: 0; }
     footer { margin-top: 0; }
