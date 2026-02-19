@@ -28,6 +28,24 @@ Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/categoria/{category}', [BlogController::class, 'byCategory'])->name('blog.category');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
+// Serve storage files via PHP (fallback for hosting without symlinks)
+Route::get('/storage/{path}', function (string $path) {
+    $fullPath = storage_path('app/public/' . $path);
+
+    if (!file_exists($fullPath)) {
+        abort(404);
+    }
+
+    // Prevent directory traversal
+    $realPath = realpath($fullPath);
+    $basePath = realpath(storage_path('app/public'));
+    if (!$realPath || !$basePath || !str_starts_with($realPath, $basePath)) {
+        abort(403);
+    }
+
+    return response()->file($realPath);
+})->where('path', '.*');
+
 // Sitemap & robots
 Route::get('/sitemap.xml', function () {
     $urls = [

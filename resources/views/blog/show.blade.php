@@ -360,7 +360,7 @@
 {{-- Featured Image --}}
 @if($post->featured_image_url)
 <div class="article-featured-image">
-    <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}">
+    <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" onerror="this.parentElement.style.display='none';">
 </div>
 @endif
 

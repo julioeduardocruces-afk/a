@@ -279,7 +279,10 @@
                 <a href="{{ $post->url }}" class="post-card featured-post">
                     <div class="post-card-image">
                         @if($post->featured_image_url)
-                            <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}">
+                            <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                            <div class="post-card-image-placeholder" style="display:none;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                            </div>
                         @else
                             <div class="post-card-image-placeholder">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
@@ -315,7 +318,10 @@
                 <a href="{{ $post->url }}" class="post-card">
                     <div class="post-card-image">
                         @if($post->featured_image_url)
-                            <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy">
+                            <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                            <div class="post-card-image-placeholder" style="display:none;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                            </div>
                         @else
                             <div class="post-card-image-placeholder">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
