@@ -94,12 +94,10 @@
         text-transform: uppercase;
         margin-bottom: 16px;
     }
-    .article-category.cv-tips { background: #28a745; }
-    .article-category.ats { background: #0066ff; }
-    .article-category.busqueda-empleo { background: #f59e0b; }
-    .article-category.entrevistas { background: #8b5cf6; }
-    .article-category.carrera { background: #ec4899; }
-    .article-category.noticias { background: #64748b; }
+    @php $catColors = \App\Models\BlogCategory::getColorsArray(); @endphp
+    @foreach($catColors as $catSlug => $catColor)
+    .article-category.{{ $catSlug }} { background: {{ $catColor }}; }
+    @endforeach
 
     .article-title {
         font-size: 2.5rem;

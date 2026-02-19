@@ -136,14 +136,7 @@ class BlogPost extends Model
 
     public static function getCategories(): array
     {
-        return [
-            'cv-tips' => 'Consejos de CV',
-            'ats' => 'Sistemas ATS',
-            'busqueda-empleo' => 'Busqueda de Empleo',
-            'entrevistas' => 'Entrevistas',
-            'carrera' => 'Desarrollo de Carrera',
-            'noticias' => 'Noticias',
-        ];
+        return BlogCategory::getAsArray();
     }
 
     public function getCategoryLabelAttribute(): string

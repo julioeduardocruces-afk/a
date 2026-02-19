@@ -10,7 +10,8 @@
         <a href="{{ route('admin.email-template') }}" class="{{ request()->routeIs('admin.email-template') ? 'active' : '' }}">Plantilla Email</a>
 
         <div class="sidebar-section">Contenido</div>
-        <a href="{{ route('admin.blog.index') }}" class="{{ request()->routeIs('admin.blog.*') ? 'active' : '' }}">Blog</a>
+        <a href="{{ route('admin.blog.index') }}" class="{{ request()->routeIs('admin.blog.index', 'admin.blog.create', 'admin.blog.edit', 'admin.blog.store', 'admin.blog.update', 'admin.blog.destroy') ? 'active' : '' }}">Blog</a>
+        <a href="{{ route('admin.blog.categories.index') }}" class="{{ request()->routeIs('admin.blog.categories.*') ? 'active' : '' }}">Categorias Blog</a>
 
         <div class="sidebar-section">Finanzas</div>
         <a href="{{ route('admin.billing.index') }}" class="{{ request()->routeIs('admin.billing.*') ? 'active' : '' }}">Facturacion</a>

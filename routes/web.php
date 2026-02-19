@@ -8,6 +8,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ResumeController;
 use App\Http\Controllers\Admin\AdminBillingController;
 use App\Http\Controllers\Admin\AdminBlogController;
+use App\Http\Controllers\Admin\AdminBlogCategoryController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminFinanceController;
 use App\Http\Middleware\AuditRequest;
@@ -281,6 +282,16 @@ Route::middleware(['auth', EnsureIsAdmin::class, AuditRequest::class])
             Route::put('/{id}', [AdminBlogController::class, 'update'])->name('update');
             Route::delete('/{id}', [AdminBlogController::class, 'destroy'])->name('destroy');
             Route::post('/upload-image', [AdminBlogController::class, 'uploadEditorImage'])->name('upload-image');
+
+            // Categories CRUD
+            Route::prefix('categories')->name('categories.')->group(function () {
+                Route::get('/', [AdminBlogCategoryController::class, 'index'])->name('index');
+                Route::get('/create', [AdminBlogCategoryController::class, 'create'])->name('create');
+                Route::post('/', [AdminBlogCategoryController::class, 'store'])->name('store');
+                Route::get('/{id}/edit', [AdminBlogCategoryController::class, 'edit'])->name('edit');
+                Route::put('/{id}', [AdminBlogCategoryController::class, 'update'])->name('update');
+                Route::delete('/{id}', [AdminBlogCategoryController::class, 'destroy'])->name('destroy');
+            });
         });
 
         // Billing / Invoicing

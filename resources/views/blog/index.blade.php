@@ -106,12 +106,10 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
-    .post-card-category.cv-tips { background: #28a745; }
-    .post-card-category.ats { background: #0066ff; }
-    .post-card-category.busqueda-empleo { background: #f59e0b; }
-    .post-card-category.entrevistas { background: #8b5cf6; }
-    .post-card-category.carrera { background: #ec4899; }
-    .post-card-category.noticias { background: #64748b; }
+    @php $catColors = \App\Models\BlogCategory::getColorsArray(); @endphp
+    @foreach($catColors as $catSlug => $catColor)
+    .post-card-category.{{ $catSlug }} { background: {{ $catColor }}; }
+    @endforeach
 
     .post-card-body {
         padding: 24px;

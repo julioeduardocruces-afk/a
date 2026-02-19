@@ -85,10 +85,12 @@ class AdminDashboardController extends Controller
         $metaCapiToken = Setting::getValue('meta_capi_token', '');
         $metaCapiTestCode = Setting::getValue('meta_capi_test_code', '');
 
+        $tinymceApiKey = Setting::getValue('tinymce_api_key', '');
+
         return view('admin.credentials', compact(
             'credentials', 'currentAi', 'currentAiProvider', 'currentFlow', 'flowEnabled',
             'systemPrompt', 'defaultPrompt', 'metaPixelId', 'metaPixelEnabled', 'metaCapiToken',
-            'metaCapiTestCode'
+            'metaCapiTestCode', 'tinymceApiKey'
         ));
     }
 
@@ -110,6 +112,10 @@ class AdminDashboardController extends Controller
 
         if ($formType === 'meta_pixel') {
             return $this->storeMetaPixel($request);
+        }
+
+        if ($formType === 'tinymce') {
+            return $this->storeTinyMceKey($request);
         }
 
         return back()->withErrors(['form_type' => 'Tipo de formulario no reconocido.']);
@@ -289,6 +295,19 @@ class AdminDashboardController extends Controller
         ], $request->ip());
 
         return back()->with('success', 'Configuracion de Facebook Pixel guardada exitosamente.');
+    }
+
+    private function storeTinyMceKey(Request $request)
+    {
+        $validated = $request->validate([
+            'tinymce_api_key' => ['required', 'string', 'max:200'],
+        ]);
+
+        Setting::setValue('tinymce_api_key', trim($validated['tinymce_api_key']));
+
+        AuditLog::record('admin.tinymce_key_updated', $request->user()->id, 'admin', [], $request->ip());
+
+        return back()->with('success', 'API Key de TinyMCE guardada exitosamente.');
     }
 
     private function storeSystemPrompt(Request $request)

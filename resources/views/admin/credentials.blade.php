@@ -184,6 +184,30 @@
 </div>
 
 {{-- ════════════════════════════════════════ --}}
+{{-- CONFIGURACION TINYMCE (Editor Blog)       --}}
+{{-- ════════════════════════════════════════ --}}
+<div class="card">
+    <h3 style="margin-bottom:16px;">TinyMCE (Editor de Blog)</h3>
+    <p style="color:#666;margin-bottom:12px;">Configura tu API Key de TinyMCE para el editor de texto enriquecido del blog. Puedes obtener una clave gratuita en <a href="https://www.tiny.cloud" target="_blank" style="color:#0066ff;">tiny.cloud</a>.</p>
+    <form method="POST" action="{{ route('admin.credentials.store') }}">
+        @csrf
+        <input type="hidden" name="form_type" value="tinymce">
+        <div class="form-group">
+            <label for="tinymce_api_key">API Key</label>
+            <input type="text" name="tinymce_api_key" id="tinymce_api_key"
+                   value="{{ old('tinymce_api_key', $tinymceApiKey ?? '') }}"
+                   placeholder="Ej: abc123def456ghi789..." maxlength="200">
+            @if(!empty($tinymceApiKey))
+                <small style="color:#28a745;">Clave configurada</small>
+            @else
+                <small style="color:#dc3545;">Sin clave configurada. El editor no funcionara correctamente.</small>
+            @endif
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">Guardar TinyMCE</button>
+    </form>
+</div>
+
+{{-- ════════════════════════════════════════ --}}
 {{-- CONFIGURACION SMTP                       --}}
 {{-- ════════════════════════════════════════ --}}
 <div class="card">
