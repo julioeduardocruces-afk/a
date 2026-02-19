@@ -25,6 +25,7 @@ Route::get('/preguntas-frecuentes', [LandingController::class, 'faq'])->name('fa
 
 // Blog
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/categoria/{category}', [BlogController::class, 'byCategory'])->name('blog.category');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 // Sitemap & robots
@@ -37,6 +38,16 @@ Route::get('/sitemap.xml', function () {
         ['url' => url('/crear-cv'), 'priority' => '0.9', 'changefreq' => 'weekly'],
         ['url' => url('/blog'), 'priority' => '0.8', 'changefreq' => 'daily'],
     ];
+
+    // Add blog category pages
+    $blogCategories = \App\Models\BlogCategory::ordered()->get();
+    foreach ($blogCategories as $cat) {
+        $urls[] = [
+            'url' => route('blog.category', $cat->slug),
+            'priority' => '0.7',
+            'changefreq' => 'weekly',
+        ];
+    }
 
     // Add blog posts
     $posts = \App\Models\BlogPost::published()->latest('published_at')->get();

@@ -265,9 +265,9 @@
     <div class="blog-container">
         {{-- Category Filters --}}
         <div class="blog-filters">
-            <a href="{{ route('blog.index') }}" class="filter-btn {{ !request('categoria') ? 'active' : '' }}">Todos</a>
+            <a href="{{ route('blog.index') }}" class="filter-btn {{ !$activeCategory ? 'active' : '' }}">Todos</a>
             @foreach($categories as $key => $label)
-                <a href="{{ route('blog.index', ['categoria' => $key]) }}" class="filter-btn {{ request('categoria') === $key ? 'active' : '' }}">{{ $label }}</a>
+                <a href="{{ route('blog.category', $key) }}" class="filter-btn {{ $activeCategory === $key ? 'active' : '' }}">{{ $label }}</a>
             @endforeach
         </div>
 

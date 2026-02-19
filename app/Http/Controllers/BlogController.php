@@ -9,25 +9,47 @@ class BlogController extends Controller
 {
     public function index(Request $request)
     {
+        // Redirect old query-param URLs to the new friendly route
+        if ($request->filled('categoria')) {
+            return redirect()->route('blog.category', $request->categoria, 301);
+        }
+
         $query = BlogPost::published()
             ->with('author')
             ->latest('published_at');
 
-        // Category filter
-        if ($request->filled('categoria')) {
-            $query->where('category', $request->categoria);
-        }
-
         $posts = $query->paginate(9);
         $categories = BlogPost::getCategories();
 
-        // Get featured post (most recent)
         $featuredPost = null;
-        if ($request->page <= 1 && !$request->filled('categoria')) {
+        $activeCategory = null;
+        if ($request->page <= 1) {
             $featuredPost = $posts->first();
         }
 
-        return view('blog.index', compact('posts', 'categories', 'featuredPost'));
+        return view('blog.index', compact('posts', 'categories', 'featuredPost', 'activeCategory'));
+    }
+
+    public function byCategory(Request $request, string $category)
+    {
+        $categories = BlogPost::getCategories();
+
+        // 404 if category doesn't exist
+        if (!array_key_exists($category, $categories)) {
+            abort(404);
+        }
+
+        $query = BlogPost::published()
+            ->with('author')
+            ->where('category', $category)
+            ->latest('published_at');
+
+        $posts = $query->paginate(9);
+
+        $featuredPost = null;
+        $activeCategory = $category;
+
+        return view('blog.index', compact('posts', 'categories', 'featuredPost', 'activeCategory'));
     }
 
     public function show(string $slug)
