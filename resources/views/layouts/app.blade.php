@@ -116,7 +116,8 @@
         .alert-info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
         footer { background: #1a1a2e; color: #aaa; padding: 30px 0; margin-top: 40px; text-align: center; }
         footer a { color: #ccc; }
-        .main-content { min-height: 60vh; padding: 30px 0; }
+        .main-content { min-height: 60vh; }
+        .main-content-padded { padding: 30px 0; }
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; }
         th { background: #f1f3f5; font-weight: 600; }
@@ -190,7 +191,7 @@
         </div>
     </nav>
 
-    <div class="main-content">
+    <div class="main-content{{ !View::hasSection('full_width') ? ' main-content-padded' : '' }}">
         @hasSection('full_width')
             @yield('full_width')
         @else

@@ -28,7 +28,7 @@ Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/categoria/{category}', [BlogController::class, 'byCategory'])->name('blog.category');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
-// Serve storage files via PHP (fallback for hosting without symlinks)
+// Serve storage files via PHP (shared hosting without reliable symlinks)
 Route::get('/storage/{path}', function (string $path) {
     $fullPath = storage_path('app/public/' . $path);
 
@@ -43,7 +43,11 @@ Route::get('/storage/{path}', function (string $path) {
         abort(403);
     }
 
-    return response()->file($realPath);
+    $headers = [
+        'Cache-Control' => 'public, max-age=86400',
+    ];
+
+    return response()->file($realPath, $headers);
 })->where('path', '.*');
 
 // Sitemap & robots
