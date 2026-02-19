@@ -71,6 +71,10 @@
         background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
         color: white;
         padding: 40px 20px 60px;
+        transition: padding 0.2s;
+    }
+    .article-header.no-featured-image {
+        padding-bottom: 40px;
     }
     .article-header-inner {
         max-width: 800px;
@@ -326,7 +330,7 @@
 
 @section('full_width')
 {{-- Header --}}
-<div class="article-header">
+<div class="article-header{{ !$post->featured_image_url ? ' no-featured-image' : '' }}" id="article-header">
     <div class="article-header-inner">
         <div class="article-breadcrumb">
             <a href="{{ route('home') }}">Inicio</a> &rsaquo;
@@ -359,8 +363,8 @@
 
 {{-- Featured Image --}}
 @if($post->featured_image_url)
-<div class="article-featured-image">
-    <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" onerror="this.parentElement.style.display='none';">
+<div class="article-featured-image" id="article-featured-image">
+    <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" onerror="this.parentElement.style.display='none';document.getElementById('article-header').classList.add('no-featured-image');">
 </div>
 @endif
 
