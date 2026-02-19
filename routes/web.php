@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ResumeController;
+use App\Http\Controllers\Admin\AdminBlogController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminFinanceController;
 use App\Http\Middleware\AuditRequest;
@@ -19,15 +21,32 @@ Route::get('/', [LandingController::class, 'home'])->name('home');
 Route::get('/como-funciona', [LandingController::class, 'howItWorks'])->name('how-it-works');
 Route::get('/preguntas-frecuentes', [LandingController::class, 'faq'])->name('faq');
 
+// Blog
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
+
 // Sitemap & robots
 Route::get('/sitemap.xml', function () {
     $urls = [
-        url('/'),
-        url('/como-funciona'),
-        url('/preguntas-frecuentes'),
-        url('/subir-cv'),
-        url('/crear-cv'),
+        ['url' => url('/'), 'priority' => '1.0', 'changefreq' => 'daily'],
+        ['url' => url('/como-funciona'), 'priority' => '0.8', 'changefreq' => 'weekly'],
+        ['url' => url('/preguntas-frecuentes'), 'priority' => '0.8', 'changefreq' => 'weekly'],
+        ['url' => url('/subir-cv'), 'priority' => '0.9', 'changefreq' => 'weekly'],
+        ['url' => url('/crear-cv'), 'priority' => '0.9', 'changefreq' => 'weekly'],
+        ['url' => url('/blog'), 'priority' => '0.8', 'changefreq' => 'daily'],
     ];
+
+    // Add blog posts
+    $posts = \App\Models\BlogPost::published()->latest('published_at')->get();
+    foreach ($posts as $post) {
+        $urls[] = [
+            'url' => $post->url,
+            'priority' => '0.7',
+            'changefreq' => 'monthly',
+            'lastmod' => $post->updated_at->format('Y-m-d'),
+        ];
+    }
+
     return response()->view('seo.sitemap', compact('urls'))
         ->header('Content-Type', 'application/xml');
 })->name('sitemap');
@@ -251,4 +270,15 @@ Route::middleware(['auth', EnsureIsAdmin::class, AuditRequest::class])
         Route::post('/free-process/upload', [AdminDashboardController::class, 'freeProcessUpload'])->name('free-process.upload');
         Route::post('/free-process/builder', [AdminDashboardController::class, 'freeProcessBuilder'])->name('free-process.builder');
         Route::post('/resumes/{id}/process-free', [AdminDashboardController::class, 'processResumeFree'])->name('resumes.process-free');
+
+        // Blog Management
+        Route::prefix('blog')->name('blog.')->group(function () {
+            Route::get('/', [AdminBlogController::class, 'index'])->name('index');
+            Route::get('/create', [AdminBlogController::class, 'create'])->name('create');
+            Route::post('/', [AdminBlogController::class, 'store'])->name('store');
+            Route::get('/{id}/edit', [AdminBlogController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [AdminBlogController::class, 'update'])->name('update');
+            Route::delete('/{id}', [AdminBlogController::class, 'destroy'])->name('destroy');
+            Route::post('/upload-image', [AdminBlogController::class, 'uploadEditorImage'])->name('upload-image');
+        });
     });

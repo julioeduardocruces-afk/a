@@ -176,6 +176,7 @@
                 <a href="{{ route('upload.form') }}">Optimizar CV</a>
                 <a href="{{ route('how-it-works') }}">Como Funciona</a>
                 <a href="{{ route('faq') }}">FAQ</a>
+                <a href="{{ route('blog.index') }}">Blog</a>
                 @auth
                     @if(auth()->user()->is_admin)
                         <a href="{{ route('admin.dashboard') }}">Admin</a>
@@ -221,7 +222,8 @@
             <p style="margin-top:8px;">
                 <a href="{{ route('home') }}">Inicio</a> |
                 <a href="{{ route('how-it-works') }}">Como Funciona</a> |
-                <a href="{{ route('faq') }}">FAQ</a>
+                <a href="{{ route('faq') }}">FAQ</a> |
+                <a href="{{ route('blog.index') }}">Blog</a>
             </p>
         </div>
     </footer>
