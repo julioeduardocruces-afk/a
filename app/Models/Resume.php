@@ -26,6 +26,17 @@ class Resume extends Model
         'status',
         'error_code',
         'error_message',
+        // Billing fields
+        'billing_name',
+        'billing_rut',
+        'billing_address',
+        'billing_city',
+        'billing_phone',
+        'invoice_status',
+        'invoice_file',
+        'invoice_issued_at',
+        'invoice_sent_at',
+        'invoice_number',
     ];
 
     protected function casts(): array
@@ -34,6 +45,8 @@ class Resume extends Model
             'structured_json' => 'array',
             'meta_user_context' => 'array',
             'status' => ResumeStatus::class,
+            'invoice_issued_at' => 'datetime',
+            'invoice_sent_at' => 'datetime',
         ];
     }
 
@@ -126,5 +139,39 @@ class Resume extends Model
         }
         $email = $this->customer_email;
         return $email ? explode('@', $email)[0] : 'Usuario';
+    }
+
+    /**
+     * Check if billing data is complete.
+     */
+    public function hasBillingData(): bool
+    {
+        return !empty($this->billing_name) && !empty($this->billing_rut);
+    }
+
+    /**
+     * Get billing name for display.
+     */
+    public function getBillingDisplayName(): string
+    {
+        return $this->billing_name ?: $this->getDisplayName();
+    }
+
+    /**
+     * Get formatted RUT (Chilean format).
+     */
+    public function getFormattedRut(): ?string
+    {
+        if (!$this->billing_rut) {
+            return null;
+        }
+        // Remove dots and dashes, then format
+        $rut = preg_replace('/[^0-9kK]/', '', $this->billing_rut);
+        if (strlen($rut) < 2) {
+            return $this->billing_rut;
+        }
+        $dv = substr($rut, -1);
+        $number = substr($rut, 0, -1);
+        return number_format((int)$number, 0, '', '.') . '-' . strtoupper($dv);
     }
 }

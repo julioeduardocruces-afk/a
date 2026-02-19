@@ -6,6 +6,7 @@ use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ResumeController;
+use App\Http\Controllers\Admin\AdminBillingController;
 use App\Http\Controllers\Admin\AdminBlogController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminFinanceController;
@@ -280,5 +281,15 @@ Route::middleware(['auth', EnsureIsAdmin::class, AuditRequest::class])
             Route::put('/{id}', [AdminBlogController::class, 'update'])->name('update');
             Route::delete('/{id}', [AdminBlogController::class, 'destroy'])->name('destroy');
             Route::post('/upload-image', [AdminBlogController::class, 'uploadEditorImage'])->name('upload-image');
+        });
+
+        // Billing / Invoicing
+        Route::prefix('billing')->name('billing.')->group(function () {
+            Route::get('/', [AdminBillingController::class, 'index'])->name('index');
+            Route::get('/{id}', [AdminBillingController::class, 'show'])->name('show');
+            Route::post('/{id}/mark-issued', [AdminBillingController::class, 'markIssued'])->name('mark-issued');
+            Route::post('/{id}/upload-invoice', [AdminBillingController::class, 'uploadInvoice'])->name('upload-invoice');
+            Route::post('/{id}/send-invoice', [AdminBillingController::class, 'sendInvoice'])->name('send-invoice');
+            Route::delete('/{id}/remove-invoice', [AdminBillingController::class, 'removeInvoice'])->name('remove-invoice');
         });
     });

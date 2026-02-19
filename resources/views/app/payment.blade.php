@@ -41,12 +41,56 @@
         <form method="POST" action="{{ route('payments.flow.create') }}">
             @csrf
             <input type="hidden" name="resume_id" value="{{ $resume->id }}">
-            <div class="form-group" style="max-width:400px;margin:0 auto 16px;">
-                <label for="customer_email">Tu email (para recibir el CV optimizado)</label>
+
+            {{-- Email --}}
+            <div class="form-group" style="max-width:500px;margin:0 auto 16px;">
+                <label for="customer_email">Email (para recibir el CV optimizado) *</label>
                 <input type="email" id="customer_email" name="customer_email"
                        value="{{ old('customer_email', $resume->customer_email) }}"
                        placeholder="tu@email.com" required>
             </div>
+
+            {{-- Billing Section --}}
+            <div style="max-width:500px;margin:0 auto 20px;text-align:left;background:#f8f9fa;padding:20px;border-radius:8px;">
+                <h4 style="margin-bottom:16px;color:#333;font-size:1rem;">Datos para Facturacion (Boleta)</h4>
+
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label for="billing_name">Nombre Completo *</label>
+                    <input type="text" id="billing_name" name="billing_name"
+                           value="{{ old('billing_name', $resume->billing_name) }}"
+                           placeholder="Juan Perez Lopez" required maxlength="255">
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label for="billing_rut">RUT *</label>
+                        <input type="text" id="billing_rut" name="billing_rut"
+                               value="{{ old('billing_rut', $resume->billing_rut) }}"
+                               placeholder="12.345.678-9" required maxlength="20">
+                    </div>
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <label for="billing_phone">Telefono *</label>
+                        <input type="tel" id="billing_phone" name="billing_phone"
+                               value="{{ old('billing_phone', $resume->billing_phone) }}"
+                               placeholder="+56 9 1234 5678" required maxlength="30">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:12px;">
+                    <label for="billing_address">Direccion *</label>
+                    <input type="text" id="billing_address" name="billing_address"
+                           value="{{ old('billing_address', $resume->billing_address) }}"
+                           placeholder="Av. Principal 123, Depto 45" required maxlength="500">
+                </div>
+
+                <div class="form-group" style="margin-bottom:0;">
+                    <label for="billing_city">Ciudad *</label>
+                    <input type="text" id="billing_city" name="billing_city"
+                           value="{{ old('billing_city', $resume->billing_city) }}"
+                           placeholder="Santiago" required maxlength="100">
+                </div>
+            </div>
+
             <button type="submit" class="btn btn-primary" style="font-size:1.1rem;padding:14px 48px;">
                 Pagar con Webpay
             </button>

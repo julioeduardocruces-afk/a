@@ -13,6 +13,7 @@
         <a href="{{ route('admin.blog.index') }}" class="{{ request()->routeIs('admin.blog.*') ? 'active' : '' }}">Blog</a>
 
         <div class="sidebar-section">Finanzas</div>
+        <a href="{{ route('admin.billing.index') }}" class="{{ request()->routeIs('admin.billing.*') ? 'active' : '' }}">Facturacion</a>
         <a href="{{ route('admin.finance.dashboard') }}" class="{{ request()->routeIs('admin.finance.dashboard') ? 'active' : '' }}">Panel Financiero</a>
         <a href="{{ route('admin.finance.sales') }}" class="{{ request()->routeIs('admin.finance.sales') ? 'active' : '' }}">Ventas</a>
         <a href="{{ route('admin.finance.refunds') }}" class="{{ request()->routeIs('admin.finance.refunds') ? 'active' : '' }}">Reembolsos</a>

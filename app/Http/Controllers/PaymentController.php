@@ -23,6 +23,12 @@ class PaymentController extends Controller
         $validated = $request->validate([
             'resume_id' => ['required', 'integer', 'exists:resumes,id'],
             'customer_email' => ['required', 'email', 'max:255'],
+            // Billing fields
+            'billing_name' => ['required', 'string', 'max:255'],
+            'billing_rut' => ['required', 'string', 'max:20'],
+            'billing_address' => ['required', 'string', 'max:500'],
+            'billing_city' => ['required', 'string', 'max:100'],
+            'billing_phone' => ['required', 'string', 'max:30'],
         ]);
 
         $resume = Resume::findOrFail($validated['resume_id']);
@@ -38,9 +44,16 @@ class PaymentController extends Controller
             return back()->withErrors(['status' => 'El CV no esta en un estado valido para pago.']);
         }
 
-        // Store customer email for delivery
+        // Store customer email and billing data
         $email = $validated['customer_email'];
-        $resume->update(['customer_email' => $email]);
+        $resume->update([
+            'customer_email' => $email,
+            'billing_name' => $validated['billing_name'],
+            'billing_rut' => $validated['billing_rut'],
+            'billing_address' => $validated['billing_address'],
+            'billing_city' => $validated['billing_city'],
+            'billing_phone' => $validated['billing_phone'],
+        ]);
 
         // Enrich stored Meta user context with email for Purchase CAPI (webhook context).
         // For the upload flow, meta_user_context was captured at showPayment() without email

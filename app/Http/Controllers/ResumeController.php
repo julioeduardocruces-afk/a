@@ -627,6 +627,7 @@ class ResumeController extends Controller
         $nameParts = preg_split('/\s+/', $name, 2);
 
         // Create Resume (no file upload, mark as form-built)
+        // Pre-populate billing fields from CV Builder data
         $resume = Resume::create([
             'original_filename' => 'formulario_cv_' . Str::slug($name) . '.txt',
             'original_mime' => 'text/plain',
@@ -642,6 +643,12 @@ class ResumeController extends Controller
                 'country' => 'cl',
             ])),
             'status' => ResumeStatus::Draft,
+            // Billing fields from CV Builder data
+            'billing_name' => $name,
+            'billing_rut' => $rut,
+            'billing_phone' => $phone,
+            'billing_address' => $address,
+            'billing_city' => $location,
         ]);
 
         // Store access_token in session
