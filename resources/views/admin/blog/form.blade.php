@@ -239,12 +239,47 @@ tinymce.init({
              'bullist numlist outdent indent | link image | removeformat code',
     content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; line-height: 1.7; }',
     images_upload_url: '{{ route("admin.blog.upload-image") }}',
+    images_upload_credentials: true,
     automatic_uploads: true,
     images_reuse_filename: true,
     relative_urls: false,
     remove_script_host: false,
     branding: false,
     promotion: false,
+    images_upload_handler: function (blobInfo, progress) {
+        return new Promise(function (resolve, reject) {
+            var formData = new FormData();
+            formData.append('file', blobInfo.blob(), blobInfo.filename());
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '{{ route("admin.blog.upload-image") }}');
+            xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+            xhr.upload.onprogress = function (e) {
+                progress(e.loaded / e.total * 100);
+            };
+
+            xhr.onload = function () {
+                if (xhr.status !== 200) {
+                    reject({ message: 'Error ' + xhr.status + ': ' + xhr.statusText, remove: true });
+                    return;
+                }
+                var json = JSON.parse(xhr.responseText);
+                if (!json || typeof json.location !== 'string') {
+                    reject({ message: 'Respuesta invalida del servidor', remove: true });
+                    return;
+                }
+                resolve(json.location);
+            };
+
+            xhr.onerror = function () {
+                reject({ message: 'Error de conexion al subir la imagen', remove: true });
+            };
+
+            xhr.send(formData);
+        });
+    },
     setup: function(editor) {
         editor.on('change keyup', function() {
             editor.save();
