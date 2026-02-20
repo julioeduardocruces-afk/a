@@ -82,7 +82,7 @@ class BlogPost extends Model
             return $this->featured_image;
         }
 
-        return url('storage/' . $this->featured_image);
+        return url('media/' . $this->featured_image);
     }
 
     public function getFormattedDateAttribute(): string

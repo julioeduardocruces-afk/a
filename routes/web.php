@@ -28,8 +28,8 @@ Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/categoria/{category}', [BlogController::class, 'byCategory'])->name('blog.category');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
-// Serve storage files via PHP (shared hosting without reliable symlinks)
-Route::get('/storage/{path}', function (string $path) {
+// Serve uploaded files via PHP (avoids symlink issues on shared hosting)
+Route::get('/media/{path}', function (string $path) {
     $fullPath = storage_path('app/public/' . $path);
 
     if (!file_exists($fullPath)) {
@@ -43,12 +43,10 @@ Route::get('/storage/{path}', function (string $path) {
         abort(403);
     }
 
-    $headers = [
+    return response()->file($realPath, [
         'Cache-Control' => 'public, max-age=86400',
-    ];
-
-    return response()->file($realPath, $headers);
-})->where('path', '.*');
+    ]);
+})->where('path', '.*')->name('media.serve');
 
 // Sitemap & robots
 Route::get('/sitemap.xml', function () {

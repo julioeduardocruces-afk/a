@@ -147,7 +147,7 @@ class AdminBlogController extends Controller
         $path = $request->file('file')->store('blog/editor', 'public');
 
         return response()->json([
-            'location' => url('storage/' . $path),
+            'location' => url('media/' . $path),
         ]);
     }
 
