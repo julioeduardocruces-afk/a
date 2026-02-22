@@ -225,6 +225,69 @@
 </div>
 
 {{-- ════════════════════════════════════════ --}}
+{{-- CONFIGURACION DE CONTACTO                --}}
+{{-- ════════════════════════════════════════ --}}
+<div class="card">
+    <h3 style="margin-bottom:16px;">Email de Contacto</h3>
+    <p style="color:#666;margin-bottom:12px;">Este correo se mostrara en el sitio para que los visitantes puedan contactarte.</p>
+    <form method="POST" action="{{ route('admin.credentials.store') }}">
+        @csrf
+        <input type="hidden" name="form_type" value="contact">
+        <div class="form-group">
+            <label for="contact_email">Email</label>
+            <input type="email" name="contact_email" id="contact_email"
+                   value="{{ old('contact_email', $contactEmail ?? '') }}"
+                   placeholder="contacto@tudominio.cl" maxlength="255">
+            @error('contact_email')
+                <div style="color:#dc3545;font-size:12px;margin-top:4px;">{{ $message }}</div>
+            @enderror
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">Guardar Email</button>
+    </form>
+</div>
+
+{{-- ════════════════════════════════════════ --}}
+{{-- CONFIGURACION WHATSAPP                   --}}
+{{-- ════════════════════════════════════════ --}}
+<div class="card">
+    <h3 style="margin-bottom:16px;">Widget de WhatsApp</h3>
+    <p style="color:#666;margin-bottom:12px;">Muestra un boton flotante de WhatsApp en el sitio publico para que los visitantes te contacten.</p>
+    <form method="POST" action="{{ route('admin.credentials.store') }}">
+        @csrf
+        <input type="hidden" name="form_type" value="whatsapp">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group">
+                <label for="whatsapp_number">Numero (con codigo de pais, sin +)</label>
+                <input type="text" name="whatsapp_number" id="whatsapp_number"
+                       value="{{ old('whatsapp_number', $whatsappNumber ?? '') }}"
+                       placeholder="56912345678" maxlength="20">
+                <small style="color:#666;">Ej: 56912345678 (Chile)</small>
+                @error('whatsapp_number')
+                    <div style="color:#dc3545;font-size:12px;margin-top:4px;">{{ $message }}</div>
+                @enderror
+            </div>
+            <div class="form-group">
+                <label style="margin-bottom:12px;">Estado</label>
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:normal;">
+                    <input type="checkbox" name="whatsapp_enabled" value="1"
+                           {{ old('whatsapp_enabled', $whatsappEnabled ?? false) ? 'checked' : '' }}
+                           style="width:auto;">
+                    Widget activo
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="whatsapp_message">Mensaje predeterminado</label>
+            <input type="text" name="whatsapp_message" id="whatsapp_message"
+                   value="{{ old('whatsapp_message', $whatsappMessage ?? 'Hola, necesito informacion sobre la optimizacion de CV.') }}"
+                   placeholder="Hola, necesito informacion..." maxlength="500">
+            <small style="color:#666;">Texto que aparecera pre-escrito al abrir el chat.</small>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">Guardar WhatsApp</button>
+    </form>
+</div>
+
+{{-- ════════════════════════════════════════ --}}
 {{-- CREDENCIALES EXISTENTES                  --}}
 {{-- ════════════════════════════════════════ --}}
 <div class="card">

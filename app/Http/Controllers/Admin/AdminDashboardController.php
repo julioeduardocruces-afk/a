@@ -87,10 +87,16 @@ class AdminDashboardController extends Controller
 
         $tinymceApiKey = Setting::getValue('tinymce_api_key', '');
 
+        $contactEmail = Setting::getValue('contact_email', '');
+        $whatsappNumber = Setting::getValue('whatsapp_number', '');
+        $whatsappMessage = Setting::getValue('whatsapp_message', 'Hola, necesito informacion sobre la optimizacion de CV.');
+        $whatsappEnabled = Setting::getValue('whatsapp_enabled', '0') === '1';
+
         return view('admin.credentials', compact(
             'credentials', 'currentAi', 'currentAiProvider', 'currentFlow', 'flowEnabled',
             'systemPrompt', 'defaultPrompt', 'metaPixelId', 'metaPixelEnabled', 'metaCapiToken',
-            'metaCapiTestCode', 'tinymceApiKey'
+            'metaCapiTestCode', 'tinymceApiKey', 'contactEmail', 'whatsappNumber',
+            'whatsappMessage', 'whatsappEnabled'
         ));
     }
 
@@ -116,6 +122,14 @@ class AdminDashboardController extends Controller
 
         if ($formType === 'tinymce') {
             return $this->storeTinyMceKey($request);
+        }
+
+        if ($formType === 'contact') {
+            return $this->storeContactSettings($request);
+        }
+
+        if ($formType === 'whatsapp') {
+            return $this->storeWhatsAppSettings($request);
         }
 
         return back()->withErrors(['form_type' => 'Tipo de formulario no reconocido.']);
@@ -308,6 +322,36 @@ class AdminDashboardController extends Controller
         AuditLog::record('admin.tinymce_key_updated', $request->user()->id, 'admin', [], $request->ip());
 
         return back()->with('success', 'API Key de TinyMCE guardada exitosamente.');
+    }
+
+    private function storeContactSettings(Request $request)
+    {
+        $validated = $request->validate([
+            'contact_email' => ['nullable', 'email', 'max:255'],
+        ]);
+
+        Setting::setValue('contact_email', trim($validated['contact_email'] ?? ''));
+
+        AuditLog::record('admin.contact_email_updated', $request->user()->id, 'admin', [], $request->ip());
+
+        return back()->with('success', 'Email de contacto guardado exitosamente.');
+    }
+
+    private function storeWhatsAppSettings(Request $request)
+    {
+        $validated = $request->validate([
+            'whatsapp_number' => ['nullable', 'string', 'max:20'],
+            'whatsapp_message' => ['nullable', 'string', 'max:500'],
+            'whatsapp_enabled' => ['nullable'],
+        ]);
+
+        Setting::setValue('whatsapp_number', trim($validated['whatsapp_number'] ?? ''));
+        Setting::setValue('whatsapp_message', trim($validated['whatsapp_message'] ?? ''));
+        Setting::setValue('whatsapp_enabled', $request->has('whatsapp_enabled') ? '1' : '0');
+
+        AuditLog::record('admin.whatsapp_updated', $request->user()->id, 'admin', [], $request->ip());
+
+        return back()->with('success', 'Configuracion de WhatsApp guardada exitosamente.');
     }
 
     private function storeSystemPrompt(Request $request)
