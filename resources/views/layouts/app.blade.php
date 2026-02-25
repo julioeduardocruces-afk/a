@@ -25,6 +25,9 @@
     <!-- Canonical URL -->
     <link rel="canonical" href="{{ $__seoUrl }}">
 
+    <!-- Sitemap -->
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="{{ route('sitemap') }}">
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="{{ $__seoType }}">
     <meta property="og:url" content="{{ $__seoUrl }}">

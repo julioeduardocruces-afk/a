@@ -65,7 +65,8 @@ Route::get('/sitemap.xml', function () {
         $urls[] = [
             'url' => route('blog.category', $cat->slug),
             'priority' => '0.7',
-            'changefreq' => 'weekly',
+            'changefreq' => 'daily',
+            'lastmod' => $cat->updated_at->format('Y-m-d'),
         ];
     }
 
@@ -74,8 +75,8 @@ Route::get('/sitemap.xml', function () {
     foreach ($posts as $post) {
         $urls[] = [
             'url' => $post->url,
-            'priority' => '0.7',
-            'changefreq' => 'monthly',
+            'priority' => '0.8',
+            'changefreq' => 'weekly',
             'lastmod' => $post->updated_at->format('Y-m-d'),
         ];
     }
