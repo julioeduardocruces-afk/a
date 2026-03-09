@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
 use Smalot\PdfParser\Parser as PdfParser;
+use Smalot\PdfParser\Config as PdfParserConfig;
 use PhpOffice\PhpWord\IOFactory as PhpWordIOFactory;
 use RuntimeException;
 
@@ -148,9 +149,35 @@ class TextExtractorService
 
     private function extractFromPdf(string $path): string
     {
-        $parser = new PdfParser();
-        $pdf = $parser->parseFile($path);
-        $text = $pdf->getText();
+        // Configure parser to skip image decoding — PDFs with embedded
+        // photos (e.g. profile pictures) cause memory errors or exceptions
+        // when the parser tries to decode large image streams.
+        $config = new PdfParserConfig();
+        $config->setDecodeMemoryLimit(0);
+        $config->setRetainImageContent(false);
+
+        $parser = new PdfParser([], $config);
+
+        try {
+            $pdf = $parser->parseFile($path);
+            $text = $pdf->getText();
+        } catch (\Exception $e) {
+            // If parsing still fails (corrupted streams, unsupported filters),
+            // attempt a second pass with a fresh parser ignoring errors
+            try {
+                $config2 = new PdfParserConfig();
+                $config2->setDecodeMemoryLimit(0);
+                $config2->setRetainImageContent(false);
+                $config2->setIgnoreEncryption(true);
+                $parser2 = new PdfParser([], $config2);
+                $pdf = $parser2->parseFile($path);
+                $text = $pdf->getText();
+            } catch (\Exception $e2) {
+                throw new RuntimeException(
+                    'No se pudo procesar el PDF. El archivo puede estar dañado o protegido. Detalle: ' . $e2->getMessage()
+                );
+            }
+        }
 
         if (empty(trim($text))) {
             throw new RuntimeException(
