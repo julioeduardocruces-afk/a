@@ -192,25 +192,67 @@ class TextExtractorService
     {
         try {
             $phpWord = PhpWordIOFactory::load($path, 'Word2007');
-        } catch (\Exception $e) {
-            throw new RuntimeException(
-                'No se pudo abrir el archivo DOCX. Puede estar dañado o protegido. Detalle: ' . $e->getMessage()
-            );
-        }
 
-        $text = '';
-
-        foreach ($phpWord->getSections() as $section) {
-            foreach ($section->getElements() as $element) {
-                $text .= $this->extractElementText($element) . "\n";
+            $text = '';
+            foreach ($phpWord->getSections() as $section) {
+                foreach ($section->getElements() as $element) {
+                    $text .= $this->extractElementText($element) . "\n";
+                }
             }
+
+            if (!empty(trim($text))) {
+                return $this->normalizeText($text);
+            }
+        } catch (\Exception $e) {
+            // PhpWord can fail on DOCX files with unsupported embedded objects
+            // (e.g. EMF images, OLE objects). Fall through to raw XML extraction.
+            \Illuminate\Support\Facades\Log::warning('PhpWord load failed, trying raw XML fallback', [
+                'path' => $path,
+                'error' => $e->getMessage(),
+            ]);
         }
+
+        // Fallback: read text directly from the DOCX ZIP (word/document.xml)
+        $text = $this->extractFromDocxRawXml($path);
 
         if (empty(trim($text))) {
             throw new RuntimeException('No se pudo extraer texto del DOCX.');
         }
 
         return $this->normalizeText($text);
+    }
+
+    /**
+     * Fallback DOCX extraction: open the ZIP, read word/document.xml,
+     * and strip XML tags to get plain text. Ignores images entirely.
+     */
+    private function extractFromDocxRawXml(string $path): string
+    {
+        $zip = new \ZipArchive();
+        if ($zip->open($path) !== true) {
+            throw new RuntimeException('No se pudo abrir el archivo DOCX como ZIP.');
+        }
+
+        $xml = $zip->getFromName('word/document.xml');
+        $zip->close();
+
+        if ($xml === false) {
+            throw new RuntimeException('El archivo DOCX no contiene word/document.xml.');
+        }
+
+        // Replace paragraph and line-break tags with newlines before stripping
+        $xml = preg_replace('/<w:p[\s>]/i', "\n<w:p ", $xml);
+        $xml = preg_replace('/<w:br[^>]*>/i', "\n", $xml);
+        // Replace tab tags with tab character
+        $xml = preg_replace('/<w:tab[^>]*>/i', "\t", $xml);
+
+        // Strip all XML tags to get plain text
+        $text = strip_tags($xml);
+
+        // Decode XML entities
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_XML1, 'UTF-8');
+
+        return $text;
     }
 
     private function extractElementText(mixed $element, int $depth = 0): string
