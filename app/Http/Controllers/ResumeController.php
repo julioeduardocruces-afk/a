@@ -223,11 +223,38 @@ class ResumeController extends Controller
                     'structured_json' => $structured,
                 ]);
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('CV text extraction failed', [
+                $disk = Storage::disk('local');
+                $diskRoot = config('filesystems.disks.local.root', storage_path('app'));
+                $fileExists = $disk->exists($resume->original_path);
+                $fullPath = $disk->path($resume->original_path);
+
+                $debugInfo = [
                     'resume_id' => $resume->id,
-                    'path' => $resume->original_path,
-                    'error' => $e->getMessage(),
-                ]);
+                    'original_path' => $resume->original_path,
+                    'original_mime' => $resume->original_mime,
+                    'disk_root' => $diskRoot,
+                    'full_path' => $fullPath,
+                    'file_exists_storage' => $fileExists,
+                    'file_exists_direct' => file_exists($fullPath),
+                    'file_size' => $fileExists ? $disk->size($resume->original_path) : 'N/A',
+                    'is_readable' => file_exists($fullPath) ? is_readable($fullPath) : false,
+                    'error_class' => get_class($e),
+                    'error_message' => $e->getMessage(),
+                    'error_file' => $e->getFile() . ':' . $e->getLine(),
+                    'memory_usage' => round(memory_get_usage(true) / 1024 / 1024, 1) . ' MB',
+                    'memory_limit' => ini_get('memory_limit'),
+                    'php_version' => PHP_VERSION,
+                ];
+
+                // Check magic bytes if file exists
+                if (file_exists($fullPath) && is_readable($fullPath)) {
+                    $header = file_get_contents($fullPath, false, null, 0, 8);
+                    $debugInfo['magic_bytes_hex'] = bin2hex($header);
+                    $debugInfo['detected_type'] = str_starts_with($header, '%PDF') ? 'PDF'
+                        : (str_starts_with($header, "PK\x03\x04") ? 'ZIP/DOCX' : 'UNKNOWN');
+                }
+
+                \Illuminate\Support\Facades\Log::error('CV text extraction failed', $debugInfo);
 
                 $userMsg = 'Error al extraer el texto del CV.';
                 if (str_contains($e->getMessage(), 'escaneado') || str_contains($e->getMessage(), 'imagen')) {
@@ -236,7 +263,9 @@ class ResumeController extends Controller
                     $userMsg = 'Archivo no encontrado en el servidor. Intenta subir el CV nuevamente.';
                 }
 
-                return back()->withErrors(['extraction' => $userMsg]);
+                return back()
+                    ->withErrors(['extraction' => $userMsg])
+                    ->with('extraction_debug', $debugInfo);
             }
         }
 

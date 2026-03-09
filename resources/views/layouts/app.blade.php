@@ -215,6 +215,28 @@
                     </div>
                 @endif
 
+                @if(session('extraction_debug'))
+                    <details style="margin:15px 0;background:#1e1e1e;color:#d4d4d4;border-radius:8px;padding:15px;font-family:monospace;font-size:13px;">
+                        <summary style="cursor:pointer;color:#ff6b6b;font-weight:bold;font-size:14px;">DEBUG: Detalle del error de extraccion (click para expandir)</summary>
+                        <table style="width:100%;margin-top:12px;border-collapse:collapse;">
+                            @foreach(session('extraction_debug') as $key => $value)
+                                <tr style="border-bottom:1px solid #333;">
+                                    <td style="padding:6px 10px;color:#9cdcfe;white-space:nowrap;vertical-align:top;">{{ $key }}</td>
+                                    <td style="padding:6px 10px;color:#ce9178;word-break:break-all;">
+                                        @if(is_bool($value))
+                                            <span style="color:{{ $value ? '#4ec9b0' : '#ff6b6b' }}">{{ $value ? 'true' : 'false' }}</span>
+                                        @elseif(is_null($value))
+                                            <span style="color:#666;">null</span>
+                                        @else
+                                            {{ $value }}
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </table>
+                    </details>
+                @endif
+
                 @yield('content')
             </div>
         @endif
