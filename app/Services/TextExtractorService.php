@@ -149,9 +149,36 @@ class TextExtractorService
 
     private function extractFromPdf(string $path): string
     {
-        // Configure parser to skip image decoding — PDFs with embedded
-        // photos (e.g. profile pictures) cause memory errors or exceptions
-        // when the parser tries to decode large image streams.
+        // Strategy 1: smalot/pdfparser with image decoding disabled
+        $text = $this->extractPdfWithSmalot($path);
+
+        if (!empty(trim($text))) {
+            return $this->normalizeText($text);
+        }
+
+        // Strategy 2: pdftotext (poppler-utils) — handles fonts without
+        // ToUnicode CMap tables that smalot cannot decode
+        $text = $this->extractPdfWithPdftotext($path);
+
+        if (!empty(trim($text))) {
+            return $this->normalizeText($text);
+        }
+
+        // Strategy 3: raw stream extraction — last resort for PDFs where
+        // neither library can decode the text properly
+        $text = $this->extractPdfRawStreams($path);
+
+        if (!empty(trim($text))) {
+            return $this->normalizeText($text);
+        }
+
+        throw new RuntimeException(
+            'No se pudo extraer texto del PDF. Puede ser un PDF escaneado (imagen).'
+        );
+    }
+
+    private function extractPdfWithSmalot(string $path): string
+    {
         $config = new PdfParserConfig();
         $config->setDecodeMemoryLimit(0);
         $config->setRetainImageContent(false);
@@ -160,10 +187,9 @@ class TextExtractorService
 
         try {
             $pdf = $parser->parseFile($path);
-            $text = $pdf->getText();
+            return $pdf->getText();
         } catch (\Exception $e) {
-            // If parsing still fails (corrupted streams, unsupported filters),
-            // attempt a second pass with a fresh parser ignoring errors
+            // Second pass: ignore encryption
             try {
                 $config2 = new PdfParserConfig();
                 $config2->setDecodeMemoryLimit(0);
@@ -171,21 +197,72 @@ class TextExtractorService
                 $config2->setIgnoreEncryption(true);
                 $parser2 = new PdfParser([], $config2);
                 $pdf = $parser2->parseFile($path);
-                $text = $pdf->getText();
+                return $pdf->getText();
             } catch (\Exception $e2) {
-                throw new RuntimeException(
-                    'No se pudo procesar el PDF. El archivo puede estar dañado o protegido. Detalle: ' . $e2->getMessage()
-                );
+                return '';
+            }
+        }
+    }
+
+    private function extractPdfWithPdftotext(string $path): string
+    {
+        // Check if pdftotext is available on the system
+        $which = @exec('which pdftotext 2>/dev/null', $output, $code);
+        if ($code !== 0 || empty($which)) {
+            return '';
+        }
+
+        $escapedPath = escapeshellarg($path);
+        $command = "pdftotext -layout {$escapedPath} - 2>/dev/null";
+
+        $text = @shell_exec($command);
+
+        return is_string($text) ? $text : '';
+    }
+
+    private function extractPdfRawStreams(string $path): string
+    {
+        $content = @file_get_contents($path);
+        if ($content === false) {
+            return '';
+        }
+
+        $text = '';
+
+        // Extract text from BT...ET blocks (PDF text objects)
+        if (preg_match_all('/BT\s*(.*?)\s*ET/s', $content, $matches)) {
+            foreach ($matches[1] as $block) {
+                // Extract strings in parentheses: (text here)
+                if (preg_match_all('/\(([^)]*)\)/', $block, $strings)) {
+                    $text .= implode(' ', $strings[1]) . "\n";
+                }
+                // Extract hex strings: <48656C6C6F>
+                if (preg_match_all('/<([0-9A-Fa-f]+)>/', $block, $hexStrings)) {
+                    foreach ($hexStrings[1] as $hex) {
+                        $decoded = @hex2bin($hex);
+                        if ($decoded !== false && mb_detect_encoding($decoded, 'UTF-8, ISO-8859-1', true)) {
+                            $text .= $decoded . ' ';
+                        }
+                    }
+                    $text .= "\n";
+                }
             }
         }
 
-        if (empty(trim($text))) {
-            throw new RuntimeException(
-                'No se pudo extraer texto del PDF. Puede ser un PDF escaneado (imagen).'
-            );
+        // Only return if we got meaningful text (not just whitespace/garbage)
+        $cleaned = preg_replace('/[\x00-\x1F\x7F-\x9F]/', '', $text);
+        $cleaned = trim($cleaned);
+
+        // Heuristic: if less than 20% of characters are printable letters, it's garbage
+        if (strlen($cleaned) < 10) {
+            return '';
+        }
+        $letterCount = preg_match_all('/[\p{L}\p{N}]/u', $cleaned);
+        if ($letterCount / max(strlen($cleaned), 1) < 0.2) {
+            return '';
         }
 
-        return $this->normalizeText($text);
+        return $text;
     }
 
     private function extractFromDocx(string $path): string
