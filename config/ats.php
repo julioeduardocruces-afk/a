@@ -49,6 +49,15 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Admin notification email
+    |--------------------------------------------------------------------------
+    | Email address to receive alerts when a paid resume fails processing.
+    | Leave empty to disable notifications.
+    */
+    'admin_notification_email' => env('ATS_ADMIN_NOTIFICATION_EMAIL', ''),
+
+    /*
+    |--------------------------------------------------------------------------
     | USD to CLP exchange rate (for AI cost estimation)
     |--------------------------------------------------------------------------
     */

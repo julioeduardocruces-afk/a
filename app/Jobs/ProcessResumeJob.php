@@ -9,6 +9,7 @@ use App\Models\AuditLog;
 use App\Models\MetricsDaily;
 use App\Models\Resume;
 use App\Models\ResumeVersion;
+use App\Services\AdminNotificationService;
 use App\Services\AiOptimizerService;
 use App\Services\AtsScoreService;
 use App\Services\TextExtractorService;
@@ -150,6 +151,14 @@ class ProcessResumeJob implements ShouldQueue
                 'resume_id' => $resume->id,
                 'error' => $exception->getMessage(),
             ]);
+
+            // Notify admin so they can process it manually
+            AdminNotificationService::notifyPostPaymentError(
+                $resume,
+                'processing',
+                $exception->getMessage(),
+                ['attempts' => $this->attempts()],
+            );
         }
     }
 }

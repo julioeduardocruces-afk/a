@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Enums\ResumeStatus;
 use App\Models\AuditLog;
 use App\Models\Resume;
+use App\Services\AdminNotificationService;
 use App\Services\MailerService;
 use App\Services\PdfGeneratorService;
 use App\Services\ResumeRendererService;
@@ -150,5 +151,13 @@ class GenerateFinalCvJob implements ShouldQueue
             'resume_id' => $resume->id,
             'error' => $exception->getMessage(),
         ]);
+
+        // Notify admin so they can process it manually
+        AdminNotificationService::notifyPostPaymentError(
+            $resume,
+            'delivery',
+            $exception->getMessage(),
+            ['attempts' => $this->attempts()],
+        );
     }
 }

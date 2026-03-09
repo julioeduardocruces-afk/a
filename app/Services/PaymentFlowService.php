@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use App\Jobs\SendMetaCapiEvent;
+use App\Services\AdminNotificationService;
 use App\Services\MetaConversionsService;
 
 class PaymentFlowService
@@ -218,6 +219,15 @@ class PaymentFlowService
                     'flow_order' => $flowOrder,
                     'amount' => $payment->amount,
                 ]);
+
+                if ($payment->resume) {
+                    AdminNotificationService::notifyPostPaymentError(
+                        $payment->resume,
+                        'webhook_transition',
+                        'Flow confirmo un pago que fue cancelado/reembolsado localmente. Posible doble cobro, requiere reembolso.',
+                        ['payment_id' => $payment->id, 'flow_order' => $flowOrder, 'amount' => $payment->amount],
+                    );
+                }
             }
 
             return $payment;
@@ -268,6 +278,13 @@ class PaymentFlowService
                     'resume_id' => $resume->id,
                     'resume_status' => $resume->status->value,
                 ]);
+
+                AdminNotificationService::notifyPostPaymentError(
+                    $resume,
+                    'webhook_transition',
+                    $e->getMessage(),
+                    ['payment_id' => $payment->id, 'resume_status' => $resume->status->value],
+                );
 
                 return $payment;
             }
