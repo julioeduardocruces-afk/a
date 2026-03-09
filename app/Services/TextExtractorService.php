@@ -190,7 +190,14 @@ class TextExtractorService
 
     private function extractFromDocx(string $path): string
     {
-        $phpWord = PhpWordIOFactory::load($path, 'Word2007');
+        try {
+            $phpWord = PhpWordIOFactory::load($path, 'Word2007');
+        } catch (\Exception $e) {
+            throw new RuntimeException(
+                'No se pudo abrir el archivo DOCX. Puede estar dañado o protegido. Detalle: ' . $e->getMessage()
+            );
+        }
+
         $text = '';
 
         foreach ($phpWord->getSections() as $section) {
@@ -211,8 +218,39 @@ class TextExtractorService
         if ($depth > 50) {
             return ''; // Prevent stack overflow from deeply nested/circular structures
         }
+
+        // Skip image/drawing elements — they have no useful text and can
+        // cause errors when the document contains profile photos or logos.
+        if ($element instanceof \PhpOffice\PhpWord\Element\Image
+            || $element instanceof \PhpOffice\PhpWord\Element\Drawing
+            || $element instanceof \PhpOffice\PhpWord\Element\OLEObject
+            || $element instanceof \PhpOffice\PhpWord\Element\Chart
+        ) {
+            return '';
+        }
+
+        // For table elements, iterate rows → cells → elements
+        if ($element instanceof \PhpOffice\PhpWord\Element\Table) {
+            $parts = [];
+            foreach ($element->getRows() as $row) {
+                foreach ($row->getCells() as $cell) {
+                    foreach ($cell->getElements() as $cellElement) {
+                        $cellText = $this->extractElementText($cellElement, $depth + 1);
+                        if (!empty(trim($cellText))) {
+                            $parts[] = trim($cellText);
+                        }
+                    }
+                }
+            }
+            return implode(' | ', $parts);
+        }
+
         if (method_exists($element, 'getText')) {
-            return $element->getText();
+            try {
+                return $element->getText();
+            } catch (\Exception $e) {
+                return ''; // Skip elements that fail to extract text
+            }
         }
         if (method_exists($element, 'getElements')) {
             $parts = [];
