@@ -206,14 +206,35 @@ class TextExtractorService
 
     private function extractPdfWithPdftotext(string $path): string
     {
-        // Check if pdftotext is available on the system
-        $which = @exec('which pdftotext 2>/dev/null', $output, $code);
-        if ($code !== 0 || empty($which)) {
+        // Look for pdftotext in common locations including user-installed binary
+        $candidates = [
+            'pdftotext',                              // system PATH
+            '/usr/bin/pdftotext',                     // standard location
+            '/usr/local/bin/pdftotext',               // local install
+            $_SERVER['HOME'] . '/bin/pdftotext',      // user home bin (shared hosting)
+        ];
+
+        $binary = null;
+        foreach ($candidates as $candidate) {
+            if ($candidate === 'pdftotext') {
+                @exec('which pdftotext 2>/dev/null', $output, $code);
+                if ($code === 0 && !empty($output[0])) {
+                    $binary = $output[0];
+                    break;
+                }
+            } elseif (is_file($candidate) && is_executable($candidate)) {
+                $binary = $candidate;
+                break;
+            }
+        }
+
+        if ($binary === null) {
             return '';
         }
 
+        $escapedBinary = escapeshellarg($binary);
         $escapedPath = escapeshellarg($path);
-        $command = "pdftotext -layout {$escapedPath} - 2>/dev/null";
+        $command = "{$escapedBinary} -layout {$escapedPath} - 2>/dev/null";
 
         $text = @shell_exec($command);
 
