@@ -14,6 +14,12 @@
     'url' => url('/'),
     'applicationCategory' => 'BusinessApplication',
     'operatingSystem' => 'Web',
+    'offers' => [
+        '@type' => 'Offer',
+        'price' => config('ats.price_clp', 4990),
+        'priceCurrency' => 'CLP',
+        'availability' => 'https://schema.org/InStock',
+    ],
 ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
 </script>
 @endsection
@@ -165,6 +171,12 @@
         <a href="{{ route('cv-builder.form') }}" class="btn btn-success">Crear CV desde Cero</a>
     </div>
     <p style="margin-top:16px;opacity:0.5;font-size:0.9rem;">Sin registro. Resultado en minutos.</p>
+    <div style="margin-top:20px;position:relative;">
+        <span style="display:inline-block;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:50px;padding:10px 28px;font-size:1.05rem;">
+            Todo por solo <strong style="color:#4da3ff;font-size:1.3rem;">${{ number_format(config('ats.price_clp', 4990), 0, ',', '.') }}</strong> CLP
+            <span style="opacity:0.6;font-size:0.85rem;margin-left:4px;">pago unico</span>
+        </span>
+    </div>
 </div>
 
 {{-- Como funciona --}}
@@ -185,7 +197,7 @@
         <div class="step-card">
             <div class="step-number">3</div>
             <h3>Recibe tu CV Optimizado</h3>
-            <p>Recibe tu CV optimizado en PDF y Word listo para postular en cualquier plataforma de empleo.</p>
+            <p>Paga solo <strong>${{ number_format(config('ats.price_clp', 4990), 0, ',', '.') }}</strong> y recibe tu CV optimizado en PDF y Word listo para postular en cualquier plataforma de empleo.</p>
         </div>
     </div>
 </div>
@@ -320,6 +332,12 @@
             </div>
         </div>
         <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+            <h3 itemprop="name">Cuanto cuesta el servicio?</h3>
+            <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                <p itemprop="text">El servicio tiene un costo unico de ${{ number_format(config('ats.price_clp', 4990), 0, ',', '.') }} CLP. No hay suscripciones, cargos ocultos ni pagos adicionales. Pagas una vez y recibes tu CV optimizado en PDF y Word.</p>
+            </div>
+        </div>
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
             <h3 itemprop="name">Necesito crear una cuenta?</h3>
             <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
                 <p itemprop="text">No. Funciona sin registro. Solo sube tu CV o crealo con nuestro formulario, elige el rubro, y recibe el resultado en tu email despues del pago.</p>
@@ -346,7 +364,7 @@
 {{-- CTA final --}}
 <div class="cta-section">
     <h2>Deja de ser filtrado. Empieza a ser contactado.</h2>
-    <p>Tu experiencia merece ser vista. Optimiza tu CV hoy y aumenta tus posibilidades de conseguir entrevistas.</p>
+    <p>Tu experiencia merece ser vista. Optimiza tu CV hoy por solo <strong>${{ number_format(config('ats.price_clp', 4990), 0, ',', '.') }}</strong> y aumenta tus posibilidades de conseguir entrevistas.</p>
     <div class="hero-buttons">
         <a href="{{ route('upload.form') }}" class="btn">Subir mi CV</a>
         <a href="{{ route('cv-builder.form') }}" class="btn btn-outline">Crear CV desde Cero</a>
